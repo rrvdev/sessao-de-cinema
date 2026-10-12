@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="Assista filmes com seus amigos: transmita um vídeo ou sua tela, com som, direto no navegador.">
+<meta name="description" content="Salas para assistir junto com os amigos: qualquer um transmite a tela, uma janela ou um filme, com som, direto no navegador.">
 <title>Sessão de Cinema</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f5b544'/%3E%3Cstop offset='1' stop-color='%23f97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M12.5 9.5v13l10.5-6.5z' fill='%231c1405'/%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
@@ -30,11 +30,9 @@ html,body{margin:0}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--text);font:14.5px/1.55 var(--font);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
-body[data-role=host] .viewer-only,body[data-role=viewer] .host-only{display:none!important}
-body:not([data-role]) .room-only{display:none!important}
-body[data-role] .home-only{display:none!important}
-body:not([data-role=host][data-source=file]) .host-file-only{display:none!important}
-body[data-role=host][data-source=screen] .vol-group{display:none!important}
+body:not([data-view=self-file]) .self-file-only{display:none!important}
+body:not([data-view=remote]) .remote-only{display:none!important}
+body[data-view=self-screen] .vol-group{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 h1,h2,h3,p{margin:0}
@@ -43,6 +41,7 @@ h1,h2,h3,p{margin:0}
 .i.fill{fill:currentColor;stroke:none}
 .muted{color:var(--text-2)}
 .small{font-size:12.5px}
+.spacer{flex:1}
 
 /* botões */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid transparent;font-weight:600;font-size:14px;white-space:nowrap;transition:background .15s,border-color .15s,color .15s;user-select:none;text-decoration:none}
@@ -57,10 +56,14 @@ h1,h2,h3,p{margin:0}
 .btn-danger:hover:not(:disabled){background:#ef4444}
 .btn-danger-ghost{background:transparent;color:var(--bad);border-color:rgba(248,113,113,.35)}
 .btn-danger-ghost:hover:not(:disabled){background:rgba(248,113,113,.1)}
+.btn-live{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.45);color:#fecaca}
+.btn-live:hover:not(:disabled){background:rgba(239,68,68,.24)}
 .btn-sm{height:34px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn-xs{height:28px;padding:0 10px;font-size:12px;border-radius:8px;gap:6px}
+.btn-xs .i{width:14px;height:14px}
 .btn-lg{height:48px;padding:0 20px;font-size:15px;border-radius:12px}
 .btn-block{width:100%}
-.icon-btn{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:0;background:transparent;color:var(--text-2)}
+.icon-btn{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:0;background:transparent;color:var(--text-2);flex:none}
 .icon-btn:hover{background:var(--surface-3);color:var(--text)}
 .icon-btn .i{width:16px;height:16px}
 
@@ -72,35 +75,49 @@ h1,h2,h3,p{margin:0}
 .select option{background:#1b1b20;color:var(--text)}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field-label{font-size:12.5px;font-weight:500;color:var(--text-2)}
-.code-input{font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase}
-.code-input::placeholder{letter-spacing:normal;text-transform:none;font-family:var(--font)}
 input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .hint{font-size:12px;color:var(--text-3)}
 .hint.warn{color:var(--warn)}
-
-/* barra superior */
-.appbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;height:60px;padding:0 20px;background:rgba(10,10,12,.85);-webkit-backdrop-filter:saturate(1.4) blur(12px);backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--border)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em;color:inherit;text-decoration:none}
-.logo{width:30px;height:30px;flex:none;display:block}
-.spacer{flex:1}
-.room-chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 4px 0 12px;border:1px solid var(--border-2);border-radius:999px;background:var(--surface)}
-.room-chip .lbl{font-size:12px;color:var(--text-3)}
-.room-chip .code{font-family:var(--mono);font-weight:600;letter-spacing:.12em;font-size:14px}
-.live-badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--surface-2);color:var(--text-3);border:1px solid var(--border);white-space:nowrap}
-.live-badge.on{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.45);color:#fecaca}
-.live-badge.on::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--live);animation:pulse 1.6s infinite}
-@keyframes pulse{50%{opacity:.3}}
 .net-status{font-size:12.5px;color:var(--warn);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:700px){.appbar{padding:0 12px;gap:8px}.brand .name{display:none}.room-chip .lbl{display:none}.appbar .btn .txt{display:none}.appbar .btn{padding:0 10px}.net-status{display:none}}
-@media (max-width:400px){.appbar{padding:0 8px;gap:6px}}
+
+/* estrutura: barra de salas + conteúdo */
+.app{display:flex;min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;width:72px;flex:none;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0;background:#060608;border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;z-index:40;scrollbar-width:none}
+.rail-rooms{display:flex;flex-direction:column;gap:8px;align-items:center}
+.rail-btn,.room-icon{position:relative;width:48px;height:48px;border-radius:24px;border:0;display:grid;place-items:center;flex:none;transition:border-radius .15s,background .15s,color .15s;cursor:pointer;padding:0}
+.rail-btn{background:var(--surface-2);color:var(--text-2)}
+.rail-btn:hover{border-radius:14px;background:var(--surface-3);color:var(--text)}
+.rail-btn.add{color:var(--ok)}
+.rail-btn.add:hover{background:var(--ok);color:#052e12}
+.rail-btn.home{background:transparent}
+.rail-btn.home svg{width:48px;height:48px;display:block}
+.room-icon{font-weight:700;font-size:15px;color:#0a0a0c;letter-spacing:-.02em}
+.room-icon:hover,.room-icon.active{border-radius:14px}
+.room-icon.active::before,.rail-btn.home.active::before{content:"";position:absolute;left:-12px;top:50%;width:4px;height:36px;margin-top:-18px;border-radius:0 4px 4px 0;background:var(--text)}
+.room-icon .dot-live{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;border-radius:50%;background:var(--live);border:3px solid #060608}
+.rail-sep{width:32px;height:2px;border-radius:1px;background:var(--border-2);flex:none}
+.main{flex:1;min-width:0}
+@media (max-width:760px){
+  .app{flex-direction:column}
+  .rail{position:sticky;top:0;width:auto;height:auto;flex-direction:row;padding:8px 12px;border-right:0;border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden}
+  .rail-rooms{flex-direction:row}
+  .rail-sep{width:2px;height:28px}
+  .rail-btn,.room-icon{width:40px;height:40px}
+  .rail-btn.home svg{width:40px;height:40px}
+  .room-icon.active::before,.rail-btn.home.active::before{display:none}
+  .room-icon.active{box-shadow:0 0 0 2px #060608,0 0 0 4px var(--text)}
+}
 
 /* início */
-.home{max-width:1120px;margin:0 auto;padding:64px 20px}
+.topbar{display:flex;align-items:center;gap:12px;height:60px;padding:0 24px;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em}
+.home-inner{max-width:1120px;margin:0 auto;padding:56px 24px 48px}
 .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
-@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr);gap:32px}.home{padding:32px 16px 48px}}
+@media (max-width:960px){.hero{grid-template-columns:minmax(0,1fr);gap:32px}.home-inner{padding:28px 16px 40px}}
+@media (max-width:760px){.topbar{padding:0 16px}}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--border-2);background:var(--surface);font-size:12.5px;color:var(--text-2);margin-bottom:20px}
 .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
-.hero h1{font-size:clamp(32px,5vw,52px);line-height:1.06;letter-spacing:-.035em;font-weight:700;margin-bottom:16px}
+.hero h1{font-size:clamp(30px,4.6vw,50px);line-height:1.06;letter-spacing:-.035em;font-weight:700;margin-bottom:16px}
 .hl{background:linear-gradient(90deg,var(--accent),#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lead{font-size:17px;color:var(--text-2);max-width:540px;margin-bottom:32px}
 .features{display:grid;gap:16px}
@@ -120,10 +137,17 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .alert .i{margin-top:1px}
 .alert.warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.35);color:#fde68a}
 .alert.bad{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35);color:#fecaca}
-.alert em{font-style:normal;font-weight:600}
 #libError{margin-top:16px}
-.faq{margin-top:72px}
-.faq h2{font-size:20px;margin-bottom:16px;letter-spacing:-.015em}
+.section-title{font-size:20px;letter-spacing:-.015em;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.my-rooms{margin-top:56px}
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.room-card{position:relative;display:flex;align-items:center;gap:12px;padding:14px 40px 14px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);cursor:pointer;text-align:left;color:var(--text);min-width:0}
+.room-card:hover{border-color:var(--border-2);background:var(--surface-2)}
+.room-card .room-avatar{width:42px;height:42px;border-radius:12px;font-size:15px}
+.room-card strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room-card span{font-size:12px;color:var(--text-3)}
+.room-card .forget{position:absolute;top:8px;right:8px}
+.faq{margin-top:64px}
 .faq-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
 @media (max-width:760px){.faq-grid{grid-template-columns:minmax(0,1fr)}}
 .faq details{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0 16px}
@@ -136,20 +160,33 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);color:var(--text-3);font-size:12.5px;display:flex;align-items:center;gap:8px}
 
 /* sala */
-.room{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;padding:20px;max-width:1640px;margin:0 auto;align-items:start}
-@media (max-width:1040px){.room{grid-template-columns:minmax(0,1fr);padding:12px;gap:12px}}
+.roomhead{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;height:60px;padding:0 20px;background:rgba(10,10,12,.88);-webkit-backdrop-filter:saturate(1.4) blur(12px);backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--border)}
+.room-title{display:flex;align-items:center;gap:10px;min-width:0}
+.room-avatar{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:13px;color:#0a0a0c;flex:none}
+.room-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+.room-sub{font-size:12px;color:var(--text-2);white-space:nowrap}
+@media (max-width:760px){.roomhead{position:static;padding:0 12px;gap:8px}.roomhead .btn .txt{display:none}.roomhead .btn{padding:0 10px}.net-status{display:none}.room-name{max-width:46vw}}
+.room-body{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;padding:20px;align-items:start;max-width:1700px;margin:0 auto}
+@media (max-width:1100px){.room-body{grid-template-columns:minmax(0,1fr);padding:12px;gap:12px}}
 .room-main{display:flex;flex-direction:column;gap:12px;min-width:0}
 .stage{position:relative;background:#000;border-radius:var(--r-lg);overflow:hidden;aspect-ratio:16/9;border:1px solid var(--border);box-shadow:var(--shadow)}
 .stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 .stage:fullscreen{border-radius:0;border:0;aspect-ratio:auto;width:100vw;height:100vh}
 .stage.idle{cursor:none}
-.overlay{position:absolute;inset:0;z-index:7;display:grid;place-items:center;padding:24px;text-align:center;background:radial-gradient(ellipse at center,rgba(22,22,28,.94),rgba(6,6,9,.98))}
+.overlay{position:absolute;inset:0;z-index:7;display:grid;place-items:center;padding:24px;text-align:center;background:radial-gradient(ellipse at center,rgba(22,22,28,.94),rgba(6,6,9,.98));overflow-y:auto}
+.empty{display:flex;flex-direction:column;align-items:center;max-width:600px}
 .empty h2{font-size:22px;letter-spacing:-.02em;margin-bottom:6px}
-.empty p{color:var(--text-2);margin-bottom:22px}
+.empty p{color:var(--text-2);margin-bottom:20px}
+.live-list{display:flex;flex-direction:column;gap:8px;width:min(420px,100%);margin-bottom:22px}
+.live-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.06);text-align:left}
+.live-item .avatar{width:32px;height:32px}
+.live-item div{flex:1;min-width:0}
+.live-item strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-item span{font-size:12px;color:var(--text-2)}
 .choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.choice{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:250px;padding:18px;text-align:left;border-radius:14px;border:1px solid var(--border-2);background:var(--surface);color:var(--text);transition:border-color .15s,background .15s,transform .15s}
+.choice{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:240px;padding:16px;text-align:left;border-radius:14px;border:1px solid var(--border-2);background:var(--surface);color:var(--text);transition:border-color .15s,background .15s,transform .15s}
 .choice:hover{border-color:var(--accent);background:var(--surface-2);transform:translateY(-2px)}
-.choice-icon{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);margin-bottom:8px}
+.choice-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);margin-bottom:6px}
 .choice strong{font-size:15px}
 .choice span{font-size:13px;color:var(--text-2)}
 .status{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:460px}
@@ -160,10 +197,11 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .status-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(248,113,113,.12);color:var(--bad)}
 .status-icon .i{width:22px;height:22px}
-@media (max-width:600px){.overlay{padding:12px}.choice{width:100%;padding:12px;flex-direction:row;align-items:center;gap:12px}.choice span{display:none}.choice-icon{margin:0;width:34px;height:34px}.empty h2{font-size:17px;margin-bottom:12px}.empty p{display:none}.choices{gap:8px}.status-title{font-size:15px}.status-sub{font-size:12.5px}.spinner{width:28px;height:28px}}
+@media (max-width:600px){.overlay{padding:12px}.choice{width:100%;padding:10px 12px;flex-direction:row;align-items:center;gap:12px}.choice span{display:none}.choice-icon{margin:0;width:32px;height:32px}.empty h2{font-size:16px;margin-bottom:10px}.empty p{display:none}.choices{gap:8px;width:100%}.live-list{margin-bottom:10px}.status-title{font-size:15px}.status-sub{font-size:12.5px}.spinner{width:28px;height:28px}}
 .stage-top{position:absolute;top:12px;left:12px;right:12px;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;transition:opacity .25s}
 .stage.idle .stage-top{opacity:0}
-.chip-dark{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:12px;color:#e4e4e7;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip-dark{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:12px;color:#e4e4e7;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.chip-dark .live-dot{width:6px;height:6px;border-radius:50%;background:var(--live);flex:none}
 .paused{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.66);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-weight:600;white-space:nowrap}
 .controls{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:32px 12px 10px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.8));display:flex;flex-direction:column;gap:4px;transition:opacity .25s}
 .stage.idle .controls{opacity:0;pointer-events:none}
@@ -191,25 +229,18 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 
 .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
 .src{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 260px}
-.src-icon{width:40px;height:40px;border-radius:10px;background:var(--surface-3);display:grid;place-items:center;color:var(--text-2);flex:none}
 .src-text{min-width:0}
-.src-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
 .src-sub{font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
 .src-sub.warn{color:var(--warn)}
+.src-sub.live{color:#fecaca}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 
-.sidebar{display:flex;flex-direction:column;gap:12px;position:sticky;top:80px;height:calc(100vh - 100px);min-height:520px}
-@media (max-width:1040px){.sidebar{position:static;height:auto;min-height:0}}
+.sidebar{display:flex;flex-direction:column;gap:12px;position:sticky;top:80px;height:calc(100vh - 100px);min-height:480px}
+@media (max-width:1100px){.sidebar{position:static;height:auto;min-height:0}}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
-.invite{padding:14px}
-.invite-head{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:10px}
-.invite-head .i{color:var(--accent)}
-.invite-row{display:flex;gap:8px}
-.invite-row .input{height:34px;font-size:12.5px;color:var(--text-2)}
-.invite-help{margin-top:8px;font-size:12.5px;color:var(--text-2)}
-.code-inline{font-family:var(--mono);color:var(--text);letter-spacing:.1em;font-weight:600}
 .panelbox{display:flex;flex-direction:column;min-height:0;flex:1}
-@media (max-width:1040px){.panelbox{min-height:440px}}
+@media (max-width:1100px){.panelbox{min-height:440px}}
 .tabs{display:flex;gap:4px;padding:6px;border-bottom:1px solid var(--border)}
 .tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--text-2);font-weight:600;font-size:13px}
 .tab:hover{color:var(--text);background:var(--surface-2)}
@@ -220,7 +251,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .count.unread{background:var(--accent);color:var(--accent-ink)}
 .tabpanel{display:flex;flex-direction:column;min-height:0;flex:1;padding:12px}
 .chatlog{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:2px 4px 10px 2px}
-@media (max-width:1040px){.chatlog{height:320px;flex:none}}
+@media (max-width:1100px){.chatlog{height:320px;flex:none}}
 .msg{display:flex;flex-direction:column;gap:1px;font-size:13.5px}
 .msg-head{display:flex;align-items:baseline;gap:8px}
 .msg-name{font-weight:600}
@@ -231,18 +262,21 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .chatform{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border)}
 .chatform .btn{width:40px;padding:0}
 .people{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.people-head{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);padding:10px 8px 4px}
 .person{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px}
 .person:hover{background:var(--surface-2)}
+.person.watching{background:var(--accent-soft)}
 .avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12.5px;color:#0a0a0c;flex:none;position:relative}
-.avatar .st{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;border:2px solid var(--surface);background:var(--text-3)}
-.st.ok{background:var(--ok)}.st.warn{background:var(--warn)}.st.bad{background:var(--bad)}
+.avatar .st{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;border:2px solid var(--surface);background:var(--ok)}
+.avatar .st.live{background:var(--live)}
 .person-main{min-width:0;flex:1}
 .person-name{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:6px;min-width:0}
 .person-name .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tag{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:var(--surface-3);color:var(--text-2);flex:none}
-.tag.host{background:var(--accent-soft);color:var(--accent)}
+.tag.live{background:rgba(239,68,68,.16);color:#fecaca}
 .person-sub{font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.person-sub.warn{color:var(--warn)}.person-sub.bad{color:var(--bad)}
+.person-sub.warn{color:var(--warn)}
+.person-sub.bad{color:var(--bad)}
 .q{display:flex;flex-direction:column;gap:18px;overflow-y:auto;padding-right:2px}
 .q-section{display:flex;flex-direction:column;gap:8px}
 .presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -260,7 +294,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .dialog{border:1px solid var(--border-2);border-radius:var(--r-lg);background:var(--surface);color:var(--text);padding:24px;width:min(420px,calc(100vw - 32px));box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .dialog::backdrop{background:rgba(0,0,0,.6)}
 .dialog h3{font-size:17px;margin-bottom:6px}
-.dialog p{color:var(--text-2);margin-bottom:22px}
+.dialog p{color:var(--text-2);margin-bottom:18px}
+.dialog .field{margin-bottom:20px}
 .dialog-actions{display:flex;justify-content:flex-end;gap:8px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:#1f1f25;border:1px solid var(--border-2);box-shadow:var(--shadow);font-size:13.5px;max-width:calc(100vw - 32px);animation:toastIn .2s ease-out}
 .toast.bad{border-color:rgba(248,113,113,.5)}
@@ -271,6 +306,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5b544"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+    <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="url(#logoGrad)"/><path d="M12.5 9.5v13l10.5-6.5z" fill="#1c1405"/></symbol>
     <symbol id="i-film" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 8h5M2 16h5M17 8h5M17 16h5M2 12h20"/></symbol>
     <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></symbol>
@@ -279,258 +315,307 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></symbol>
     <symbol id="i-max" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
     <symbol id="i-min" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
     <symbol id="i-userplus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
     <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
     <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></symbol>
     <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+    <symbol id="i-login" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
     <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
     <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
-    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-cast" viewBox="0 0 24 24"><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M2 20h.01"/></symbol>
   </defs>
 </svg>
 
-<header class="appbar">
-  <a class="brand" href="./" aria-label="Sessão de Cinema, início">
-    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="url(#logoGrad)"/><path d="M12.5 9.5v13l10.5-6.5z" fill="#1c1405"/></svg>
-    <span class="name">Sessão de Cinema</span>
-  </a>
-  <div class="room-chip room-only">
-    <span class="lbl">Sala</span>
-    <span id="roomCode" class="code">······</span>
-    <button id="copyCodeBtn" class="icon-btn" type="button" title="Copiar código" aria-label="Copiar código da sala" disabled><svg class="i"><use href="#i-copy"/></svg></button>
-  </div>
-  <span id="liveBadge" class="live-badge room-only">Sem transmissão</span>
-  <div class="spacer"></div>
-  <span id="netStatus" class="net-status"></span>
-  <button id="installBtn" class="btn btn-secondary btn-sm home-only" type="button" aria-label="Instalar app" hidden><svg class="i"><use href="#i-download"/></svg><span class="txt">Instalar app</span></button>
-  <button id="endBtn" class="btn btn-danger-ghost btn-sm room-only host-only" type="button" aria-label="Encerrar sala"><svg class="i"><use href="#i-stop"/></svg><span class="txt">Encerrar sala</span></button>
-  <button id="leaveBtn" class="btn btn-secondary btn-sm room-only viewer-only" type="button" aria-label="Sair da sala"><svg class="i"><use href="#i-logout"/></svg><span class="txt">Sair</span></button>
-</header>
+<div class="app">
+  <nav id="rail" class="rail" aria-label="Suas salas">
+    <button id="homeBtn" class="rail-btn home" type="button" title="Início" aria-label="Início"><svg aria-hidden="true"><use href="#i-logo"/></svg></button>
+    <div class="rail-sep"></div>
+    <div id="railRooms" class="rail-rooms"></div>
+    <button id="railCreate" class="rail-btn add" type="button" title="Criar sala" aria-label="Criar sala"><svg class="i"><use href="#i-plus"/></svg></button>
+    <button id="railJoin" class="rail-btn" type="button" title="Entrar numa sala" aria-label="Entrar numa sala"><svg class="i"><use href="#i-login"/></svg></button>
+  </nav>
 
-<main id="home" class="home">
-  <section class="hero">
-    <div>
-      <div class="eyebrow"><span class="dot"></span>Grátis · Sem cadastro · Direto no navegador</div>
-      <h1>Assista filmes com seus amigos, <span class="hl">juntos e ao vivo</span>.</h1>
-      <p class="lead">Transmita um filme do seu computador, ou qualquer tela ou guia, com som, direto para o navegador de quem você convidar.</p>
-      <div class="features">
-        <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-music"/></svg></div><div><strong>Som estéreo de verdade</strong><span>Áudio em alta qualidade, não só o microfone.</span></div></div>
-        <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-gauge"/></svg></div><div><strong>Até 4K e 60 fps</strong><span>Você escolhe a resolução, os quadros e o bitrate.</span></div></div>
-        <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-lock"/></svg></div><div><strong>Conexão direta e criptografada</strong><span>O vídeo vai do seu PC para os seus amigos, sem passar por um servidor de vídeo.</span></div></div>
-      </div>
-    </div>
-    <div class="start-card">
-      <h2>Comece agora</h2>
-      <p class="sub">Crie uma sala ou entre com o código de um amigo.</p>
-      <label class="field">
-        <span class="field-label">Seu apelido</span>
-        <input id="nameInput" class="input" type="text" maxlength="24" placeholder="Como seus amigos vão te ver" autocomplete="nickname">
-      </label>
-      <button id="createBtn" class="btn btn-primary btn-lg btn-block" type="button" style="margin-top:16px"><svg class="i"><use href="#i-film"/></svg>Criar uma sala</button>
-      <div class="divider">ou entre em uma sala</div>
-      <form id="joinForm" class="join-row">
-        <input id="codeInput" class="input code-input" type="text" maxlength="200" placeholder="Código da sala" autocomplete="off" spellcheck="false" aria-label="Código da sala">
-        <button class="btn btn-secondary" type="submit">Entrar</button>
-      </form>
-      <div id="libError" class="alert bad" hidden><svg class="i"><use href="#i-alert"/></svg><span>Não consegui carregar a parte que faz a conexão. Verifique sua internet e recarregue a página.</span></div>
-    </div>
-  </section>
-
-  <section class="faq" aria-labelledby="faqTitle">
-    <h2 id="faqTitle">Perguntas frequentes</h2>
-    <div class="faq-grid">
-      <details><summary>Como transmitir com som?</summary><p>Para um filme salvo no PC, use <em>Arquivo de vídeo</em>: o som vai perfeito. Em <em>Tela ou guia</em>, marque a opção de compartilhar o áudio na janela do navegador. Na <em>Janela</em> de um app (VLC, por exemplo) vai só o som daquele app; numa <em>Guia</em>, só o som da guia; na <em>Tela inteira</em>, o som do computador todo. O som só do app exige Chrome ou Edge 141 ou mais novo.</p></details>
-      <details><summary>Por que Netflix, Prime e Disney+ ficam pretos?</summary><p>Esses serviços têm proteção contra cópia, e quem assiste vê a tela preta. Acontece com qualquer programa de compartilhar tela.</p></details>
-      <details><summary>Qual qualidade escolher?</summary><p>Comece em <em>Padrão</em> (1080p, 8 Mbps). Cada amigo usa o bitrate escolhido do seu <em>upload</em>: com 3 amigos em 8 Mbps, você precisa de uns 25 Mbps de upload. Se travar, diminua o bitrate. Cabo de rede ajuda muito.</p></details>
-      <details><summary>Meu arquivo .mkv ficou sem som</summary><p>O navegador não toca áudio AC3 ou DTS, comum em .mkv. Converta para MP4 com áudio AAC, ou abra no VLC e use <em>Tela ou guia</em> com o áudio do sistema.</p></details>
-      <details><summary>Precisa instalar alguma coisa?</summary><p>Não. Quem transmite usa Chrome ou Edge no computador. Quem assiste pode usar qualquer navegador atualizado, inclusive no celular.</p></details>
-      <details><summary>Dá para instalar como app?</summary><p>Sim. No Chrome ou no Edge, clique em <em>Instalar app</em> no topo da página (ou no ícone de instalar na barra de endereço). Ele ganha ícone no menu Iniciar e abre em janela própria. Depois, clique com o botão direito num vídeo e use <em>Abrir com → Sessão de Cinema</em>: a sala já é criada com o filme.</p></details>
-      <details><summary>Em call no Discord ou WhatsApp ao mesmo tempo?</summary><p>Use <em>Arquivo de vídeo</em>, a <em>Janela</em> do app do filme ou uma <em>Guia</em>: assim só vai o som do filme. Com a tela inteira vai o som do computador todo, e a voz dos amigos volta para eles.</p></details>
-    </div>
-  </section>
-  <footer class="footer"><svg class="i"><use href="#i-lock"/></svg>Vídeo e som vão direto entre os navegadores (WebRTC), criptografados. Um servidor gratuito (PeerJS) só ajuda vocês a se encontrarem.</footer>
-</main>
-
-<main id="room" class="room" hidden>
-  <section class="room-main">
-    <div id="stage" class="stage no-controls">
-      <video id="video" playsinline></video>
-      <div class="stage-top">
-        <span id="stats" class="chip-dark viewer-only" hidden></span>
-        <span></span>
-      </div>
-      <div id="pausedPill" class="paused viewer-only" hidden><svg class="i"><use href="#i-pause"/></svg>Pausado pelo host</div>
-      <div id="floaters" class="floaters"></div>
-      <div id="stageToasts" class="stage-toasts"></div>
-
-      <div id="controls" class="controls">
-        <input id="seek" class="seek host-file-only" type="range" min="0" max="0" step="0.1" value="0" aria-label="Posição do vídeo">
-        <div class="ctrlrow">
-          <button id="playPauseBtn" class="cbtn host-file-only" type="button" title="Reproduzir/pausar (espaço)" aria-label="Reproduzir ou pausar">
-            <svg id="iconPlay" class="i fill"><use href="#i-play"/></svg>
-            <svg id="iconPause" class="i fill" hidden><use href="#i-pause"/></svg>
-          </button>
-          <div class="vol-group">
-            <button id="muteBtn" class="cbtn" type="button" title="Som (M)" aria-label="Ligar ou desligar o som">
-              <svg id="iconSound" class="i"><use href="#i-vol"/></svg>
-              <svg id="iconMuted" class="i" hidden><use href="#i-mute"/></svg>
-            </button>
-            <input id="volume" class="vol" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
-          </div>
-          <span id="timeLabel" class="time host-file-only">0:00 / 0:00</span>
-          <span class="live-tag viewer-only">AO VIVO</span>
-          <div class="spacer"></div>
-          <div id="reactions" class="reacts"></div>
-          <button id="fsBtn" class="cbtn" type="button" title="Tela cheia (F)" aria-label="Tela cheia">
-            <svg id="iconMax" class="i"><use href="#i-max"/></svg>
-            <svg id="iconMin" class="i" hidden><use href="#i-min"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <div id="overlay" class="overlay">
-        <div id="emptyState" class="empty host-only">
-          <h2>O que vocês vão assistir?</h2>
-          <p>Seus amigos já podem entrar enquanto você escolhe.</p>
-          <div class="choices">
-            <button id="fileChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-film"/></svg></span><strong>Arquivo de vídeo</strong><span>Filme salvo no seu computador. Melhor qualidade e som.</span></button>
-            <button id="screenChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-monitor"/></svg></span><strong>Tela ou guia</strong><span>Qualquer coisa aberta no PC, com som.</span></button>
-          </div>
-        </div>
-        <div id="statusBox" class="status" hidden>
-          <div id="spinner" class="spinner"></div>
-          <div id="statusIcon" class="status-icon" hidden><svg class="i"><use href="#i-alert"/></svg></div>
-          <p id="overlayMsg" class="status-title"></p>
-          <p id="overlaySub" class="status-sub"></p>
-          <div class="status-actions">
-            <button id="playBtn" class="btn btn-primary" type="button" hidden><svg class="i fill"><use href="#i-play"/></svg>Assistir com som</button>
-            <button id="backBtn" class="btn btn-secondary" type="button" hidden>Voltar ao início</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="bar host-only">
-      <div class="src">
-        <div class="src-icon"><svg class="i"><use id="sourceIcon" href="#i-film"/></svg></div>
-        <div class="src-text">
-          <div id="sourceName" class="src-name">Nenhuma fonte selecionada</div>
-          <div id="sendStats" class="src-sub"></div>
-        </div>
-      </div>
-      <div class="actions">
-        <button id="fileBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-film"/></svg>Arquivo</button>
-        <button id="screenBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-monitor"/></svg>Tela ou guia</button>
-        <button id="qualityChip" class="btn btn-ghost btn-sm" type="button" title="Configurar qualidade"><svg class="i"><use href="#i-sliders"/></svg><span id="qualitySummary"></span></button>
-        <button id="stopBtn" class="btn btn-danger-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-stop"/></svg>Parar</button>
-      </div>
-      <input id="fileInput" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.m4v" hidden>
-    </div>
-    <div class="bar viewer-only">
-      <div class="src">
-        <div class="src-icon"><svg class="i"><use href="#i-film"/></svg></div>
-        <div class="src-text">
-          <div id="viewerTitle" class="src-name">Sessão de cinema</div>
-          <div id="viewerSub" class="src-sub">Conectando…</div>
-        </div>
-      </div>
-    </div>
-    <div id="audioWarn" class="alert warn host-only" hidden><svg class="i"><use href="#i-alert"/></svg><span id="audioWarnText"></span></div>
-  </section>
-
-  <aside class="sidebar">
-    <section class="card invite host-only">
-      <div class="invite-head"><svg class="i"><use href="#i-userplus"/></svg>Convide seus amigos</div>
-      <div id="inviteRow" class="invite-row">
-        <input id="inviteLink" class="input" type="text" readonly aria-label="Link de convite">
-        <button id="copyLinkBtn" class="btn btn-primary btn-sm" type="button" disabled>Copiar link</button>
-      </div>
-      <p id="inviteHelp" class="invite-help"></p>
-    </section>
-
-    <section class="card panelbox">
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" type="button" data-tab="chat" aria-controls="panel-chat" aria-selected="true"><svg class="i"><use href="#i-chat"/></svg>Chat<span id="unreadCount" class="count unread" hidden>0</span></button>
-        <button class="tab" role="tab" type="button" data-tab="people" aria-controls="panel-people" aria-selected="false"><svg class="i"><use href="#i-users"/></svg>Pessoas<span id="peopleCount" class="count">1</span></button>
-        <button class="tab host-only" role="tab" type="button" data-tab="quality" aria-controls="panel-quality" aria-selected="false"><svg class="i"><use href="#i-sliders"/></svg>Qualidade</button>
-      </div>
-
-      <div id="panel-chat" class="tabpanel" role="tabpanel">
-        <div id="chatlog" class="chatlog" aria-live="polite"></div>
-        <form id="chatForm" class="chatform">
-          <input id="chatInput" class="input" type="text" maxlength="300" placeholder="Escreva uma mensagem" autocomplete="off" aria-label="Mensagem">
-          <button class="btn btn-primary" type="submit" aria-label="Enviar"><svg class="i"><use href="#i-send"/></svg></button>
-        </form>
-      </div>
-
-      <div id="panel-people" class="tabpanel" role="tabpanel" hidden>
-        <ul id="people" class="people"></ul>
-      </div>
-
-      <div id="panel-quality" class="tabpanel host-only" role="tabpanel" hidden>
-        <div class="q">
-          <div class="q-section">
-            <span class="field-label">Predefinição</span>
-            <div id="presets" class="presets"></div>
-          </div>
-          <div class="q-grid">
-            <label class="field"><span class="field-label">Resolução</span>
-              <select id="resSel" class="select">
-                <option value="0">Original da fonte</option>
-                <option value="2160">2160p (4K)</option>
-                <option value="1440">1440p</option>
-                <option value="1080">1080p (Full HD)</option>
-                <option value="720">720p (HD)</option>
-                <option value="480">480p</option>
-              </select>
-            </label>
-            <label class="field"><span class="field-label">Quadros por segundo</span>
-              <select id="fpsSel" class="select">
-                <option value="24">24 fps (cinema)</option>
-                <option value="30">30 fps</option>
-                <option value="60">60 fps</option>
-              </select>
-            </label>
-          </div>
-          <div class="q-section">
-            <div class="bitrate-head">
-              <label class="field-label" for="bitrateInput">Bitrate máximo por pessoa</label>
-              <span class="num-wrap"><input id="bitrateInput" class="input" type="number" min="0.5" max="200" step="0.5" inputmode="decimal">Mbps</span>
+  <div class="main">
+    <!-- INÍCIO -->
+    <section id="home">
+      <header class="topbar">
+        <div class="brand"><svg class="i" style="width:28px;height:28px" aria-hidden="true"><use href="#i-logo"/></svg>Sessão de Cinema</div>
+        <div class="spacer"></div>
+        <button id="installBtn" class="btn btn-secondary btn-sm" type="button" hidden><svg class="i"><use href="#i-download"/></svg>Instalar app</button>
+      </header>
+      <div class="home-inner">
+        <div class="hero">
+          <div>
+            <div class="eyebrow"><span class="dot"></span>Grátis · Sem cadastro · Direto no navegador</div>
+            <h1>Salas para assistir junto, <span class="hl">do seu jeito</span>.</h1>
+            <p class="lead">Crie uma sala, chame os amigos e qualquer pessoa pode transmitir a tela, a janela de um app ou um filme do computador, com som.</p>
+            <div class="features">
+              <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-users"/></svg></div><div><strong>Salas como servidores</strong><span>Suas salas ficam na barra à esquerda. O link é sempre o mesmo, é só voltar.</span></div></div>
+              <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-cast"/></svg></div><div><strong>Todo mundo pode transmitir</strong><span>Cada um escolhe a quem assistir, inclusive com várias transmissões ao mesmo tempo.</span></div></div>
+              <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-gauge"/></svg></div><div><strong>Até 4K, 60 fps e som estéreo</strong><span>Quem transmite escolhe a resolução, os quadros e o bitrate.</span></div></div>
+              <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-lock"/></svg></div><div><strong>Direto e criptografado</strong><span>O vídeo vai de um navegador para o outro, sem servidor de vídeo no meio.</span></div></div>
             </div>
-            <input id="bitrateRange" type="range" min="1" max="100" step="1" aria-label="Bitrate máximo">
-            <div class="ticks"><span>1</span><span>25</span><span>50</span><span>75</span><span>100 Mbps</span></div>
-            <p id="uploadEst" class="hint"></p>
           </div>
-          <label class="field"><span class="field-label">Se a internet apertar, priorizar</span>
-            <select id="prioritySel" class="select">
-              <option value="framerate">Fluidez (recomendado)</option>
-              <option value="resolution">Nitidez</option>
-              <option value="balanced">Equilibrado</option>
-            </select>
-            <span class="hint">Fluidez reduz a resolução para não travar. Nitidez mantém a resolução e reduz os quadros.</span>
-          </label>
-          <label class="field"><span class="field-label">Codec de vídeo</span>
-            <select id="codecSel" class="select">
-              <option value="auto">Automático (recomendado)</option>
-              <option value="h264">H.264</option>
-              <option value="vp9">VP9</option>
-              <option value="av1">AV1</option>
-            </select>
-            <span class="hint">Automático usa H.264 (placa de vídeo) e VP9 acima de 1440p. VP9 e AV1 dão mais qualidade por Mbps, mas AV1 pesa no processador. Trocar o codec ou subir o bitrate reconecta os amigos por 1 a 2 segundos.</span>
-          </label>
-          <p class="hint">O limite real é a sua internet. Se o vídeo travar ou ficar borrado, diminua o bitrate ou a resolução.</p>
+          <div class="start-card">
+            <h2>Comece agora</h2>
+            <p class="sub">Escolha seu nome e crie uma sala, ou entre na de um amigo.</p>
+            <label class="field">
+              <span class="field-label">Seu nome</span>
+              <input id="nameInput" class="input" type="text" maxlength="24" placeholder="Como seus amigos vão te ver" autocomplete="nickname">
+            </label>
+            <button id="createBtn" class="btn btn-primary btn-lg btn-block" type="button" style="margin-top:16px"><svg class="i"><use href="#i-plus"/></svg>Criar uma sala</button>
+            <div class="divider">ou entre numa sala</div>
+            <form id="joinForm" class="join-row">
+              <input id="codeInput" class="input" type="text" maxlength="400" placeholder="Cole o link ou o código" autocomplete="off" spellcheck="false" aria-label="Link ou código da sala">
+              <button class="btn btn-secondary" type="submit">Entrar</button>
+            </form>
+            <div id="libError" class="alert bad" hidden><svg class="i"><use href="#i-alert"/></svg><span>Não consegui carregar a parte que faz a conexão. Verifique sua internet e recarregue a página.</span></div>
+          </div>
         </div>
+
+        <section id="myRooms" class="my-rooms" hidden>
+          <h2 class="section-title">Suas salas</h2>
+          <div id="roomCards" class="rooms-grid"></div>
+        </section>
+
+        <section class="faq" aria-labelledby="faqTitle">
+          <h2 id="faqTitle" class="section-title">Perguntas frequentes</h2>
+          <div class="faq-grid">
+            <details><summary>Como funcionam as salas?</summary><p>Cada sala tem um link fixo. Quem abre o link escolhe um nome e entra. As salas em que você esteve ficam na barra à esquerda, como os servidores do Discord. Se todo mundo sair, a sala continua existindo: o primeiro que voltar abre de novo.</p></details>
+            <details><summary>Quem pode transmitir?</summary><p>Qualquer pessoa na sala, e várias ao mesmo tempo. Quem está na sala escolhe a quem assistir em <em>Pessoas</em> ou na tela principal. Só quem está assistindo usa a internet de quem transmite.</p></details>
+            <details><summary>Como transmitir com som?</summary><p>Para um filme salvo no PC, use <em>Arquivo de vídeo</em>. Em <em>Tela ou janela</em>, marque a opção de áudio na janela do navegador: na <em>Janela</em> de um app vai só o som dele; numa <em>Guia</em>, só o som da guia; na <em>Tela inteira</em>, o som do computador todo.</p></details>
+            <details><summary>Por que Netflix, Prime e Disney+ ficam pretos?</summary><p>Esses serviços têm proteção contra cópia, e quem assiste vê a tela preta. Acontece com qualquer programa de compartilhar tela.</p></details>
+            <details><summary>Qual qualidade escolher?</summary><p>Comece em <em>Padrão</em> (1080p, 8 Mbps). Cada pessoa que assiste usa o bitrate escolhido do seu <em>upload</em>: com 3 pessoas em 8 Mbps, você precisa de uns 25 Mbps de upload.</p></details>
+            <details><summary>Dá para instalar como app?</summary><p>Sim. No Chrome ou no Edge, clique em <em>Instalar app</em> no topo da página. Depois, clique com o botão direito num vídeo e use <em>Abrir com → Sessão de Cinema</em> para transmitir o filme.</p></details>
+          </div>
+        </section>
+        <footer class="footer"><svg class="i"><use href="#i-lock"/></svg>Vídeo e som vão direto entre os navegadores (WebRTC), criptografados. Um servidor gratuito (PeerJS) só ajuda vocês a se encontrarem.</footer>
       </div>
     </section>
-  </aside>
-</main>
+
+    <!-- SALA -->
+    <section id="room" hidden>
+      <header class="roomhead">
+        <div class="room-title">
+          <span id="roomAvatar" class="room-avatar"></span>
+          <div style="min-width:0">
+            <div id="roomName" class="room-name"></div>
+            <div id="roomSub" class="room-sub"></div>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <span id="netStatus" class="net-status"></span>
+        <button id="inviteBtn" class="btn btn-primary btn-sm" type="button" aria-label="Convidar"><svg class="i"><use href="#i-userplus"/></svg><span class="txt">Convidar</span></button>
+        <button id="leaveBtn" class="btn btn-secondary btn-sm" type="button" aria-label="Sair da sala"><svg class="i"><use href="#i-logout"/></svg><span class="txt">Sair</span></button>
+      </header>
+
+      <div class="room-body">
+        <section class="room-main">
+          <div id="stage" class="stage no-controls">
+            <video id="localVideo" playsinline hidden></video>
+            <video id="remoteVideo" playsinline hidden></video>
+            <div class="stage-top">
+              <span id="watchChip" class="chip-dark" hidden></span>
+              <span id="stats" class="chip-dark" hidden></span>
+            </div>
+            <div id="pausedPill" class="paused" hidden><svg class="i"><use href="#i-pause"/></svg><span id="pausedText">Pausado</span></div>
+            <div id="floaters" class="floaters"></div>
+            <div id="stageToasts" class="stage-toasts"></div>
+
+            <div id="controls" class="controls">
+              <input id="seek" class="seek self-file-only" type="range" min="0" max="0" step="0.1" value="0" aria-label="Posição do vídeo">
+              <div class="ctrlrow">
+                <button id="playPauseBtn" class="cbtn self-file-only" type="button" title="Reproduzir/pausar (espaço)" aria-label="Reproduzir ou pausar">
+                  <svg id="iconPlay" class="i fill"><use href="#i-play"/></svg>
+                  <svg id="iconPause" class="i fill" hidden><use href="#i-pause"/></svg>
+                </button>
+                <div class="vol-group">
+                  <button id="muteBtn" class="cbtn" type="button" title="Som (M)" aria-label="Ligar ou desligar o som">
+                    <svg id="iconSound" class="i"><use href="#i-vol"/></svg>
+                    <svg id="iconMuted" class="i" hidden><use href="#i-mute"/></svg>
+                  </button>
+                  <input id="volume" class="vol" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+                </div>
+                <span id="timeLabel" class="time self-file-only">0:00</span>
+                <span class="live-tag remote-only">AO VIVO</span>
+                <div class="spacer"></div>
+                <div id="reactions" class="reacts"></div>
+                <button id="fsBtn" class="cbtn" type="button" title="Tela cheia (F)" aria-label="Tela cheia">
+                  <svg id="iconMax" class="i"><use href="#i-max"/></svg>
+                  <svg id="iconMin" class="i" hidden><use href="#i-min"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div id="overlay" class="overlay">
+              <div id="emptyState" class="empty" hidden>
+                <h2 id="emptyTitle">Ninguém está transmitindo</h2>
+                <p id="emptySub">Comece você: transmita a tela, a janela de um app ou um filme do computador.</p>
+                <div id="liveList" class="live-list" hidden></div>
+                <div class="choices">
+                  <button id="screenChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-monitor"/></svg></span><strong>Tela ou janela</strong><span>Um app, uma guia ou a tela inteira, com som.</span></button>
+                  <button id="fileChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-film"/></svg></span><strong>Arquivo de vídeo</strong><span>Um filme salvo no computador. Melhor qualidade.</span></button>
+                </div>
+              </div>
+              <div id="statusBox" class="status" hidden>
+                <div id="spinner" class="spinner"></div>
+                <div id="statusIcon" class="status-icon" hidden><svg class="i"><use href="#i-alert"/></svg></div>
+                <p id="overlayMsg" class="status-title"></p>
+                <p id="overlaySub" class="status-sub"></p>
+                <div class="status-actions">
+                  <button id="playBtn" class="btn btn-primary" type="button" hidden><svg class="i fill"><use href="#i-play"/></svg>Assistir com som</button>
+                  <button id="stopWatchBtn" class="btn btn-secondary" type="button" hidden>Parar de assistir</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bar">
+            <div class="src">
+              <span id="meAvatar" class="avatar"></span>
+              <div class="src-text">
+                <div class="src-name"><span id="meName"></span><button id="renameBtn" class="icon-btn" type="button" title="Trocar seu nome" aria-label="Trocar seu nome"><svg class="i"><use href="#i-edit"/></svg></button></div>
+                <div id="meSub" class="src-sub"></div>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="screenBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-monitor"/></svg>Tela ou janela</button>
+              <button id="fileBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-film"/></svg>Arquivo</button>
+              <button id="qualityChip" class="btn btn-ghost btn-sm" type="button" title="Qualidade da sua transmissão"><svg class="i"><use href="#i-sliders"/></svg><span id="qualitySummary"></span></button>
+              <button id="selfViewBtn" class="btn btn-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-eye"/></svg>Ver a minha</button>
+              <button id="stopBtn" class="btn btn-danger-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-stop"/></svg>Parar</button>
+            </div>
+            <input id="fileInput" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.m4v" hidden>
+          </div>
+          <div id="audioWarn" class="alert warn" hidden><svg class="i"><use href="#i-alert"/></svg><span id="audioWarnText"></span></div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="card panelbox">
+            <div class="tabs" role="tablist">
+              <button class="tab" role="tab" type="button" data-tab="chat" aria-controls="panel-chat" aria-selected="true"><svg class="i"><use href="#i-chat"/></svg>Chat<span id="unreadCount" class="count unread" hidden>0</span></button>
+              <button class="tab" role="tab" type="button" data-tab="people" aria-controls="panel-people" aria-selected="false"><svg class="i"><use href="#i-users"/></svg>Pessoas<span id="peopleCount" class="count">1</span></button>
+              <button class="tab" role="tab" type="button" data-tab="quality" aria-controls="panel-quality" aria-selected="false"><svg class="i"><use href="#i-sliders"/></svg>Qualidade</button>
+            </div>
+
+            <div id="panel-chat" class="tabpanel" role="tabpanel">
+              <div id="chatlog" class="chatlog" aria-live="polite"></div>
+              <form id="chatForm" class="chatform">
+                <input id="chatInput" class="input" type="text" maxlength="300" placeholder="Escreva uma mensagem" autocomplete="off" aria-label="Mensagem">
+                <button class="btn btn-primary" type="submit" aria-label="Enviar"><svg class="i"><use href="#i-send"/></svg></button>
+              </form>
+            </div>
+
+            <div id="panel-people" class="tabpanel" role="tabpanel" hidden>
+              <ul id="people" class="people"></ul>
+            </div>
+
+            <div id="panel-quality" class="tabpanel" role="tabpanel" hidden>
+              <div class="q">
+                <p class="hint">Vale para quando <em>você</em> transmite.</p>
+                <div class="q-section">
+                  <span class="field-label">Predefinição</span>
+                  <div id="presets" class="presets"></div>
+                </div>
+                <div class="q-grid">
+                  <label class="field"><span class="field-label">Resolução</span>
+                    <select id="resSel" class="select">
+                      <option value="0">Original da fonte</option>
+                      <option value="2160">2160p (4K)</option>
+                      <option value="1440">1440p</option>
+                      <option value="1080">1080p (Full HD)</option>
+                      <option value="720">720p (HD)</option>
+                      <option value="480">480p</option>
+                    </select>
+                  </label>
+                  <label class="field"><span class="field-label">Quadros por segundo</span>
+                    <select id="fpsSel" class="select">
+                      <option value="24">24 fps (cinema)</option>
+                      <option value="30">30 fps</option>
+                      <option value="60">60 fps</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="q-section">
+                  <div class="bitrate-head">
+                    <label class="field-label" for="bitrateInput">Bitrate máximo por pessoa</label>
+                    <span class="num-wrap"><input id="bitrateInput" class="input" type="number" min="0.5" max="200" step="0.5" inputmode="decimal">Mbps</span>
+                  </div>
+                  <input id="bitrateRange" type="range" min="1" max="100" step="1" aria-label="Bitrate máximo">
+                  <div class="ticks"><span>1</span><span>25</span><span>50</span><span>75</span><span>100 Mbps</span></div>
+                  <p id="uploadEst" class="hint"></p>
+                </div>
+                <label class="field"><span class="field-label">Se a internet apertar, priorizar</span>
+                  <select id="prioritySel" class="select">
+                    <option value="framerate">Fluidez (recomendado)</option>
+                    <option value="resolution">Nitidez</option>
+                    <option value="balanced">Equilibrado</option>
+                  </select>
+                  <span class="hint">Fluidez reduz a resolução para não travar. Nitidez mantém a resolução e reduz os quadros.</span>
+                </label>
+                <label class="field"><span class="field-label">Codec de vídeo</span>
+                  <select id="codecSel" class="select">
+                    <option value="auto">Automático (recomendado)</option>
+                    <option value="h264">H.264</option>
+                    <option value="vp9">VP9</option>
+                    <option value="av1">AV1</option>
+                  </select>
+                  <span class="hint">Automático usa H.264 (placa de vídeo) e VP9 acima de 1440p. Trocar o codec ou subir o bitrate reconecta quem está assistindo por 1 a 2 segundos.</span>
+                </label>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </div>
+</div>
+
+<dialog id="nameDialog" class="dialog">
+  <form method="dialog">
+    <h3>Como você quer ser chamado?</h3>
+    <p>Seu nome aparece para todo mundo na sala.</p>
+    <label class="field"><span class="field-label">Seu nome</span><input id="nameField" class="input" type="text" maxlength="24" autocomplete="nickname" required></label>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" value="cancel" formnovalidate>Cancelar</button>
+      <button class="btn btn-primary" value="ok">Continuar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="createDialog" class="dialog">
+  <form method="dialog">
+    <h3>Criar uma sala</h3>
+    <p>Dê um nome para a sala. Depois é só mandar o link para a galera.</p>
+    <label class="field"><span class="field-label">Nome da sala</span><input id="roomNameField" class="input" type="text" maxlength="32" required></label>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" value="cancel" formnovalidate>Cancelar</button>
+      <button class="btn btn-primary" value="ok">Criar sala</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="joinDialog" class="dialog">
+  <form method="dialog">
+    <h3>Entrar numa sala</h3>
+    <p>Cole o link que seu amigo mandou, ou o código da sala.</p>
+    <label class="field"><span class="field-label">Link ou código</span><input id="joinField" class="input" type="text" maxlength="400" autocomplete="off" spellcheck="false" required></label>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" value="cancel" formnovalidate>Cancelar</button>
+      <button class="btn btn-primary" value="ok">Entrar</button>
+    </div>
+  </form>
+</dialog>
 
 <dialog id="confirmDialog" class="dialog">
   <form method="dialog">
@@ -550,13 +635,16 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 (() => {
   'use strict';
 
-  const PREFIX = 'sessao-cinema-v1-';
-  const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-  const CODE_LEN = 6;
+  // ---------- constantes ----------
+  const NS = 'sc2-';
+  const ROOM_PREFIX = NS + 'room-';
+  const MEMBER_PREFIX = NS + 'm-';
+  const ID_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789';
+  const ROOM_ID_LEN = 10;
   const REACTIONS = ['😂', '😱', '😍', '👏', '🍿', '😴'];
   const AUDIO_BPS = 256000;
-  const JOIN_TIMEOUT_MS = 25000;
   const MAX_MBPS = 200;
+  const MAX_MEMBERS = 30;
   const HEIGHTS = [0, 480, 720, 1080, 1440, 2160];
   const PRESETS = [
     { id: 'eco', name: 'Econômica', height: 720, fps: 30, mbps: 3 },
@@ -572,7 +660,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   const COLORS = ['#f5b544', '#60a5fa', '#34d399', '#f472b6', '#a78bfa', '#fb923c', '#22d3ee', '#facc15'];
 
   const $ = (id) => document.getElementById(id);
-  const video = $('video');
+  const localVideo = $('localVideo');
+  const remoteVideo = $('remoteVideo');
   const stage = $('stage');
 
   const storage = {
@@ -580,26 +669,16 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     set(k, v) { try { localStorage.setItem(k, v); } catch { /* sem armazenamento */ } },
   };
 
-  const st = {
-    role: null, name: '', code: '', peer: null, closing: false, lastReact: 0, tab: 'chat', unread: 0,
-    q: loadQuality(),
-    // host
-    viewers: new Map(), stream: null, source: null, sourceName: '', loading: false,
-    objectUrl: null, recallTimer: 0, audioCheckTimer: 0, applyTimer: 0, wakeLock: null, hostStatsTimer: 0, seeking: false,
-    // quem assiste
-    conn: null, call: null, hostName: '', live: false, paused: false, playing: false,
-    needsClick: false, mediaFailed: false, ended: false, endedMsg: '', endedSub: '', userMuted: false,
-    statsTimer: 0, lastBytes: 0, lastTs: 0, joinTimer: 0, rx: null,
-  };
-
   // ---------- utilidades ----------
   const cleanName = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+  const cleanRoomName = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 32);
   const cleanText = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 300);
-  const normCode = (s) => String(s || '').split('#').pop().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
-  function clamp(n, a, b) { return Math.min(b, Math.max(a, n)); }
+  const validRoomId = (s) => typeof s === 'string' && new RegExp('^[' + ID_ALPHABET + ']{' + ROOM_ID_LEN + '}$').test(s);
+  const validMemberId = (s) => typeof s === 'string' && s.startsWith(MEMBER_PREFIX) && s.length < 64;
+  const toOrder = (v) => (Number.isInteger(v) && v >= 0 && v < 1e9 ? v : null);
   const fmtNum = (n, d = 1) => Number(n).toFixed(d).replace('.', ',');
   const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
-
+  function clamp(n, a, b) { return Math.min(b, Math.max(a, n)); }
   function fmtMbps(n) { return (Number.isInteger(n) ? String(n) : fmtNum(n)) + ' Mbps'; }
 
   function fmtTime(s) {
@@ -611,34 +690,23 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     return h ? h + ':' + String(m).padStart(2, '0') + ':' + sec : m + ':' + sec;
   }
 
-  function randomCode() {
-    const a = new Uint32Array(CODE_LEN);
+  function randomId(len) {
+    const a = new Uint32Array(len);
     crypto.getRandomValues(a);
-    return Array.from(a, (n) => ALPHABET[n % ALPHABET.length]).join('');
+    return Array.from(a, (n) => ID_ALPHABET[n % ID_ALPHABET.length]).join('');
   }
 
   function colorFor(name) {
     let h = 0;
-    for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+    for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) >>> 0;
     return COLORS[h % COLORS.length];
   }
 
   function initials(name) {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
     const first = Array.from(parts[0] || '?')[0];
     const last = parts.length > 1 ? Array.from(parts[parts.length - 1])[0] : '';
     return (first + last).toUpperCase();
-  }
-
-  function svgIcon(name, cls) {
-    const NS = 'http://www.w3.org/2000/svg';
-    const s = document.createElementNS(NS, 'svg');
-    s.setAttribute('class', 'i' + (cls ? ' ' + cls : ''));
-    s.setAttribute('aria-hidden', 'true');
-    const u = document.createElementNS(NS, 'use');
-    u.setAttribute('href', '#i-' + name);
-    s.appendChild(u);
-    return s;
   }
 
   function el(tag, cls, text) {
@@ -646,6 +714,24 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (cls) e.className = cls;
     if (text != null) e.textContent = text;
     return e;
+  }
+
+  function svgIcon(name, cls) {
+    const NSV = 'http://www.w3.org/2000/svg';
+    const s = document.createElementNS(NSV, 'svg');
+    s.setAttribute('class', 'i' + (cls ? ' ' + cls : ''));
+    s.setAttribute('aria-hidden', 'true');
+    const u = document.createElementNS(NSV, 'use');
+    u.setAttribute('href', '#i-' + name);
+    s.appendChild(u);
+    return s;
+  }
+
+  function avatarEl(name, cls, live) {
+    const a = el('span', 'avatar' + (cls ? ' ' + cls : ''), initials(name));
+    a.style.background = colorFor(name);
+    if (live != null) a.appendChild(el('span', 'st' + (live ? ' live' : '')));
+    return a;
   }
 
   let toastTimer = 0;
@@ -672,6 +758,20 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     try { ok = document.execCommand('copy'); } catch { ok = false; }
     ta.remove();
     return ok;
+  }
+
+  // Abre um <dialog> de formulário e devolve o valor do campo (ou null se cancelar).
+  function promptDialog(dialogId, fieldId, value) {
+    const d = $(dialogId);
+    const f = $(fieldId);
+    f.value = value || '';
+    d.returnValue = '';
+    d.showModal();
+    f.focus();
+    f.select();
+    return new Promise((resolve) => {
+      d.addEventListener('close', () => resolve(d.returnValue === 'ok' ? f.value : null), { once: true });
+    });
   }
 
   function confirmDialog(title, text, okLabel) {
@@ -713,15 +813,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     return p ? p.id : 'custom';
   }
 
-  function resLabel(h) {
-    return h === 0 ? 'Original' : h === 2160 ? '4K' : h + 'p';
-  }
+  function resLabel(h) { return h === 0 ? 'Original' : h === 2160 ? '4K' : h + 'p'; }
+  function qualitySummary(q) { return resLabel(q.height) + ' · ' + q.fps + ' fps · ' + fmtMbps(q.mbps); }
 
-  function qualitySummary(q) {
-    return resLabel(q.height) + ' · ' + q.fps + ' fps · ' + fmtMbps(q.mbps);
-  }
-
-  // Altura que vai de fato para os amigos: a escolhida, sem passar da fonte.
   function effectiveHeight(q, srcH) {
     if (!q.height) return srcH || 1080;
     return srcH ? Math.min(q.height, srcH) : q.height;
@@ -734,6 +828,14 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     const start = h >= 2000 ? 12000 : h >= 1300 ? 8000 : h >= 1000 ? 5000 : h >= 650 ? 2500 : 1200;
     const max = Math.round(q.mbps * 1000);
     return { start: Math.min(start, max), max };
+  }
+
+  function codecSupported(codec) {
+    if (codec === 'auto') return true;
+    try {
+      const caps = RTCRtpSender.getCapabilities && RTCRtpSender.getCapabilities('video');
+      return !!(caps && caps.codecs.some((c) => c.mimeType.toLowerCase() === CODEC_MIME[codec]));
+    } catch { return false; }
   }
 
   // "Automático" usa H.264 (codificado pela placa de vídeo na maioria dos PCs) e VP9 acima de 1440p.
@@ -797,18 +899,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   }
 
   // O Chrome só respeita o x-google-*-bitrate na RESPOSTA, então quem aplica é quem assiste,
-  // com os valores que o host manda junto da chamada.
+  // com os valores que quem transmite manda junto da chamada.
   function tuneSdp(sdp, kbps) {
     sdp = tuneOpus(sdp);
     return kbps ? tuneVideo(sdp, kbps) : sdp;
-  }
-
-  function codecSupported(codec) {
-    if (codec === 'auto') return true;
-    try {
-      const caps = RTCRtpSender.getCapabilities && RTCRtpSender.getCapabilities('video');
-      return !!(caps && caps.codecs.some((c) => c.mimeType.toLowerCase() === CODEC_MIME[codec]));
-    } catch { return false; }
   }
 
   // O PeerJS cria a oferta dentro de peer.call(), antes de dar tempo de usar setCodecPreferences.
@@ -831,29 +925,77 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     return lines.join('\r\n');
   }
 
+  // ---------- estado ----------
+  const st = {
+    name: cleanName(storage.get('cinema-name')),
+    rooms: [],
+    room: null, joined: false, closing: false,
+    peer: null, lobby: null, lobbyPending: null, lobbyRetry: 0, discoverTimer: 0, electTimer: 0,
+    me: { id: null, order: null }, maxOrder: -1,
+    members: new Map(),   // id -> { id, conns: Set, name, order, share, paused }
+    pending: new Map(),   // ids que ainda estão conectando: id -> { order, until }
+    dialing: new Set(),   // ids para os quais eu já abri conexão
+    q: loadQuality(),
+    // minha transmissão
+    share: null,          // { kind: 'screen'|'file', stream, title }
+    loadingFile: '',
+    objectUrl: null,
+    watchers: new Map(),  // id -> { id, call, status, stats, prevOut, maxKbps, codec }
+    recallTimer: 0, qualityRecallTimer: 0, audioCheckTimer: 0, applyTimer: 0, senderStatsTimer: 0, wakeLock: null, seeking: false,
+    // o que eu assisto
+    watching: null,       // id de quem eu assisto, 'self' ou null
+    call: null, playing: false, needsClick: false, mediaFailed: false, rx: null,
+    rxTimer: 0, lastBytes: 0, lastTs: 0, userMuted: false,
+    tab: 'chat', unread: 0, lastReact: 0,
+  };
+
+  // ---------- salas salvas ----------
+  function loadRooms() {
+    try {
+      const a = JSON.parse(storage.get('cinema-rooms') || '[]');
+      if (!Array.isArray(a)) return [];
+      return a.filter((r) => r && validRoomId(r.id))
+        .map((r) => ({ id: r.id, name: cleanRoomName(r.name) || 'Sala', last: Number(r.last) || 0 }))
+        .slice(0, 50);
+    } catch { return []; }
+  }
+  function saveRooms() { storage.set('cinema-rooms', JSON.stringify(st.rooms)); }
+  function rememberRoom(room) {
+    st.rooms = st.rooms.filter((r) => r.id !== room.id);
+    st.rooms.unshift({ id: room.id, name: room.name, last: Date.now() });
+    saveRooms();
+    renderRail();
+    renderRoomCards();
+  }
+  function forgetRoom(id) {
+    st.rooms = st.rooms.filter((r) => r.id !== id);
+    saveRooms();
+    renderRail();
+    renderRoomCards();
+  }
+
+  function roomLink(room) {
+    return location.href.split('#')[0] + '#r=' + room.id + '&n=' + encodeURIComponent(room.name);
+  }
+
+  // Aceita o link inteiro (#r=…&n=…) ou só o código da sala.
+  function parseRoomRef(text) {
+    const s = String(text || '').trim();
+    const hashPart = s.includes('#') ? s.slice(s.indexOf('#') + 1) : s;
+    const params = new URLSearchParams(hashPart);
+    const id = (params.get('r') || '').toLowerCase();
+    if (validRoomId(id)) return { id, name: cleanRoomName(params.get('n')) };
+    const bare = s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (validRoomId(bare)) return { id: bare, name: '' };
+    return null;
+  }
+
   // ---------- conexão ----------
   function peerLibOk() {
     if (typeof window.Peer === 'function') return true;
     $('libError').hidden = false;
+    notify('Não consegui carregar a conexão. Verifique a internet e recarregue.', true);
     return false;
-  }
-
-  function reconnectPeer(peer) {
-    if (st.closing || st.ended || peer.destroyed || st.peer !== peer) return;
-    netStatus('Reconectando ao servidor de salas…');
-    setTimeout(() => {
-      if (!st.closing && !st.ended && !peer.destroyed && peer.disconnected) {
-        try { peer.reconnect(); } catch { /* tenta de novo no próximo aviso */ }
-      }
-    }, 2000);
-    // Às vezes o servidor aceita a volta sem mandar "open": confere depois de um tempo.
-    setTimeout(() => {
-      if (st.closing || peer.destroyed || peer.disconnected || st.peer !== peer) return;
-      netStatus('');
-      if (st.role === 'host' && st.stream) {
-        for (const v of st.viewers.values()) if (!v.call) callViewer(v);
-      }
-    }, 6000);
   }
 
   const PEER_ERRORS = {
@@ -863,105 +1005,989 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     'socket-error': 'A conexão com o servidor de salas caiu. Tentando de novo…',
     'socket-closed': 'A conexão com o servidor de salas caiu. Tentando de novo…',
     'ssl-unavailable': 'Não consegui uma conexão segura com o servidor de salas.',
-    'unavailable-id': 'Não consegui criar a sala. Recarregue a página e tente de novo.',
   };
   function peerError(err) {
     console.warn('PeerJS', err && err.type, err);
     notify(PEER_ERRORS[err && err.type] || 'Erro de conexão: ' + ((err && err.message) || 'desconhecido'), true);
   }
 
-  function leaveRoom() {
-    st.closing = true;
-    try { if (st.peer) st.peer.destroy(); } catch { /* já fechado */ }
-    location.href = location.href.split('#')[0];
+  function reconnectPeer(peer, onBack) {
+    if (st.closing || peer.destroyed) return;
+    netStatus('Reconectando ao servidor de salas…');
+    setTimeout(() => {
+      if (!st.closing && !peer.destroyed && peer.disconnected) {
+        try { peer.reconnect(); } catch { /* tenta de novo no próximo aviso */ }
+      }
+    }, 2000);
+    // Às vezes o servidor aceita a volta sem mandar "open": confere depois de um tempo.
+    setTimeout(() => {
+      if (st.closing || peer.destroyed || peer.disconnected) return;
+      netStatus('');
+      if (onBack) onBack();
+    }, 6000);
   }
 
-  // ---------- sala: comum ----------
-  function enterRoom() {
-    document.body.dataset.role = st.role;
-    $('home').hidden = true;
-    $('room').hidden = false;
-    const r = $('reactions');
-    r.textContent = '';
-    for (const e of REACTIONS) {
-      const b = el('button', null, e);
-      b.type = 'button';
-      b.title = 'Reagir com ' + e;
-      b.addEventListener('click', () => sendReaction(e));
-      r.appendChild(b);
+  // =====================================================================
+  // SALA: entrar, descobrir quem está lá e manter a "portaria"
+  // =====================================================================
+  // Cada pessoa tem um id próprio no PeerJS e se conecta diretamente com todas as outras.
+  // Para achar a sala, existe um id fixo (sc2-room-<código>) que fica com o "coordenador":
+  // quem chega se conecta nele e recebe a lista de quem está na sala. O coordenador é quem
+  // tem o menor número de chegada; se ele sair, o próximo assume o id fixo sozinho.
+
+  async function openRoom(ref) {
+    if (!ref || !validRoomId(ref.id)) return;
+    if (st.room && st.room.id === ref.id) { showRoomView(); return; }
+    if (!peerLibOk()) return;
+    const name = await ensureName();
+    if (!name) return;
+    if (st.room) {
+      if (!(await confirmLeave())) return;
+      leaveRoom({ keepView: true });
     }
-    const vol = parseFloat(storage.get('cinema-volume'));
-    if (!Number.isNaN(vol)) { video.volume = clamp(vol, 0, 1); $('volume').value = String(video.volume); }
-    updateVolumeIcon();
-    setTab('chat');
-    renderCode();
+    const saved = st.rooms.find((r) => r.id === ref.id);
+    st.room = { id: ref.id, name: cleanRoomName(ref.name) || (saved && saved.name) || 'Sala' };
+    rememberRoom(st.room);
+    setHash(roomLink(st.room).split('#')[1]);
+    resetRoomState();
+    showRoomView();
+    connectMemberPeer();
+  }
+
+  function resetRoomState() {
+    st.closing = false;
+    st.joined = false;
+    st.me = { id: null, order: null };
+    st.maxOrder = -1;
+    st.members.clear();
+    st.pending.clear();
+    st.dialing.clear();
+    st.watchers.clear();
+    st.watching = null;
+    st.unread = 0;
+    $('chatlog').textContent = '';
     renderChatEmpty();
   }
 
-  function renderCode() {
-    const code = st.code;
-    $('roomCode').textContent = code || '······';
-    $('copyCodeBtn').disabled = !code;
-    const web = /^https?:$/.test(location.protocol);
-    $('inviteRow').hidden = !web;
-    $('copyLinkBtn').disabled = !code;
-    $('inviteLink').value = code && web ? inviteLink() : '';
-    const help = $('inviteHelp');
-    help.textContent = '';
-    if (!code) { help.textContent = 'Criando a sala…'; return; }
-    const c = el('span', 'code-inline', code);
-    if (web) help.append('Ou passe o código ', c, '.');
-    else help.append('Mande este arquivo e o código ', c, ' para seus amigos.');
+  function setHash(h) {
+    try { history.replaceState(null, '', location.pathname + location.search + (h ? '#' + h : '')); } catch { location.hash = h || ''; }
   }
 
-  function inviteLink() { return location.href.split('#')[0] + '#' + st.code; }
-
-  function readName(fallback) {
-    st.name = cleanName($('nameInput').value) || fallback;
-    if (cleanName($('nameInput').value)) storage.set('cinema-name', st.name);
+  function connectMemberPeer() {
+    const peer = new Peer(MEMBER_PREFIX + randomId(12), { debug: 1 });
+    st.peer = peer;
+    netStatus('Conectando…');
+    renderAll();
+    peer.on('open', (id) => {
+      if (st.peer !== peer) return;
+      netStatus('');
+      if (!st.me.id) { st.me.id = id; discover(); }
+    });
+    peer.on('connection', onMeshConnection);
+    peer.on('call', onIncomingCall);
+    peer.on('disconnected', () => reconnectPeer(peer, () => {
+      for (const w of st.watchers.values()) if (!w.call) callWatcher(w);
+    }));
+    peer.on('error', (err) => onMemberPeerError(peer, err));
   }
 
-  function setBadge(on, text) {
-    const b = $('liveBadge');
-    b.textContent = text;
-    b.classList.toggle('on', on);
+  function onMemberPeerError(peer, err) {
+    if (st.peer !== peer) return;
+    if (err.type === 'peer-unavailable') {
+      const target = String(err.message || '').split(' ').pop();
+      if (st.room && target === ROOM_PREFIX + st.room.id) {
+        // Ninguém segurando a portaria: a sala está vazia, então eu abro.
+        if (!st.joined) { clearTimeout(st.discoverTimer); claimLobby(); }
+        return;
+      }
+      st.dialing.delete(target);
+      if (st.pending.delete(target)) electCoordinator();
+      return;
+    }
+    if (err.type === 'unavailable-id' && !st.me.id) {
+      try { peer.destroy(); } catch { /* ignora */ }
+      connectMemberPeer();
+      return;
+    }
+    peerError(err);
   }
 
-  function setTab(name) {
-    st.tab = name;
-    for (const t of document.querySelectorAll('.tab')) t.setAttribute('aria-selected', String(t.dataset.tab === name));
-    for (const p of ['chat', 'people', 'quality']) $('panel-' + p).hidden = p !== name;
-    if (name === 'chat') {
-      st.unread = 0;
-      renderUnread();
-      const log = $('chatlog');
-      log.scrollTop = log.scrollHeight;
+  function discover() {
+    if (!st.room || st.joined || !st.peer || st.peer.disconnected) return;
+    clearTimeout(st.discoverTimer);
+    renderAll();
+    const conn = st.peer.connect(ROOM_PREFIX + st.room.id, { reliable: true, metadata: { room: st.room.id, name: st.name } });
+    conn.on('data', (msg) => { if (msg && msg.t === 'roster') onRoster(msg, conn); });
+    conn.on('error', () => { /* tratado pelo timeout */ });
+    // Se a portaria existe mas não responde (quem a segurava caiu), tenta assumir.
+    st.discoverTimer = setTimeout(() => {
+      if (st.joined) return;
+      try { conn.close(); } catch { /* ignora */ }
+      claimLobby();
+    }, 12000);
+  }
+
+  function claimLobby() {
+    if (!st.room || st.closing || st.lobby || st.lobbyPending) return;
+    clearTimeout(st.lobbyRetry);
+    const roomId = st.room.id;
+    const lobby = new Peer(ROOM_PREFIX + roomId, { debug: 1 });
+    st.lobbyPending = lobby;
+    lobby.on('open', () => {
+      if (st.lobbyPending !== lobby || !st.room || st.room.id !== roomId) { try { lobby.destroy(); } catch { /* ignora */ } return; }
+      st.lobbyPending = null;
+      st.lobby = lobby;
+      if (!st.joined) {
+        st.joined = true;
+        st.me.order = 0;
+        st.maxOrder = Math.max(st.maxOrder, 0);
+        sysChat('Você abriu a sala. Convide os amigos pelo botão Convidar.');
+        autoPickStream();
+      }
+      renderAll();
+    });
+    lobby.on('connection', onLobbyConnection);
+    lobby.on('disconnected', () => {
+      if (st.lobby === lobby && !lobby.destroyed) setTimeout(() => { try { if (lobby.disconnected && !lobby.destroyed) lobby.reconnect(); } catch { /* ignora */ } }, 2000);
+    });
+    lobby.on('error', (err) => {
+      if (err.type === 'unavailable-id') {
+        try { lobby.destroy(); } catch { /* ignora */ }
+        if (st.lobbyPending === lobby) st.lobbyPending = null;
+        if (!st.room || st.room.id !== roomId) return;
+        // Alguém abriu a sala junto comigo, ou o id antigo ainda não foi liberado.
+        if (!st.joined) st.lobbyRetry = setTimeout(discover, 1500);
+        else if (isCoordinator()) probeLobby();
+        return;
+      }
+      if (err.type === 'peer-unavailable') return;
+      console.warn('portaria', err);
+    });
+  }
+
+  // Eu deveria ser o coordenador, mas a portaria está com outra pessoa: ou é o id de quem
+  // caiu (o servidor ainda não liberou) ou a sala se dividiu em dois grupos. Pergunto à
+  // portaria quem está lá e me junto a eles; depois a eleição decide quem fica com ela.
+  function probeLobby() {
+    if (!st.room || !st.peer || st.peer.disconnected) { st.lobbyRetry = setTimeout(claimLobby, 3000); return; }
+    clearTimeout(st.lobbyRetry);
+    const conn = st.peer.connect(ROOM_PREFIX + st.room.id, { reliable: true, metadata: { room: st.room.id, name: st.name, probe: true } });
+    conn.on('data', (msg) => {
+      if (!msg || msg.t !== 'roster' || !Array.isArray(msg.members)) return;
+      mergeRoster(msg.members.slice(0, MAX_MEMBERS));
+      setTimeout(() => { try { conn.close(); } catch { /* ignora */ } }, 500);
+    });
+    conn.on('error', () => { /* tratado pelo retry */ });
+    st.lobbyRetry = setTimeout(() => {
+      try { conn.close(); } catch { /* ignora */ }
+      if (st.joined && isCoordinator() && !st.lobby && !st.lobbyPending) claimLobby();
+    }, 8000);
+  }
+
+  function releaseLobby() {
+    clearTimeout(st.lobbyRetry);
+    for (const l of [st.lobby, st.lobbyPending]) if (l) { try { l.destroy(); } catch { /* ignora */ } }
+    st.lobby = null;
+    st.lobbyPending = null;
+  }
+
+  function onLobbyConnection(conn) {
+    conn.on('open', () => {
+      if (!st.room || !conn.metadata || conn.metadata.room !== st.room.id || !st.joined) { setTimeout(() => conn.close(), 200); return; }
+      if (st.members.size + 1 >= MAX_MEMBERS) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
+      const order = ++st.maxOrder;
+      const members = [{ id: st.me.id, name: st.name, order: st.me.order, share: shareInfo() }];
+      for (const m of st.members.values()) members.push({ id: m.id, name: m.name, order: m.order, share: m.share });
+      conn.send({ t: 'roster', room: { name: st.room.name }, order, members });
+      setTimeout(() => { try { conn.close(); } catch { /* ignora */ } }, 3000);
+    });
+  }
+
+  function onRoster(msg, conn) {
+    if (st.joined || !st.room) return;
+    clearTimeout(st.discoverTimer);
+    clearTimeout(st.lobbyRetry);
+    st.joined = true;
+    st.me.order = toOrder(msg.order) == null ? st.maxOrder + 1 : msg.order;
+    st.maxOrder = Math.max(st.maxOrder, st.me.order);
+    const rn = cleanRoomName(msg.room && msg.room.name);
+    if (rn && rn !== st.room.name) {
+      st.room.name = rn;
+      rememberRoom(st.room);
+      setHash(roomLink(st.room).split('#')[1]);
+    }
+    mergeRoster(Array.isArray(msg.members) ? msg.members.slice(0, MAX_MEMBERS) : []);
+    clearTimeout(st.electTimer);
+    st.electTimer = setTimeout(electCoordinator, 10500);
+    sysChat('Você entrou na sala ' + st.room.name + '.');
+    setTimeout(() => { try { conn.close(); } catch { /* ignora */ } }, 500);
+    renderAll();
+  }
+
+  // Conecta com quem eu ainda não conheço. Vem do roster da portaria ou da lista que cada
+  // pessoa manda ao se conectar comigo, então a malha se completa sozinha.
+  function mergeRoster(list) {
+    const until = Date.now() + 10000;
+    let added = false;
+    for (const p of list) {
+      if (!p || !validMemberId(p.id) || p.id === st.me.id || st.members.has(p.id) || st.dialing.has(p.id)) continue;
+      if (st.members.size + st.dialing.size + 1 >= MAX_MEMBERS) break;
+      const order = toOrder(p.order);
+      if (order != null) st.maxOrder = Math.max(st.maxOrder, order);
+      st.pending.set(p.id, { order, until });
+      connectMember(p);
+      added = true;
+    }
+    if (added) {
+      clearTimeout(st.electTimer);
+      st.electTimer = setTimeout(electCoordinator, 10500);
     }
   }
 
-  function renderUnread() {
-    const u = $('unreadCount');
-    u.hidden = !st.unread;
-    u.textContent = st.unread > 99 ? '99+' : String(st.unread);
+  function connectMember(m) {
+    if (!st.peer || !st.room || st.members.has(m.id) || st.dialing.has(m.id)) return;
+    st.dialing.add(m.id);
+    const conn = st.peer.connect(m.id, { reliable: true, metadata: { room: st.room.id, name: st.name, order: st.me.order } });
+    bindMeshConn(conn, { name: cleanName(m.name) || 'Alguém', order: toOrder(m.order), share: cleanShare(m.share) }, false);
   }
 
-  function showOverlay(cfg) {
-    const o = $('overlay');
-    if (!cfg) { o.hidden = true; return; }
-    o.hidden = false;
-    $('emptyState').hidden = !cfg.empty;
-    $('statusBox').hidden = !!cfg.empty;
-    if (cfg.empty) return;
-    $('spinner').hidden = !cfg.spinner;
-    $('statusIcon').hidden = !cfg.error;
-    $('overlayMsg').textContent = cfg.title || '';
-    $('overlaySub').textContent = cfg.sub || '';
-    $('overlaySub').hidden = !cfg.sub;
-    $('playBtn').hidden = !cfg.play;
-    $('backBtn').hidden = !cfg.back;
+  function sendTo(m, msg) {
+    for (const c of m.conns) {
+      if (!c.open) continue;
+      try { c.send(msg); return true; } catch { /* tenta a próxima */ }
+    }
+    return false;
   }
 
-  // ---------- chat e reações ----------
+  function onMeshConnection(conn) {
+    const md = conn.metadata || {};
+    if (!st.room || md.room !== st.room.id || !validMemberId(conn.peer)) { setTimeout(() => { try { conn.close(); } catch { /* ignora */ } }, 200); return; }
+    bindMeshConn(conn, { name: cleanName(md.name) || 'Alguém', order: toOrder(md.order), share: null }, true);
+  }
+
+  // Duas pessoas podem abrir conexão uma com a outra ao mesmo tempo: as duas valem.
+  // A pessoa só sai da sala quando todas as conexões com ela fecham.
+  function bindMeshConn(conn, info, incoming) {
+    const dialTimer = incoming ? 0 : setTimeout(() => {
+      if (conn.open) return;
+      st.dialing.delete(conn.peer);
+      if (st.pending.delete(conn.peer)) electCoordinator();
+      try { conn.close(); } catch { /* ignora */ }
+    }, 20000);
+    conn.on('open', () => {
+      clearTimeout(dialTimer);
+      st.dialing.delete(conn.peer);
+      if (!st.room) { conn.close(); return; }
+      let m = st.members.get(conn.peer);
+      const isNew = !m;
+      if (!m) {
+        if (st.members.size + 1 >= MAX_MEMBERS) { conn.close(); return; }
+        m = { id: conn.peer, conns: new Set(), name: info.name, order: info.order, share: info.share, paused: false };
+        st.members.set(conn.peer, m);
+      }
+      m.conns.add(conn);
+      st.pending.delete(conn.peer);
+      if (m.order != null) st.maxOrder = Math.max(st.maxOrder, m.order);
+      conn.send({ t: 'hello', name: st.name, order: st.me.order, share: shareInfo(), paused: isLocalPaused() });
+      const others = [...st.members.values()].filter((x) => x.id !== m.id).map((x) => ({ id: x.id, name: x.name, order: x.order }));
+      if (others.length) conn.send({ t: 'peers', list: others });
+      if (isNew) {
+        // Só anuncia quem chegou depois de mim (os que já estavam não "entraram agora").
+        if (incoming && (m.order == null || st.me.order == null || m.order > st.me.order)) sysChat(m.name + ' entrou na sala');
+        electCoordinator();
+        if (m.share) autoPickStream();
+        renderAll();
+      }
+    });
+    conn.on('data', (msg) => onMeshData(conn, msg));
+    conn.on('close', () => { clearTimeout(dialTimer); dropConn(conn); });
+    conn.on('error', () => { clearTimeout(dialTimer); dropConn(conn); });
+  }
+
+  function dropConn(conn) {
+    st.dialing.delete(conn.peer);
+    const m = st.members.get(conn.peer);
+    if (!m || !m.conns.has(conn)) return;
+    m.conns.delete(conn);
+    if (!m.conns.size) removeMember(m);
+  }
+
+  function removeMember(m) {
+    if (st.members.get(m.id) !== m) return;
+    st.members.delete(m.id);
+    st.pending.delete(m.id);
+    closeWatcher(m.id);
+    for (const c of m.conns) { try { c.close(); } catch { /* ignora */ } }
+    m.conns.clear();
+    if (st.watching === m.id) {
+      stopRemote();
+      st.watching = null;
+      sysChat(m.name + ' saiu, e a transmissão acabou.');
+      autoPickStream();
+    } else {
+      sysChat(m.name + ' saiu');
+    }
+    electCoordinator();
+    renderAll();
+  }
+
+  function cleanShare(s) {
+    if (!s || typeof s !== 'object') return null;
+    return { kind: s.kind === 'file' ? 'file' : 'screen', title: cleanText(s.title).slice(0, 80) };
+  }
+
+  function onMeshData(conn, msg) {
+    const m = st.members.get(conn.peer);
+    if (!m || !m.conns.has(conn) || !msg || typeof msg !== 'object') return;
+    switch (msg.t) {
+      case 'peers':
+        if (Array.isArray(msg.list)) mergeRoster(msg.list.slice(0, MAX_MEMBERS));
+        break;
+      case 'hello': {
+        const n = cleanName(msg.name);
+        if (n) m.name = n;
+        const o = toOrder(msg.order);
+        if (o != null) { m.order = o; st.maxOrder = Math.max(st.maxOrder, o); }
+        m.paused = !!msg.paused;
+        setMemberShare(m, cleanShare(msg.share), false);
+        electCoordinator();
+        renderAll();
+        break;
+      }
+      case 'name': {
+        const n = cleanName(msg.name);
+        if (n && n !== m.name) { sysChat(m.name + ' agora se chama ' + n); m.name = n; renderAll(); }
+        break;
+      }
+      case 'share':
+        setMemberShare(m, cleanShare(msg.share), true);
+        break;
+      case 'paused':
+        m.paused = !!msg.paused;
+        renderStage();
+        break;
+      case 'watch':
+        onWatchRequest(m);
+        break;
+      case 'unwatch':
+        closeWatcher(m.id);
+        renderAll();
+        break;
+      case 'chat': {
+        const text = cleanText(msg.text);
+        if (text) addChat(m.name, text);
+        break;
+      }
+      case 'react':
+        if (REACTIONS.includes(msg.e)) floatReaction(msg.e);
+        break;
+      case 'bye':
+        removeMember(m);
+        break;
+    }
+  }
+
+  function setMemberShare(m, share, announce) {
+    const was = m.share;
+    m.share = share;
+    if (announce) {
+      if (share && !was) sysChat(m.name + ' começou a transmitir' + (share.title ? ': ' + share.title : ''));
+      else if (!share && was) sysChat(m.name + ' parou de transmitir');
+    }
+    if (!share) {
+      m.paused = false;
+      if (st.watching === m.id) { stopRemote(); st.watching = null; autoPickStream(); }
+    } else if (!was) {
+      autoPickStream();
+    }
+    renderAll();
+  }
+
+  function broadcast(msg) {
+    for (const m of st.members.values()) sendTo(m, msg);
+  }
+
+  function coordinatorId() {
+    if (!st.joined || st.me.order == null) return null;
+    let best = { id: st.me.id, order: st.me.order };
+    const consider = (id, order) => {
+      if (order == null) return;
+      if (order < best.order || (order === best.order && id < best.id)) best = { id, order };
+    };
+    for (const m of st.members.values()) consider(m.id, m.order);
+    const now = Date.now();
+    for (const [id, p] of st.pending) if (p.until > now) consider(id, p.order);
+    return best.id;
+  }
+  function isCoordinator() { return !!st.me.id && coordinatorId() === st.me.id; }
+
+  function electCoordinator() {
+    if (!st.joined || st.closing) return;
+    if (isCoordinator()) { if (!st.lobby && !st.lobbyPending) claimLobby(); }
+    else if (st.lobby || st.lobbyPending) releaseLobby();
+  }
+
+  async function confirmLeave() {
+    if (!st.share || !st.watchers.size) return true;
+    return confirmDialog('Sair da sala?', 'Sua transmissão termina para ' + plural(st.watchers.size, 'pessoa', 'pessoas') + '.', 'Sair');
+  }
+
+  function leaveRoom(opts) {
+    opts = opts || {};
+    if (!st.room) return;
+    st.closing = true;
+    broadcast({ t: 'bye' });
+    st.joined = false;
+    stopShare(false);
+    stopRemote();
+    st.watching = null;
+    clearTimeout(st.discoverTimer);
+    clearTimeout(st.electTimer);
+    releaseLobby();
+    const peer = st.peer;
+    st.peer = null;
+    setTimeout(() => { try { if (peer) peer.destroy(); } catch { /* ignora */ } }, 150);
+    st.members.clear();
+    st.pending.clear();
+    st.room = null;
+    st.joined = false;
+    netStatus('');
+    if (!opts.keepView) { setHash(''); showHome(); }
+    renderRail();
+  }
+
+  // =====================================================================
+  // TRANSMITIR (qualquer pessoa)
+  // =====================================================================
+  function shareInfo() { return st.share ? { kind: st.share.kind, title: st.share.title } : null; }
+  function isLocalPaused() { return !!st.share && st.share.kind === 'file' && localVideo.paused; }
+  function hasLiveTracks() { return !!st.share && !!st.share.stream && st.share.stream.getTracks().length > 0; }
+
+  function sourceHeight(track) {
+    let h = 0;
+    try { h = (track && track.getSettings && track.getSettings().height) || 0; } catch { h = 0; }
+    if (!h && st.share && st.share.kind === 'file') h = localVideo.videoHeight || 0;
+    return h;
+  }
+  function currentSourceHeight() { return sourceHeight(st.share && st.share.stream && st.share.stream.getVideoTracks()[0]); }
+
+  function screenConstraints() {
+    const c = { frameRate: { ideal: st.q.fps, max: st.q.fps } };
+    if (st.q.height) c.height = { max: st.q.height };
+    return c;
+  }
+
+  async function startScreenShare() {
+    if (!st.room) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      notify('Este navegador não deixa compartilhar a tela. Use Chrome ou Edge no computador.', true);
+      return;
+    }
+    // windowAudio: 'window' faz o Chrome/Edge 141+ oferecer só o som do app da janela escolhida.
+    // O navegador lê a opção na hora da chamada; se não conhece, o getter nunca roda.
+    let windowAudioKnown = false;
+    const options = {
+      video: screenConstraints(),
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } },
+      systemAudio: 'include',
+      selfBrowserSurface: 'exclude',
+      surfaceSwitching: 'include',
+      get windowAudio() { windowAudioKnown = true; return 'window'; },
+    };
+    let s;
+    try {
+      s = await navigator.mediaDevices.getDisplayMedia(options);
+    } catch (e) {
+      if (e && e.name !== 'NotAllowedError' && e.name !== 'AbortError') notify('Não foi possível compartilhar a tela: ' + (e.message || e.name), true);
+      return;
+    }
+    if (!st.room) { s.getTracks().forEach((t) => t.stop()); return; }
+    stopShare(false, true);
+    const vt = s.getVideoTracks()[0];
+    let surface = '';
+    try { surface = (vt && vt.getSettings().displaySurface) || ''; } catch { surface = ''; }
+    const title = { monitor: 'Tela inteira', window: 'Janela', browser: 'Guia do navegador' }[surface] || 'Tela';
+    st.share = { kind: 'screen', stream: s, title };
+    if (vt) vt.onended = () => { if (st.share && st.share.stream === s) stopShare(true); };
+    localVideo.muted = true;
+    localVideo.srcObject = s;
+    localVideo.play().catch(() => {});
+    announceShare();
+    publishShare();
+    const hasAudio = s.getAudioTracks().length > 0;
+    if (!hasAudio && surface === 'window' && !windowAudioKnown) showAudioWarn('Este navegador não captura o som de uma janela só. Atualize o Chrome ou o Edge (141 ou mais novo), ou use uma guia do navegador ou “Arquivo”.');
+    else if (!hasAudio) showAudioWarn('Você está transmitindo sem som. Clique em “Tela ou janela” de novo e marque a opção de compartilhar o áudio: na janela de um app vai só o som dele; numa guia, só o som da guia; na tela inteira, o som do computador todo.');
+    else if (surface === 'window' && !windowAudioKnown) showAudioWarn('Este navegador está enviando o som do computador inteiro, não só o deste app. Atualize o Chrome ou o Edge (141 ou mais novo).');
+    else if (surface === 'monitor') showAudioWarn('Na tela inteira vai o som do computador todo, inclusive notificações e chamadas. Para mandar só o som do filme, compartilhe a janela do app ou uma guia.');
+  }
+
+  function waitForEvent(target, ok, bad, ms) {
+    return new Promise((resolve) => {
+      let timer = 0;
+      const done = (val) => {
+        clearTimeout(timer);
+        target.removeEventListener(ok, onOk);
+        if (bad) target.removeEventListener(bad, onBad);
+        resolve(val);
+      };
+      const onOk = () => done(true);
+      const onBad = () => done(false);
+      target.addEventListener(ok, onOk);
+      if (bad) target.addEventListener(bad, onBad);
+      timer = setTimeout(() => done(false), ms);
+    });
+  }
+
+  async function waitForTracks(stream, ms) {
+    const end = Date.now() + ms;
+    while (!stream.getVideoTracks().length && Date.now() < end) await new Promise((r) => setTimeout(r, 100));
+  }
+
+  function captureFile() {
+    const capture = localVideo.captureStream ? localVideo.captureStream() : localVideo.mozCaptureStream ? localVideo.mozCaptureStream() : null;
+    if (!capture) return null;
+    // O Chrome repete "addtrack" para trilhas que já existiam: só rechama se elas mudarem de verdade.
+    const trackIds = () => capture.getTracks().map((t) => t.id).join();
+    let lastIds = trackIds();
+    capture.onaddtrack = capture.onremovetrack = () => {
+      const now = trackIds();
+      if (now === lastIds) return;
+      lastIds = now;
+      scheduleRecall();
+    };
+    return capture;
+  }
+
+  async function startFileShare(file) {
+    if (!file || !st.room) return;
+    stopShare(false, true);
+    const url = URL.createObjectURL(file);
+    st.objectUrl = url;
+    st.loadingFile = file.name;
+    renderAll();
+    localVideo.muted = false;
+    localVideo.src = url;
+    const loaded = await waitForEvent(localVideo, 'loadeddata', 'error', 15000);
+    if (st.objectUrl !== url) return;
+    st.loadingFile = '';
+    if (!loaded) {
+      shareFailed();
+      notify('Esse arquivo não abre no navegador. Prefira MP4 (vídeo H.264 e áudio AAC).', true);
+      return;
+    }
+    const capture = captureFile();
+    if (!capture) {
+      shareFailed();
+      notify('Seu navegador não consegue transmitir arquivos. Use Chrome ou Edge.', true);
+      return;
+    }
+    await waitForTracks(capture, 3000);
+    if (st.objectUrl !== url || !st.room) return;
+    st.share = { kind: 'file', stream: capture, title: file.name };
+    announceShare();
+    publishShare();
+    updateTime();
+    updatePlayIcon();
+  }
+
+  // Quando o filme chega ao fim, o Chrome encerra as trilhas capturadas. Versões mais
+  // novas recriam sozinhas ao dar play de novo; nas antigas é preciso capturar outra vez.
+  function recaptureIfEnded() {
+    setTimeout(() => {
+      if (!st.share || st.share.kind !== 'file' || localVideo.paused) return;
+      if (st.share.stream.getTracks().some((t) => t.readyState === 'live')) return;
+      st.share.stream.onaddtrack = st.share.stream.onremovetrack = null;
+      const capture = captureFile();
+      if (capture) { st.share.stream = capture; publishShare(); }
+    }, 400);
+  }
+
+  function checkFileAudio() {
+    clearTimeout(st.audioCheckTimer);
+    if (!st.share || st.share.kind !== 'file') return;
+    st.audioCheckTimer = setTimeout(() => {
+      if (!st.share || st.share.kind !== 'file' || localVideo.paused) return;
+      const noTrack = !st.share.stream.getAudioTracks().length;
+      const noBytes = typeof localVideo.webkitAudioDecodedByteCount === 'number' && localVideo.webkitAudioDecodedByteCount === 0;
+      if (noTrack || noBytes) showAudioWarn('Esse arquivo está sem som no navegador. Provavelmente o áudio é AC3 ou DTS (comum em .mkv). Converta para MP4 com áudio AAC, ou abra no VLC e use “Tela ou janela” com o áudio do app.');
+    }, 2500);
+  }
+
+  function announceShare() {
+    broadcast({ t: 'share', share: shareInfo() });
+    keepAwake(!!st.share);
+    if (st.share) {
+      sysChat('Você começou a transmitir: ' + st.share.title);
+      if (!st.watching || st.watching === 'self') { stopRemote(); st.watching = 'self'; }
+    }
+    renderAll();
+  }
+
+  function publishShare() {
+    applyTrackHints();
+    for (const w of st.watchers.values()) callWatcher(w);
+    renderAll();
+  }
+
+  function scheduleRecall() {
+    clearTimeout(st.recallTimer);
+    st.recallTimer = setTimeout(() => {
+      if (!st.share) return;
+      // Trilhas sumiram (fim do filme): mantém as chamadas e espera o próximo play.
+      if (st.share.stream.getTracks().length) publishShare();
+      else renderAll();
+    }, 500);
+  }
+
+  function resetLocalVideo() {
+    localVideo.pause();
+    localVideo.srcObject = null;
+    localVideo.removeAttribute('src');
+    localVideo.load();
+    if (st.objectUrl) { URL.revokeObjectURL(st.objectUrl); st.objectUrl = null; }
+    st.loadingFile = '';
+  }
+
+  // Para a minha transmissão. "replacing": vou começar outra logo em seguida.
+  function stopShare(announce, replacing) {
+    clearTimeout(st.recallTimer);
+    clearTimeout(st.audioCheckTimer);
+    $('audioWarn').hidden = true;
+    const had = !!st.share;
+    if (st.share) {
+      const s = st.share.stream;
+      s.onaddtrack = s.onremovetrack = null;
+      s.getTracks().forEach((t) => { t.onended = null; t.stop(); });
+    }
+    st.share = null;
+    resetLocalVideo();
+    if (!replacing) {
+      for (const id of [...st.watchers.keys()]) closeWatcher(id);
+      if (had) {
+        broadcast({ t: 'share', share: null });
+        if (announce) sysChat('Você parou de transmitir');
+      }
+      keepAwake(false);
+      if (st.watching === 'self') { st.watching = null; autoPickStream(); }
+    }
+    renderAll();
+  }
+
+  // O arquivo novo não abriu depois que a transmissão anterior já tinha sido trocada:
+  // avisa todo mundo que eu não estou mais ao vivo.
+  function shareFailed() {
+    resetLocalVideo();
+    for (const id of [...st.watchers.keys()]) closeWatcher(id);
+    broadcast({ t: 'share', share: null });
+    keepAwake(false);
+    if (st.watching === 'self') { st.watching = null; autoPickStream(); }
+    renderAll();
+  }
+
+  function showAudioWarn(text) {
+    $('audioWarnText').textContent = text;
+    $('audioWarn').hidden = false;
+  }
+
+  async function keepAwake(on) {
+    try {
+      if (on && !st.wakeLock && navigator.wakeLock) {
+        st.wakeLock = await navigator.wakeLock.request('screen');
+        st.wakeLock.addEventListener('release', () => { st.wakeLock = null; });
+      } else if (!on && st.wakeLock) {
+        await st.wakeLock.release();
+        st.wakeLock = null;
+      }
+    } catch { /* sem wake lock, tudo bem */ }
+  }
+
+  // ---------- quem me assiste ----------
+  function onWatchRequest(m) {
+    if (!st.share) { sendTo(m, { t: 'share', share: null }); return; }
+    let w = st.watchers.get(m.id);
+    if (!w) { w = { id: m.id, call: null, status: 'conectando', stats: null, prevOut: null }; st.watchers.set(m.id, w); }
+    callWatcher(w);
+    sendTo(m, { t: 'paused', paused: isLocalPaused() });
+    renderAll();
+  }
+
+  function closeWatcher(id) {
+    const w = st.watchers.get(id);
+    if (!w) return;
+    st.watchers.delete(id);
+    if (w.call) { const c = w.call; w.call = null; try { c.close(); } catch { /* ignora */ } }
+  }
+
+  function callWatcher(w) {
+    if (w.call) { const c = w.call; w.call = null; try { c.close(); } catch { /* ignora */ } }
+    w.stats = null;
+    w.prevOut = null;
+    if (!hasLiveTracks() || !st.peer || st.peer.disconnected || !st.members.has(w.id)) { w.status = 'esperando'; return; }
+    const srcH = currentSourceHeight();
+    const kbps = videoKbps(st.q, srcH);
+    const codec = effectiveCodec(st.q, srcH);
+    const call = st.peer.call(w.id, st.share.stream, {
+      sdpTransform: (sdp) => preferCodecSdp(tuneOpus(sdp), codec),
+      metadata: { q: kbps },
+    });
+    if (!call) return;
+    w.call = call;
+    w.maxKbps = kbps.max;
+    w.codec = codec;
+    w.status = 'conectando';
+    // Aplicar já (antes de conectar) faz a primeira imagem sair na resolução certa.
+    applyEncoding(call);
+    const pc = call.peerConnection;
+    if (pc) {
+      pc.addEventListener('connectionstatechange', () => {
+        if (w.call !== call) return;
+        const s = pc.connectionState;
+        if (s === 'connected') { w.status = 'assistindo'; applyEncoding(call); }
+        else if (s === 'disconnected') w.status = 'instável';
+        else if (s === 'failed') w.status = 'falhou';
+        renderPeople();
+      });
+    }
+    call.on('close', () => { if (w.call === call) { w.call = null; if (w.status !== 'falhou') w.status = 'esperando'; renderPeople(); } });
+    call.on('error', () => { if (w.call === call) { w.status = 'falhou'; renderPeople(); } });
+  }
+
+  async function applyEncoding(call) {
+    const pc = call && call.peerConnection;
+    if (!pc) return;
+    const q = st.q;
+    for (const sender of pc.getSenders()) {
+      const track = sender.track;
+      if (!track || track.kind !== 'video') continue;
+      const srcH = sourceHeight(track);
+      const scale = q.height && srcH > q.height ? srcH / q.height : 1;
+      const build = (withDegradation) => {
+        const p = sender.getParameters();
+        if (!p.encodings || !p.encodings.length) return null;
+        const e = p.encodings[0];
+        e.maxBitrate = Math.round(q.mbps * 1e6);
+        e.maxFramerate = q.fps;
+        e.scaleResolutionDownBy = scale;
+        if (withDegradation) p.degradationPreference = DEGRADATION[q.priority];
+        return p;
+      };
+      try {
+        const p = build(true);
+        if (p) await sender.setParameters(p);
+      } catch {
+        try { const p = build(false); if (p) await sender.setParameters(p); } catch (e2) { console.warn('encoding', e2); }
+      }
+    }
+  }
+
+  function applyEncodingAll() {
+    clearTimeout(st.applyTimer);
+    st.applyTimer = setTimeout(() => { for (const w of st.watchers.values()) if (w.call) applyEncoding(w.call); }, 120);
+  }
+
+  // Sempre "motion": a prioridade vai pelo degradationPreference. Com "detail" o Chrome
+  // nunca reduz a resolução, mesmo pedindo fluidez; e o padrão da tela é o modo "slides".
+  function applyTrackHints() {
+    if (!st.share) return;
+    for (const t of st.share.stream.getVideoTracks()) { try { t.contentHint = 'motion'; } catch { /* opcional */ } }
+  }
+
+  function applyCaptureConstraints() {
+    if (!st.share || st.share.kind !== 'screen') return;
+    for (const t of st.share.stream.getVideoTracks()) t.applyConstraints(screenConstraints()).catch(() => {}).then(applyEncodingAll);
+  }
+
+  // Subir o bitrate acima do combinado na conexão, ou mudar o codec, exige refazer a chamada.
+  function scheduleQualityRecall() {
+    clearTimeout(st.qualityRecallTimer);
+    st.qualityRecallTimer = setTimeout(() => {
+      if (!hasLiveTracks()) return;
+      const srcH = currentSourceHeight();
+      const max = videoKbps(st.q, srcH).max;
+      const codec = effectiveCodec(st.q, srcH);
+      for (const w of st.watchers.values()) if (w.call && (w.maxKbps < max || w.codec !== codec)) callWatcher(w);
+      renderPeople();
+    }, 900);
+  }
+
+  function startSenderStats() {
+    clearInterval(st.senderStatsTimer);
+    st.senderStatsTimer = setInterval(async () => {
+      if (!st.watchers.size) return;
+      for (const w of st.watchers.values()) {
+        const pc = w.call && w.call.peerConnection;
+        if (!pc || pc.connectionState !== 'connected') { w.stats = null; continue; }
+        try {
+          const report = await pc.getStats();
+          let out = null;
+          let avail = 0;
+          const codecs = {};
+          report.forEach((r) => {
+            if (r.type === 'outbound-rtp' && r.kind === 'video') out = r;
+            else if (r.type === 'codec') codecs[r.id] = r;
+            else if (r.type === 'candidate-pair' && r.nominated && r.state === 'succeeded' && r.availableOutgoingBitrate) avail = r.availableOutgoingBitrate;
+          });
+          if (!out) continue;
+          let mbps = 0;
+          if (w.prevOut && out.timestamp > w.prevOut.ts) mbps = ((out.bytesSent - w.prevOut.bytes) * 8) / ((out.timestamp - w.prevOut.ts) * 1000);
+          w.prevOut = { bytes: out.bytesSent, ts: out.timestamp };
+          const codec = codecs[out.codecId];
+          let limit = out.qualityLimitationReason || 'none';
+          // No teto escolhido o Chrome também diz "bandwidth": aí o limite é a configuração, não a internet.
+          if (limit === 'bandwidth' && avail >= 0.95 * st.q.mbps * 1e6) limit = 'cap';
+          w.stats = { h: out.frameHeight || 0, fps: out.framesPerSecond || 0, mbps, limit, codec: codec && codec.mimeType ? codec.mimeType.split('/')[1].toUpperCase() : '' };
+        } catch { /* estatística é só informativa */ }
+      }
+      renderPeople();
+      renderMeBar();
+    }, 2000);
+  }
+
+  function statsText(s) {
+    const parts = [];
+    if (s.h) parts.push(s.h + 'p');
+    if (s.fps) parts.push(Math.round(s.fps) + ' fps');
+    if (s.mbps > 0) parts.push(fmtNum(s.mbps) + ' Mbps');
+    if (s.codec) parts.push(s.codec);
+    return parts.join(' · ');
+  }
+
+  // =====================================================================
+  // ASSISTIR
+  // =====================================================================
+  function watch(id) {
+    if (st.watching === id) return;
+    if (st.watching && st.watching !== 'self') {
+      const prev = st.members.get(st.watching);
+      if (prev) sendTo(prev, { t: 'unwatch' });
+    }
+    stopRemote();
+    st.watching = null;
+    if (id === 'self') {
+      if (st.share) st.watching = 'self';
+    } else if (id) {
+      const m = st.members.get(id);
+      if (m && m.share) {
+        st.watching = id;
+        sendTo(m, { t: 'watch' });
+      }
+    }
+    renderAll();
+  }
+
+  // Se não estou assistindo nada, assisto alguém ao vivo (ou a minha transmissão).
+  function autoPickStream() {
+    if (st.watching || !st.joined) return;
+    for (const m of st.members.values()) { if (m.share) { watch(m.id); return; } }
+    if (st.share) { st.watching = 'self'; renderAll(); }
+  }
+
+  function onIncomingCall(call) {
+    if (!st.room || call.peer !== st.watching) { try { call.close(); } catch { /* ignora */ } return; }
+    const old = st.call;
+    st.call = call;
+    st.mediaFailed = false;
+    if (old) { try { old.close(); } catch { /* ignora */ } }
+    const kbps = sanitizeKbps(call.metadata && call.metadata.q);
+    call.answer(undefined, { sdpTransform: (sdp) => tuneSdp(sdp, kbps) });
+    const pc = call.peerConnection;
+    if (pc) {
+      pc.addEventListener('connectionstatechange', () => {
+        if (st.call !== call) return;
+        st.mediaFailed = pc.connectionState === 'failed';
+        renderStage();
+      });
+    }
+    call.on('stream', (stream) => { if (st.call === call) attachRemote(stream, call); });
+    // O PeerJS avisa a falha de rede com "error" e fecha a chamada logo em seguida.
+    call.on('error', () => { if (st.call === call) { st.mediaFailed = true; renderStage(); } });
+    call.on('close', () => { if (st.call === call) { st.call = null; st.playing = false; renderStage(); } });
+    renderStage();
+  }
+
+  function attachRemote(stream, call) {
+    if (remoteVideo.srcObject !== stream) remoteVideo.srcObject = stream;
+    remoteVideo.muted = st.userMuted;
+    const p = remoteVideo.play();
+    if (p && p.then) {
+      p.then(() => { st.needsClick = false; renderStage(); })
+        .catch((err) => { if (err && err.name === 'NotAllowedError') { st.needsClick = true; renderStage(); } });
+    }
+    const pc = call.peerConnection;
+    if (pc) {
+      // Um pouco mais de buffer = imagem mais lisa (filme não precisa de atraso mínimo).
+      for (const r of pc.getReceivers()) { try { if ('jitterBufferTarget' in r) r.jitterBufferTarget = 250; } catch { /* opcional */ } }
+    }
+    startRxStats(call);
+    renderStage();
+  }
+
+  function stopRemote() {
+    clearInterval(st.rxTimer);
+    st.rx = null;
+    if (st.call) { const c = st.call; st.call = null; try { c.close(); } catch { /* ignora */ } }
+    remoteVideo.srcObject = null;
+    st.playing = false;
+    st.needsClick = false;
+    st.mediaFailed = false;
+  }
+
+  function startRxStats(call) {
+    clearInterval(st.rxTimer);
+    st.lastBytes = 0;
+    st.lastTs = 0;
+    st.rxTimer = setInterval(async () => {
+      const pc = call.peerConnection;
+      if (!pc || st.call !== call) return;
+      try {
+        const report = await pc.getStats();
+        let v = null;
+        const codecs = {};
+        report.forEach((r) => {
+          if (r.type === 'inbound-rtp' && r.kind === 'video') v = r;
+          else if (r.type === 'codec') codecs[r.id] = r;
+        });
+        if (!v) return;
+        let mbps = 0;
+        if (st.lastTs && v.timestamp > st.lastTs) mbps = ((v.bytesReceived - st.lastBytes) * 8) / ((v.timestamp - st.lastTs) * 1000);
+        st.lastBytes = v.bytesReceived;
+        st.lastTs = v.timestamp;
+        const codec = codecs[v.codecId];
+        st.rx = { h: v.frameHeight || 0, fps: v.framesPerSecond || 0, mbps, codec: codec && codec.mimeType ? codec.mimeType.split('/')[1].toUpperCase() : '' };
+        renderStageChips();
+      } catch { /* estatística é só informativa */ }
+    }, 2000);
+  }
+
+  // =====================================================================
+  // NOME
+  // =====================================================================
+  async function ensureName() {
+    if (st.name) return st.name;
+    const v = await promptDialog('nameDialog', 'nameField', $('nameInput').value);
+    const n = cleanName(v);
+    if (!n) return null;
+    setName(n);
+    return n;
+  }
+
+  function setName(n) {
+    st.name = n;
+    storage.set('cinema-name', n);
+    $('nameInput').value = n;
+    if (st.room) broadcast({ t: 'name', name: n });
+    renderAll();
+  }
+
+  async function renameMe() {
+    const v = await promptDialog('nameDialog', 'nameField', st.name);
+    const n = cleanName(v);
+    if (n && n !== st.name) setName(n);
+  }
+
+  // =====================================================================
+  // CHAT E REAÇÕES
+  // =====================================================================
   function renderChatEmpty() {
     const log = $('chatlog');
     if (!log.children.length) log.appendChild(el('div', 'chat-empty', 'As mensagens da sala aparecem aqui.'));
@@ -1014,10 +2040,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 
   function sendChat(text) {
     text = cleanText(text);
-    if (!text) return;
+    if (!text || !st.room) return;
     addChat(st.name, text, { mine: true });
-    if (st.role === 'host') broadcast({ t: 'chat', from: st.name, text });
-    else if (st.conn && st.conn.open) st.conn.send({ t: 'chat', text });
+    broadcast({ t: 'chat', text });
   }
 
   function sendReaction(e) {
@@ -1025,622 +2050,293 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (now - st.lastReact < 250) return;
     st.lastReact = now;
     floatReaction(e);
-    if (st.role === 'host') broadcast({ t: 'react', e });
-    else if (st.conn && st.conn.open) st.conn.send({ t: 'react', e });
+    broadcast({ t: 'react', e });
+  }
+
+  // =====================================================================
+  // INTERFACE
+  // =====================================================================
+  function showHome() {
+    $('room').hidden = true;
+    $('home').hidden = false;
+    renderRail();
+    renderRoomCards();
+  }
+
+  function showRoomView() {
+    $('home').hidden = true;
+    $('room').hidden = false;
+    renderAll();
+  }
+
+  function renderRail() {
+    const box = $('railRooms');
+    box.textContent = '';
+    for (const r of st.rooms) {
+      const b = el('button', 'room-icon' + (st.room && st.room.id === r.id ? ' active' : ''), initials(r.name));
+      b.type = 'button';
+      b.title = r.name;
+      b.setAttribute('aria-label', 'Sala ' + r.name);
+      b.style.background = colorFor(r.id);
+      b.addEventListener('click', () => openRoom({ id: r.id, name: r.name }));
+      box.appendChild(b);
+    }
+    $('homeBtn').classList.toggle('active', !$('home').hidden);
+  }
+
+  function renderRoomCards() {
+    const box = $('roomCards');
+    box.textContent = '';
+    $('myRooms').hidden = !st.rooms.length;
+    for (const r of st.rooms) {
+      const card = el('div', 'room-card');
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      const av = el('span', 'room-avatar', initials(r.name));
+      av.style.background = colorFor(r.id);
+      const txt = el('div');
+      txt.style.minWidth = '0';
+      txt.append(el('strong', null, r.name), el('span', null, st.room && st.room.id === r.id ? 'Você está aqui' : 'Código ' + r.id));
+      const x = el('button', 'icon-btn forget');
+      x.type = 'button';
+      x.title = 'Tirar da lista';
+      x.setAttribute('aria-label', 'Tirar ' + r.name + ' da lista');
+      x.appendChild(svgIcon('x'));
+      x.addEventListener('click', (e) => { e.stopPropagation(); forgetRoom(r.id); });
+      card.append(av, txt, x);
+      const open = () => openRoom({ id: r.id, name: r.name });
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+      box.appendChild(card);
+    }
+  }
+
+  function renderAll() {
+    if (!st.room) { renderRail(); return; }
+    renderRoomHead();
+    renderStage();
+    renderMeBar();
+    renderPeople();
+    renderQualityForm();
+    renderRail();
+  }
+
+  function liveMembers() { return [...st.members.values()].filter((m) => m.share); }
+
+  function renderRoomHead() {
+    const r = st.room;
+    $('roomName').textContent = r.name;
+    const av = $('roomAvatar');
+    av.textContent = initials(r.name);
+    av.style.background = colorFor(r.id);
+    const n = st.members.size + 1;
+    const live = liveMembers().length + (st.share ? 1 : 0);
+    $('roomSub').textContent = !st.joined ? 'Entrando…' : plural(n, 'pessoa', 'pessoas') + (live ? ' · ' + live + ' ao vivo' : '');
+    $('peopleCount').textContent = String(n);
+    document.title = r.name + ' · Sessão de Cinema';
+  }
+
+  function activeVideo() { return st.watching === 'self' ? localVideo : remoteVideo; }
+
+  function showOverlay(cfg) {
+    const o = $('overlay');
+    if (!cfg) { o.hidden = true; return; }
+    o.hidden = false;
+    $('emptyState').hidden = !cfg.empty;
+    $('statusBox').hidden = !!cfg.empty;
+    if (cfg.empty) return;
+    $('spinner').hidden = !cfg.spinner;
+    $('statusIcon').hidden = !cfg.error;
+    $('overlayMsg').textContent = cfg.title || '';
+    $('overlaySub').textContent = cfg.sub || '';
+    $('overlaySub').hidden = !cfg.sub;
+    $('playBtn').hidden = !cfg.play;
+    $('stopWatchBtn').hidden = !cfg.stopWatch;
+  }
+
+  function renderEmptyState() {
+    const lives = liveMembers();
+    const list = $('liveList');
+    list.textContent = '';
+    list.hidden = !lives.length;
+    for (const m of lives) {
+      const item = el('div', 'live-item');
+      const info = el('div');
+      info.append(el('strong', null, m.name), el('span', null, 'Ao vivo · ' + (m.share.title || 'Tela')));
+      const b = el('button', 'btn btn-live btn-xs');
+      b.type = 'button';
+      b.append(svgIcon('eye'), document.createTextNode('Assistir'));
+      b.addEventListener('click', () => watch(m.id));
+      item.append(avatarEl(m.name), info, b);
+      list.appendChild(item);
+    }
+    if (lives.length) {
+      $('emptyTitle').textContent = lives.length === 1 ? lives[0].name + ' está ao vivo' : lives.length + ' pessoas ao vivo';
+      $('emptySub').textContent = 'Escolha quem assistir, ou transmita você também.';
+    } else {
+      $('emptyTitle').textContent = 'Ninguém está transmitindo';
+      $('emptySub').textContent = st.members.size ? 'Comece você: transmita a tela, a janela de um app ou um filme do computador.' : 'Convide a galera pelo botão Convidar, ou já comece a transmitir.';
+    }
+  }
+
+  function renderStage() {
+    if (!st.room) return;
+    const w = st.watching;
+    let view = 'none';
+    localVideo.hidden = true;
+    remoteVideo.hidden = true;
+    if (!st.joined) {
+      showOverlay({ spinner: true, title: 'Entrando na sala…', sub: st.room.name });
+    } else if (st.loadingFile && !st.share) {
+      showOverlay({ spinner: true, title: 'Abrindo o arquivo…', sub: st.loadingFile });
+    } else if (w === 'self' && st.share) {
+      view = st.share.kind === 'file' ? 'self-file' : 'self-screen';
+      localVideo.hidden = false;
+      showOverlay(null);
+    } else if (w && w !== 'self') {
+      const m = st.members.get(w);
+      view = 'remote';
+      remoteVideo.hidden = false;
+      const name = m ? m.name : 'a pessoa';
+      if (st.mediaFailed) showOverlay({ error: true, title: 'O vídeo não conseguiu chegar até você', sub: 'Provavelmente um bloqueio de rede (CGNAT ou firewall). Tente outra rede, como o 4G do celular.', stopWatch: true });
+      else if (st.needsClick) showOverlay({ title: name + ' está ao vivo', sub: 'Clique para assistir com som.', play: true });
+      else if (!st.call || !st.playing) showOverlay({ spinner: true, title: 'Conectando à transmissão de ' + name + '…', stopWatch: true });
+      else showOverlay(null);
+    } else {
+      renderEmptyState();
+      showOverlay({ empty: true });
+    }
+    document.body.dataset.view = view;
+    stage.classList.toggle('no-controls', !$('overlay').hidden);
+    const m = w && w !== 'self' ? st.members.get(w) : null;
+    $('pausedPill').hidden = !(m && m.paused && st.playing && m.share && m.share.kind === 'file');
+    if (m) $('pausedText').textContent = 'Pausado por ' + m.name;
+    renderStageChips();
+    updateVolumeUi();
+  }
+
+  function renderStageChips() {
+    const chip = $('watchChip');
+    const w = st.watching;
+    chip.textContent = '';
+    if (w === 'self' && st.share) {
+      chip.append(el('span', 'live-dot'), document.createTextNode('Sua transmissão · ' + plural(st.watchers.size, 'pessoa assistindo', 'pessoas assistindo')));
+      chip.hidden = false;
+    } else if (w && st.members.get(w)) {
+      chip.append(el('span', 'live-dot'), document.createTextNode(st.members.get(w).name));
+      chip.hidden = false;
+    } else {
+      chip.hidden = true;
+    }
+    const s = $('stats');
+    const text = w && w !== 'self' && st.rx ? statsText(st.rx) : '';
+    s.textContent = text;
+    s.hidden = !text;
+  }
+
+  function renderMeBar() {
+    if (!st.room) return;
+    const av = $('meAvatar');
+    av.textContent = initials(st.name || '?');
+    av.style.background = colorFor(st.name || '?');
+    $('meName').textContent = st.name + ' (você)';
+    const sub = $('meSub');
+    sub.className = 'src-sub';
+    if (st.loadingFile && !st.share) sub.textContent = 'Abrindo ' + st.loadingFile + '…';
+    else if (!st.share) sub.textContent = 'Você não está transmitindo';
+    else {
+      const watching = [...st.watchers.values()].filter((w) => w.status === 'assistindo' && w.stats);
+      let text = 'Ao vivo · ' + st.share.title;
+      if (!st.watchers.size) text += ' · ninguém assistindo ainda';
+      else if (!watching.length) text += ' · conectando ' + plural(st.watchers.size, 'pessoa', 'pessoas') + '…';
+      else {
+        const minH = Math.min(...watching.map((w) => w.stats.h || 0));
+        const fps = watching.reduce((a, w) => a + w.stats.fps, 0) / watching.length;
+        const mbps = watching.reduce((a, w) => a + w.stats.mbps, 0) / watching.length;
+        text += ' · ' + plural(watching.length, 'pessoa', 'pessoas') + ' · ' + (minH ? minH + 'p · ' : '') + Math.round(fps) + ' fps · ' + fmtNum(mbps) + ' Mbps';
+        if (watching.some((w) => w.stats.limit === 'bandwidth')) { text += ' · limitado pela internet'; sub.classList.add('warn'); }
+        else if (watching.some((w) => w.stats.limit === 'cpu')) { text += ' · limitado pelo processador'; sub.classList.add('warn'); }
+      }
+      sub.textContent = text;
+      if (!sub.classList.contains('warn')) sub.classList.add('live');
+    }
+    $('stopBtn').hidden = !st.share;
+    $('selfViewBtn').hidden = !st.share || st.watching === 'self';
+    $('qualitySummary').textContent = qualitySummary(st.q);
   }
 
   function personItem(p) {
-    const li = el('li', 'person');
-    const av = el('div', 'avatar', initials(p.name));
-    av.style.background = colorFor(p.name);
-    av.appendChild(el('span', 'st ' + (p.state || 'ok')));
+    const li = el('li', 'person' + (p.watching ? ' watching' : ''));
     const main = el('div', 'person-main');
     const nm = el('div', 'person-name');
     nm.appendChild(el('span', 'nm', p.name));
-    for (const t of p.tags || []) nm.appendChild(el('span', 'tag' + (t === 'Host' ? ' host' : ''), t));
+    for (const t of p.tags || []) nm.appendChild(el('span', 'tag' + (t === 'Ao vivo' ? ' live' : ''), t));
     main.appendChild(nm);
     if (p.sub) main.appendChild(el('div', 'person-sub' + (p.subCls ? ' ' + p.subCls : ''), p.sub));
-    li.append(av, main);
+    li.append(avatarEl(p.name, null, !!p.live), main);
+    if (p.action) {
+      const b = el('button', 'btn btn-xs ' + (p.action.cls || 'btn-secondary'));
+      b.type = 'button';
+      if (p.action.icon) b.appendChild(svgIcon(p.action.icon));
+      b.appendChild(document.createTextNode(p.action.label));
+      b.addEventListener('click', p.action.onClick);
+      li.appendChild(b);
+    }
     return li;
   }
 
-  // ---------- player ----------
-  function toggleFullscreen() {
-    if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
-    if (stage.requestFullscreen) stage.requestFullscreen().catch(() => {});
-    else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
-    else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-  }
-
-  function updateVolumeIcon() {
-    const muted = video.muted || video.volume === 0;
-    $('iconSound').toggleAttribute('hidden', muted);
-    $('iconMuted').toggleAttribute('hidden', !muted);
-  }
-
-  function toggleMute() {
-    if (st.role === 'host' && st.source === 'screen') return;
-    video.muted = !video.muted;
-    if (!video.muted && video.volume === 0) { video.volume = 0.8; $('volume').value = '0.8'; }
-    st.userMuted = video.muted;
-  }
-
-  function updatePlayIcon() {
-    $('iconPlay').toggleAttribute('hidden', !video.paused);
-    $('iconPause').toggleAttribute('hidden', video.paused);
-  }
-
-  function togglePlay() {
-    if (st.role !== 'host' || st.source !== 'file') return;
-    if (video.paused) video.play().catch(() => {});
-    else video.pause();
-  }
-
-  function updateTime() {
-    const d = video.duration;
-    if (!st.seeking) $('seek').value = String(video.currentTime || 0);
-    const cur = fmtTime(st.seeking ? Number($('seek').value) : video.currentTime);
-    $('timeLabel').textContent = Number.isFinite(d) ? cur + ' / ' + fmtTime(d) : cur;
-  }
-
-  let idleTimer = 0;
-  let revealUntil = 0;
-  const canHover = window.matchMedia('(hover: hover)').matches;
-  function wakeControls() {
-    stage.classList.remove('idle');
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      const ctrls = $('controls');
-      if (video.paused || ctrls.querySelector(':focus-visible')) return;
-      if (canHover && ctrls.matches(':hover')) return;
-      stage.classList.add('idle');
-    }, 2800);
-  }
-
-  // =====================================================================
-  // HOST
-  // =====================================================================
-  function startHost() {
-    if (!peerLibOk()) return;
-    readName('Host');
-    st.role = 'host';
-    enterRoom();
-    renderPresets();
-    renderQualityForm();
-    renderHost();
-    openHostPeer(0);
-    startHostStats();
-  }
-
-  function openHostPeer(attempt) {
-    const code = randomCode();
-    const peer = new Peer(PREFIX + code, { debug: 1 });
-    st.peer = peer;
-    netStatus('Criando sala…');
-    peer.on('open', () => {
-      netStatus('');
-      if (!st.code) {
-        st.code = code;
-        renderCode();
-        sysChat('Sala criada. Convide seus amigos com o link ou o código ' + code + '.');
-      }
-      for (const v of st.viewers.values()) if (st.stream && !v.call) callViewer(v);
-    });
-    peer.on('connection', onViewerConnection);
-    peer.on('call', (call) => { try { call.close(); } catch { /* ignora */ } });
-    peer.on('disconnected', () => reconnectPeer(peer));
-    peer.on('error', (err) => {
-      if (err.type === 'unavailable-id' && !st.code && attempt < 5) {
-        peer.destroy();
-        openHostPeer(attempt + 1);
-        return;
-      }
-      if (err.type === 'peer-unavailable') return; // um amigo saiu enquanto era chamado
-      peerError(err);
-    });
-  }
-
-  function onViewerConnection(conn) {
-    const id = conn.peer;
-    conn.on('open', () => {
-      const old = st.viewers.get(id);
-      if (old && old.conn !== conn) removeViewer(id, true);
-      const name = cleanName(conn.metadata && conn.metadata.name) || 'Convidado';
-      const v = { id, conn, call: null, name, status: 'na sala', stats: null, prevOut: null };
-      st.viewers.set(id, v);
-      conn.send({ t: 'welcome', host: st.name, live: !!st.stream, paused: isHostPaused() });
-      sysChat(name + ' entrou na sala');
-      broadcastPeople();
-      if (st.stream) callViewer(v);
-    });
-    conn.on('data', (msg) => onHostData(id, conn, msg));
-    conn.on('close', () => { const v = st.viewers.get(id); if (v && v.conn === conn) removeViewer(id); });
-    conn.on('error', () => { const v = st.viewers.get(id); if (v && v.conn === conn) removeViewer(id); });
-  }
-
-  function removeViewer(id, silent) {
-    const v = st.viewers.get(id);
-    if (!v) return;
-    st.viewers.delete(id);
-    try { if (v.call) v.call.close(); } catch { /* ignora */ }
-    try { v.conn.close(); } catch { /* ignora */ }
-    if (!silent) sysChat(v.name + ' saiu');
-    broadcastPeople();
-  }
-
-  function onHostData(id, conn, msg) {
-    const v = st.viewers.get(id);
-    if (!v || v.conn !== conn || !msg || typeof msg !== 'object') return;
-    if (msg.t === 'chat') {
-      const text = cleanText(msg.text);
-      if (!text) return;
-      addChat(v.name, text);
-      broadcast({ t: 'chat', from: v.name, text }, id);
-    } else if (msg.t === 'react' && REACTIONS.includes(msg.e)) {
-      floatReaction(msg.e);
-      broadcast({ t: 'react', e: msg.e }, id);
-    }
-  }
-
-  function broadcast(msg, exceptId) {
-    for (const v of st.viewers.values()) {
-      if (v.id === exceptId || !v.conn.open) continue;
-      try { v.conn.send(msg); } catch { /* conexão caindo */ }
-    }
-  }
-
-  function broadcastPeople() {
-    if (!st.peer) return;
-    const list = [{ id: st.peer.id, name: st.name, host: true }];
-    for (const v of st.viewers.values()) list.push({ id: v.id, name: v.name });
-    broadcast({ t: 'people', list });
-    renderHost();
-  }
-
-  function isHostPaused() { return st.source === 'file' && video.paused; }
-  function hasLiveTracks() { return !!st.stream && st.stream.getTracks().length > 0; }
-
-  function callViewer(v) {
-    if (v.call) { const c = v.call; v.call = null; try { c.close(); } catch { /* ignora */ } }
-    v.stats = null;
-    v.prevOut = null;
-    if (!hasLiveTracks() || !st.peer || st.peer.disconnected) {
-      v.status = 'na sala';
-      renderHost();
-      return;
-    }
-    const srcH = currentSourceHeight();
-    const kbps = videoKbps(st.q, srcH);
-    const codec = effectiveCodec(st.q, srcH);
-    const call = st.peer.call(v.id, st.stream, {
-      sdpTransform: (sdp) => preferCodecSdp(tuneOpus(sdp), codec),
-      metadata: { q: kbps },
-    });
-    if (!call) return;
-    v.call = call;
-    v.maxKbps = kbps.max;
-    v.codec = codec;
-    v.status = 'conectando vídeo';
-    // Aplicar já (antes de conectar) faz a primeira imagem sair na resolução certa.
-    applyEncoding(call);
-    renderHost();
-    const pc = call.peerConnection;
-    if (pc) {
-      pc.addEventListener('connectionstatechange', () => {
-        if (v.call !== call) return;
-        const s = pc.connectionState;
-        if (s === 'connected') { v.status = 'assistindo'; applyEncoding(call); }
-        else if (s === 'disconnected') v.status = 'instável';
-        else if (s === 'failed') v.status = 'falhou';
-        renderHost();
-      });
-    }
-    call.on('close', () => {
-      if (v.call !== call) return;
-      v.call = null;
-      if (v.status !== 'falhou') v.status = 'na sala';
-      renderHost();
-    });
-    call.on('error', () => { if (v.call === call) { v.status = 'falhou'; renderHost(); } });
-  }
-
-  function sourceHeight(track) {
-    let h = 0;
-    try { h = (track && track.getSettings && track.getSettings().height) || 0; } catch { h = 0; }
-    if (!h && st.source === 'file') h = video.videoHeight || 0;
-    return h;
-  }
-
-  function currentSourceHeight() {
-    return sourceHeight(st.stream && st.stream.getVideoTracks()[0]);
-  }
-
-  // Subir o bitrate acima do combinado na conexão, ou mudar o codec, exige refazer a chamada.
-  function scheduleQualityRecall() {
-    clearTimeout(st.qualityRecallTimer);
-    st.qualityRecallTimer = setTimeout(() => {
-      if (!hasLiveTracks()) return;
-      const srcH = currentSourceHeight();
-      const max = videoKbps(st.q, srcH).max;
-      const codec = effectiveCodec(st.q, srcH);
-      let changed = false;
-      for (const v of st.viewers.values()) {
-        if (v.call && (v.maxKbps < max || v.codec !== codec)) { callViewer(v); changed = true; }
-      }
-      if (changed) renderHost();
-    }, 900);
-  }
-
-  async function applyEncoding(call) {
-    const pc = call && call.peerConnection;
-    if (!pc) return;
-    const q = st.q;
-    for (const sender of pc.getSenders()) {
-      const track = sender.track;
-      if (!track || track.kind !== 'video') continue;
-      const srcH = sourceHeight(track);
-      const scale = q.height && srcH > q.height ? srcH / q.height : 1;
-      const build = (withDegradation) => {
-        const p = sender.getParameters();
-        if (!p.encodings || !p.encodings.length) return null;
-        const e = p.encodings[0];
-        e.maxBitrate = Math.round(q.mbps * 1e6);
-        e.maxFramerate = q.fps;
-        e.scaleResolutionDownBy = scale;
-        if (withDegradation) p.degradationPreference = DEGRADATION[q.priority];
-        return p;
-      };
-      try {
-        const p = build(true);
-        if (p) await sender.setParameters(p);
-      } catch (e) {
-        try { const p = build(false); if (p) await sender.setParameters(p); } catch (e2) { console.warn('encoding', e2); }
-      }
-    }
-  }
-
-  function applyEncodingAll() {
-    clearTimeout(st.applyTimer);
-    st.applyTimer = setTimeout(() => {
-      for (const v of st.viewers.values()) if (v.call) applyEncoding(v.call);
-    }, 120);
-  }
-
-  // Sempre "motion": a prioridade vai pelo degradationPreference. Com "detail" o Chrome
-  // nunca reduz a resolução, mesmo pedindo fluidez; e o padrão da tela é o modo "slides".
-  function applyTrackHints() {
-    if (!st.stream) return;
-    for (const t of st.stream.getVideoTracks()) {
-      try { t.contentHint = 'motion'; } catch { /* opcional */ }
-    }
-  }
-
-  function screenConstraints() {
-    const c = { frameRate: { ideal: st.q.fps, max: st.q.fps } };
-    if (st.q.height) c.height = { max: st.q.height };
-    return c;
-  }
-
-  function applyCaptureConstraints() {
-    if (st.source !== 'screen' || !st.stream) return;
-    for (const t of st.stream.getVideoTracks()) {
-      t.applyConstraints(screenConstraints()).catch(() => {}).then(applyEncodingAll);
-    }
-  }
-
-  function publish(stream) {
-    st.stream = stream;
-    applyTrackHints();
-    for (const v of st.viewers.values()) {
-      if (stream) callViewer(v);
-      else if (v.call) { const c = v.call; v.call = null; v.status = 'na sala'; v.stats = null; try { c.close(); } catch { /* ignora */ } }
-    }
-    broadcast({ t: 'live', live: !!stream, paused: isHostPaused() });
-    keepAwake(!!stream);
-    renderHost();
-  }
-
-  function scheduleRecall() {
-    clearTimeout(st.recallTimer);
-    st.recallTimer = setTimeout(() => {
-      if (!st.stream) return;
-      // Trilhas sumiram (fim do filme): mantém as chamadas e espera o próximo play.
-      if (st.stream.getTracks().length) publish(st.stream);
-      else renderHost();
-    }, 500);
-  }
-
-  function stopSource() {
-    clearTimeout(st.recallTimer);
-    clearTimeout(st.audioCheckTimer);
-    const s = st.stream;
-    st.stream = null;
-    if (s) {
-      s.onaddtrack = s.onremovetrack = null;
-      s.getTracks().forEach((t) => { t.onended = null; t.stop(); });
-    }
-    video.pause();
-    video.srcObject = null;
-    video.removeAttribute('src');
-    video.load();
-    if (st.objectUrl) { URL.revokeObjectURL(st.objectUrl); st.objectUrl = null; }
-    st.source = null;
-    st.sourceName = '';
-    st.loading = false;
-    $('audioWarn').hidden = true;
-  }
-
-  function waitForEvent(target, ok, bad, ms) {
-    return new Promise((resolve) => {
-      let timer = 0;
-      const done = (val) => {
-        clearTimeout(timer);
-        target.removeEventListener(ok, onOk);
-        if (bad) target.removeEventListener(bad, onBad);
-        resolve(val);
-      };
-      const onOk = () => done(true);
-      const onBad = () => done(false);
-      target.addEventListener(ok, onOk);
-      if (bad) target.addEventListener(bad, onBad);
-      timer = setTimeout(() => done(false), ms);
-    });
-  }
-
-  async function waitForTracks(stream, ms) {
-    const end = Date.now() + ms;
-    while (!stream.getVideoTracks().length && Date.now() < end) {
-      await new Promise((r) => setTimeout(r, 100));
-    }
-  }
-
-  function captureFile() {
-    const capture = video.captureStream ? video.captureStream() : video.mozCaptureStream ? video.mozCaptureStream() : null;
-    if (!capture) return null;
-    // O Chrome repete "addtrack" para trilhas que já existiam: só rechama os amigos se elas mudarem de verdade.
-    const trackIds = () => capture.getTracks().map((t) => t.id).join();
-    let lastIds = trackIds();
-    capture.onaddtrack = capture.onremovetrack = () => {
-      const now = trackIds();
-      if (now === lastIds) return;
-      lastIds = now;
-      scheduleRecall();
-    };
-    return capture;
-  }
-
-  // Quando o filme chega ao fim, o Chrome encerra as trilhas capturadas. Versões mais
-  // novas recriam sozinhas ao dar play de novo; nas antigas é preciso capturar outra vez.
-  function recaptureIfEnded() {
-    setTimeout(() => {
-      if (st.source !== 'file' || !st.stream || video.paused) return;
-      if (st.stream.getTracks().some((t) => t.readyState === 'live')) return;
-      st.stream.onaddtrack = st.stream.onremovetrack = null;
-      const capture = captureFile();
-      if (capture) publish(capture);
-    }, 400);
-  }
-
-  async function useFile(file) {
-    if (!file) return;
-    stopSource();
-    publish(null);
-    const url = URL.createObjectURL(file);
-    st.objectUrl = url;
-    st.loading = true;
-    st.sourceName = file.name;
-    renderHost();
-    video.muted = false;
-    video.src = url;
-    const loaded = await waitForEvent(video, 'loadeddata', 'error', 15000);
-    if (st.objectUrl !== url) return;
-    if (!loaded) {
-      stopSource();
-      renderHost();
-      notify('Esse arquivo não abre no navegador. Prefira MP4 (vídeo H.264 e áudio AAC).', true);
-      return;
-    }
-    const capture = captureFile();
-    if (!capture) {
-      stopSource();
-      renderHost();
-      notify('Seu navegador não consegue transmitir arquivos. Use Chrome ou Edge.', true);
-      return;
-    }
-    await waitForTracks(capture, 3000);
-    if (st.objectUrl !== url) return;
-    st.loading = false;
-    st.source = 'file';
-    publish(capture);
-    updateTime();
-    updatePlayIcon();
-    sysChat('Transmitindo: ' + file.name);
-  }
-
-  function checkFileAudio() {
-    clearTimeout(st.audioCheckTimer);
-    if (st.source !== 'file') return;
-    st.audioCheckTimer = setTimeout(() => {
-      if (st.source !== 'file' || video.paused || !st.stream) return;
-      const noTrack = !st.stream.getAudioTracks().length;
-      const noBytes = typeof video.webkitAudioDecodedByteCount === 'number' && video.webkitAudioDecodedByteCount === 0;
-      if (noTrack || noBytes) {
-        showAudioWarn('Esse arquivo está sem som no navegador. Provavelmente o áudio é AC3 ou DTS (comum em .mkv). Converta para MP4 com áudio AAC, ou abra no VLC e use “Tela ou guia” → “Tela inteira” com “Compartilhar também o áudio do sistema”.');
-      }
-    }, 2500);
-  }
-
-  async function useScreen() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-      notify('Este navegador não deixa compartilhar a tela. Use Chrome ou Edge no computador.', true);
-      return;
-    }
-    // windowAudio: 'window' faz o Chrome/Edge 141+ oferecer só o som do app da janela escolhida,
-    // em vez do som do sistema inteiro. O navegador lê a opção na hora da chamada; se ele não
-    // conhece a opção, o getter nunca roda e dá para avisar que o som pode vazar.
-    let windowAudioKnown = false;
-    const options = {
-      video: screenConstraints(),
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } },
-      systemAudio: 'include',
-      selfBrowserSurface: 'exclude',
-      surfaceSwitching: 'include',
-      get windowAudio() { windowAudioKnown = true; return 'window'; },
-    };
-    let s;
-    try {
-      s = await navigator.mediaDevices.getDisplayMedia(options);
-    } catch (e) {
-      if (e && e.name !== 'NotAllowedError' && e.name !== 'AbortError') notify('Não foi possível compartilhar a tela: ' + (e.message || e.name), true);
-      return;
-    }
-    stopSource();
-    video.muted = true;
-    video.srcObject = s;
-    video.play().catch(() => {});
-    const vt = s.getVideoTracks()[0];
-    let surface = '';
-    if (vt) {
-      vt.onended = () => { if (st.stream === s) { stopSource(); publish(null); sysChat('Transmissão encerrada'); } };
-      try { surface = vt.getSettings().displaySurface || ''; } catch { surface = ''; }
-      st.sourceName = { monitor: 'Compartilhando a tela inteira', window: 'Compartilhando uma janela', browser: 'Compartilhando uma guia' }[surface] || 'Tela compartilhada';
-    }
-    st.source = 'screen';
-    publish(s);
-    const hasAudio = s.getAudioTracks().length > 0;
-    if (!hasAudio && surface === 'window' && !windowAudioKnown) {
-      showAudioWarn('Este navegador não captura o som de uma janela só. Atualize o Chrome ou o Edge (versão 141 ou mais nova), ou abra o filme numa guia do navegador ou em “Arquivo de vídeo”.');
-    } else if (!hasAudio) {
-      showAudioWarn('Você compartilhou sem som. Clique em “Tela ou guia” de novo e, na janela do navegador, marque a opção de compartilhar o áudio: na Janela de um app vai só o som daquele app; numa Guia, só o som da guia; na Tela inteira, o som do computador todo.');
-    } else if (surface === 'window' && !windowAudioKnown) {
-      showAudioWarn('Atenção: este navegador está enviando o som do computador inteiro, não só o deste app. Para mandar só o som do app, atualize o Chrome ou o Edge (versão 141 ou mais nova).');
-    } else if (surface === 'monitor') {
-      showAudioWarn('Na Tela inteira vai o som do computador todo, inclusive notificações e chamadas. Para mandar só o som do filme, compartilhe a Janela do app ou uma Guia.');
-    }
-  }
-
-  function showAudioWarn(text) {
-    $('audioWarnText').textContent = text;
-    $('audioWarn').hidden = false;
-  }
-
-  async function keepAwake(on) {
-    try {
-      if (on && !st.wakeLock && navigator.wakeLock) {
-        st.wakeLock = await navigator.wakeLock.request('screen');
-        st.wakeLock.addEventListener('release', () => { st.wakeLock = null; });
-      } else if (!on && st.wakeLock) {
-        await st.wakeLock.release();
-        st.wakeLock = null;
-      }
-    } catch { /* sem wake lock, tudo bem */ }
-  }
-
-  function startHostStats() {
-    clearInterval(st.hostStatsTimer);
-    st.hostStatsTimer = setInterval(async () => {
-      for (const v of st.viewers.values()) {
-        const pc = v.call && v.call.peerConnection;
-        if (!pc || pc.connectionState !== 'connected') { v.stats = null; continue; }
-        try {
-          const report = await pc.getStats();
-          let out = null;
-          let avail = 0;
-          const codecs = {};
-          report.forEach((r) => {
-            if (r.type === 'outbound-rtp' && r.kind === 'video') out = r;
-            else if (r.type === 'codec') codecs[r.id] = r;
-            else if (r.type === 'candidate-pair' && r.nominated && r.state === 'succeeded' && r.availableOutgoingBitrate) avail = r.availableOutgoingBitrate;
-          });
-          if (!out) continue;
-          let mbps = 0;
-          if (v.prevOut && out.timestamp > v.prevOut.ts) mbps = ((out.bytesSent - v.prevOut.bytes) * 8) / ((out.timestamp - v.prevOut.ts) * 1000);
-          v.prevOut = { bytes: out.bytesSent, ts: out.timestamp };
-          const codec = codecs[out.codecId];
-          let limit = out.qualityLimitationReason || 'none';
-          // No teto escolhido o Chrome também diz "bandwidth": aí o limite é a configuração, não a internet.
-          if (limit === 'bandwidth' && avail >= 0.95 * st.q.mbps * 1e6) limit = 'cap';
-          v.stats = {
-            h: out.frameHeight || 0,
-            fps: out.framesPerSecond || 0,
-            mbps,
-            limit,
-            codec: codec && codec.mimeType ? codec.mimeType.split('/')[1].toUpperCase() : '',
-          };
-        } catch { /* estatística é só informativa */ }
-      }
-      renderHost();
-    }, 2000);
-  }
-
-  function statsText(s) {
-    const parts = [];
-    if (s.h) parts.push(s.h + 'p');
-    if (s.fps) parts.push(Math.round(s.fps) + ' fps');
-    if (s.mbps > 0) parts.push(fmtNum(s.mbps) + ' Mbps');
-    if (s.codec) parts.push(s.codec);
-    return parts.join(' · ');
-  }
-
-  function renderHost() {
-    if (st.role !== 'host') return;
-    const live = hasLiveTracks();
-    document.body.dataset.source = st.source || 'none';
-    if (st.source) showOverlay(null);
-    else if (st.loading) showOverlay({ spinner: true, title: 'Abrindo o arquivo…', sub: st.sourceName });
-    else showOverlay({ empty: true });
-    stage.classList.toggle('no-controls', !st.source);
-    $('stopBtn').hidden = !st.source;
-    setBadge(live, live ? 'Ao vivo' : 'Sem transmissão');
-
-    $('sourceIcon').setAttribute('href', st.source === 'screen' ? '#i-monitor' : '#i-film');
-    $('sourceName').textContent = st.source ? st.sourceName : st.loading ? 'Abrindo ' + st.sourceName + '…' : 'Nenhuma fonte selecionada';
-
-    const sub = $('sendStats');
-    sub.classList.remove('warn');
-    const watching = [...st.viewers.values()].filter((v) => v.status === 'assistindo' && v.stats);
-    if (!st.source) sub.textContent = 'Escolha um arquivo de vídeo ou compartilhe uma tela. Seus amigos já podem entrar.';
-    else if (!st.viewers.size) sub.textContent = 'Pronto. Assim que alguém entrar, recebe a transmissão na hora.';
-    else if (!watching.length) sub.textContent = 'Conectando o vídeo para ' + plural(st.viewers.size, 'pessoa', 'pessoas') + '…';
-    else {
-      const minH = Math.min(...watching.map((v) => v.stats.h || 0));
-      const fps = watching.reduce((a, v) => a + v.stats.fps, 0) / watching.length;
-      const mbps = watching.reduce((a, v) => a + v.stats.mbps, 0) / watching.length;
-      let text = 'Enviando ' + (minH ? minH + 'p · ' : '') + Math.round(fps) + ' fps · ' + fmtNum(mbps) + ' Mbps para ' + plural(watching.length, 'pessoa', 'pessoas');
-      if (watching.some((v) => v.stats.limit === 'bandwidth')) { text += ' · limitado pela internet'; sub.classList.add('warn'); }
-      else if (watching.some((v) => v.stats.limit === 'cpu')) { text += ' · limitado pelo processador'; sub.classList.add('warn'); }
-      else if (watching.some((v) => v.stats.limit === 'cap')) text += ' · no teto de ' + fmtMbps(st.q.mbps);
-      sub.textContent = text;
-    }
-
+  function renderPeople() {
+    if (!st.room) return;
     const ul = $('people');
     ul.textContent = '';
-    ul.appendChild(personItem({ name: st.name, tags: ['Host', 'Você'], state: 'ok', sub: live ? 'transmitindo' : 'na sala' }));
-    for (const v of st.viewers.values()) {
-      const state = v.status === 'assistindo' ? 'ok' : v.status === 'falhou' ? 'bad' : 'warn';
-      let subText = v.status;
-      let subCls = v.status === 'falhou' ? 'bad' : '';
-      if (v.stats && v.status === 'assistindo') {
-        subText = statsText(v.stats);
-        if (v.stats.limit === 'bandwidth') { subText += ' · rede limitando'; subCls = 'warn'; }
-        else if (v.stats.limit === 'cpu') { subText += ' · processador limitando'; subCls = 'warn'; }
-        else if (v.stats.limit === 'cap') subText += ' · no teto escolhido';
+    const meTags = ['Você'];
+    if (st.share) meTags.push('Ao vivo');
+    let meSub = st.share ? st.share.title + ' · ' + plural(st.watchers.size, 'pessoa assistindo', 'pessoas assistindo') : 'na sala';
+    ul.appendChild(personItem({
+      name: st.name, tags: meTags, live: !!st.share, sub: meSub, watching: st.watching === 'self',
+      action: st.share && st.watching !== 'self' ? { label: 'Ver', icon: 'eye', onClick: () => watch('self') } : null,
+    }));
+    const others = [...st.members.values()].sort((a, b) => (b.share ? 1 : 0) - (a.share ? 1 : 0) || a.name.localeCompare(b.name));
+    for (const m of others) {
+      const w = st.watchers.get(m.id);
+      let sub = m.share ? 'Ao vivo · ' + (m.share.title || 'Tela') : 'na sala';
+      let subCls = '';
+      if (w) {
+        if (w.stats && w.status === 'assistindo') {
+          sub = 'assistindo você · ' + statsText(w.stats);
+          if (w.stats.limit === 'bandwidth') { sub += ' · rede limitando'; subCls = 'warn'; }
+          else if (w.stats.limit === 'cpu') { sub += ' · processador limitando'; subCls = 'warn'; }
+        } else sub = 'assistindo você · ' + w.status;
+        if (w.status === 'falhou') subCls = 'bad';
       }
-      ul.appendChild(personItem({ name: v.name, state, sub: subText, subCls }));
+      const tags = m.share ? ['Ao vivo'] : [];
+      let action = null;
+      if (m.share) {
+        action = st.watching === m.id
+          ? { label: 'Assistindo', cls: 'btn-ghost', onClick: () => watch(null) }
+          : { label: 'Assistir', icon: 'eye', cls: 'btn-live', onClick: () => { watch(m.id); } };
+      }
+      ul.appendChild(personItem({ name: m.name, tags, live: !!m.share, sub, subCls, watching: st.watching === m.id, action }));
     }
-    $('peopleCount').textContent = String(st.viewers.size + 1);
-    $('qualitySummary').textContent = qualitySummary(st.q);
     renderUploadEst();
   }
 
-  function renderUploadEst() {
-    const n = st.viewers.size;
-    const per = st.q.mbps + AUDIO_BPS / 1e6;
-    const est = $('uploadEst');
-    est.classList.toggle('warn', n * per > 50);
-    est.textContent = n
-      ? 'Com ' + plural(n, 'amigo', 'amigos') + ', seu upload precisa de até ~' + fmtNum(n * per) + ' Mbps.'
-      : 'Cada amigo usa até ~' + fmtNum(per) + ' Mbps do seu upload.';
+  function setTab(name) {
+    st.tab = name;
+    for (const t of document.querySelectorAll('.tab')) t.setAttribute('aria-selected', String(t.dataset.tab === name));
+    for (const p of ['chat', 'people', 'quality']) $('panel-' + p).hidden = p !== name;
+    if (name === 'chat') {
+      st.unread = 0;
+      renderUnread();
+      const log = $('chatlog');
+      log.scrollTop = log.scrollHeight;
+    }
+  }
+
+  function renderUnread() {
+    const u = $('unreadCount');
+    u.hidden = !st.unread;
+    u.textContent = st.unread > 99 ? '99+' : String(st.unread);
   }
 
   // ---------- painel de qualidade ----------
@@ -1683,6 +2379,16 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     renderUploadEst();
   }
 
+  function renderUploadEst() {
+    const n = st.watchers.size;
+    const per = st.q.mbps + AUDIO_BPS / 1e6;
+    const est = $('uploadEst');
+    est.classList.toggle('warn', n * per > 50);
+    est.textContent = n
+      ? 'Com ' + plural(n, 'pessoa assistindo', 'pessoas assistindo') + ', seu upload precisa de até ~' + fmtNum(n * per) + ' Mbps.'
+      : 'Cada pessoa que assiste usa até ~' + fmtNum(per) + ' Mbps do seu upload.';
+  }
+
   function setQuality(patch) {
     const prev = st.q;
     const next = sanitizeQuality(Object.assign({}, prev, patch));
@@ -1690,262 +2396,279 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     st.q = next;
     storage.set('cinema-quality', JSON.stringify(next));
     renderQualityForm();
-    if (st.role !== 'host') return;
     if (prev.height !== next.height || prev.fps !== next.fps) applyCaptureConstraints();
     applyEncodingAll();
     scheduleQualityRecall();
-    renderHost();
+    renderMeBar();
   }
 
-  async function endRoom() {
-    if (st.viewers.size) {
-      const ok = await confirmDialog('Encerrar a sala?', 'A transmissão termina para ' + plural(st.viewers.size, 'pessoa', 'pessoas') + ' e o código deixa de funcionar.', 'Encerrar sala');
-      if (!ok) return;
+  // ---------- player ----------
+  function toggleFullscreen() {
+    if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
+    if (stage.requestFullscreen) stage.requestFullscreen().catch(() => {});
+    else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
+    else if (activeVideo().webkitEnterFullscreen) activeVideo().webkitEnterFullscreen();
+  }
+
+  function updateVolumeUi() {
+    const v = activeVideo();
+    const muted = v.muted || v.volume === 0;
+    $('iconSound').toggleAttribute('hidden', muted);
+    $('iconMuted').toggleAttribute('hidden', !muted);
+    if (document.activeElement !== $('volume')) $('volume').value = String(v.volume);
+  }
+
+  function toggleMute() {
+    if (document.body.dataset.view === 'self-screen') return;
+    const v = activeVideo();
+    v.muted = !v.muted;
+    if (!v.muted && v.volume === 0) v.volume = 0.8;
+    if (v === remoteVideo) st.userMuted = v.muted;
+    updateVolumeUi();
+  }
+
+  function updatePlayIcon() {
+    $('iconPlay').toggleAttribute('hidden', !localVideo.paused);
+    $('iconPause').toggleAttribute('hidden', localVideo.paused);
+  }
+
+  function togglePlay() {
+    if (!st.share || st.share.kind !== 'file') return;
+    if (localVideo.paused) localVideo.play().catch(() => {});
+    else localVideo.pause();
+  }
+
+  function updateTime() {
+    const d = localVideo.duration;
+    if (!st.seeking) $('seek').value = String(localVideo.currentTime || 0);
+    const cur = fmtTime(st.seeking ? Number($('seek').value) : localVideo.currentTime);
+    $('timeLabel').textContent = Number.isFinite(d) ? cur + ' / ' + fmtTime(d) : cur;
+  }
+
+  let idleTimer = 0;
+  let revealUntil = 0;
+  const canHover = window.matchMedia('(hover: hover)').matches;
+  function wakeControls() {
+    stage.classList.remove('idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      const ctrls = $('controls');
+      if (activeVideo().paused || ctrls.querySelector(':focus-visible')) return;
+      if (canHover && ctrls.matches(':hover')) return;
+      stage.classList.add('idle');
+    }, 2800);
+  }
+
+  // ---------- convite ----------
+  async function invite() {
+    if (!st.room) return;
+    const web = /^https?:$/.test(location.protocol);
+    if (web) {
+      notify(await copyText(roomLink(st.room)) ? 'Link da sala copiado. Mande para a galera!' : 'Não consegui copiar. Código da sala: ' + st.room.id);
+    } else {
+      notify(await copyText(st.room.id) ? 'Código copiado (' + st.room.id + '). Mande o código e este arquivo para os amigos.' : 'Código da sala: ' + st.room.id);
     }
-    broadcast({ t: 'bye' });
-    stopSource();
-    st.closing = true;
-    setTimeout(leaveRoom, 300);
   }
 
   // =====================================================================
-  // QUEM ASSISTE
+  // EVENTOS
   // =====================================================================
-  function startViewer(code) {
+  st.rooms = loadRooms();
+  if (st.name) $('nameInput').value = st.name;
+  renderPresets();
+  for (const e of REACTIONS) {
+    const b = el('button', null, e);
+    b.type = 'button';
+    b.title = 'Reagir com ' + e;
+    b.addEventListener('click', () => sendReaction(e));
+    $('reactions').appendChild(b);
+  }
+  const savedVol = parseFloat(storage.get('cinema-volume'));
+  if (!Number.isNaN(savedVol)) remoteVideo.volume = clamp(savedVol, 0, 1);
+  renderRail();
+  renderRoomCards();
+  startSenderStats();
+
+  $('nameInput').addEventListener('change', () => {
+    const n = cleanName($('nameInput').value);
+    if (n) setName(n);
+  });
+
+  async function createRoomFlow() {
     if (!peerLibOk()) return;
-    readName('Convidado');
-    st.role = 'viewer';
-    st.code = code;
-    enterRoom();
-    renderViewer();
-
-    const peer = new Peer({ debug: 1 });
-    st.peer = peer;
-    const hostId = PREFIX + code;
-
-    st.joinTimer = setTimeout(() => {
-      if (!st.conn || !st.conn.open) endViewer('Não consegui entrar na sala', 'Confira o código e se quem criou a sala está com a página aberta.');
-    }, JOIN_TIMEOUT_MS);
-
-    peer.on('open', () => {
-      netStatus('');
-      if (st.conn) return;
-      const conn = peer.connect(hostId, { reliable: true, metadata: { name: st.name } });
-      st.conn = conn;
-      conn.on('open', () => { clearTimeout(st.joinTimer); renderViewer(); });
-      conn.on('data', onViewerData);
-      conn.on('close', () => endViewer('A conexão com o host caiu', 'A sala foi encerrada ou a internet de alguém oscilou.'));
-      conn.on('error', () => endViewer('A conexão com o host caiu', 'A sala foi encerrada ou a internet de alguém oscilou.'));
-    });
-
-    peer.on('call', (call) => {
-      if (call.peer !== hostId || st.ended) { try { call.close(); } catch { /* ignora */ } return; }
-      const old = st.call;
-      st.call = call;
-      st.mediaFailed = false;
-      if (old) { try { old.close(); } catch { /* ignora */ } }
-      const kbps = sanitizeKbps(call.metadata && call.metadata.q);
-      call.answer(undefined, { sdpTransform: (sdp) => tuneSdp(sdp, kbps) });
-      const pc = call.peerConnection;
-      if (pc) {
-        pc.addEventListener('connectionstatechange', () => {
-          if (st.call !== call) return;
-          st.mediaFailed = pc.connectionState === 'failed';
-          renderViewer();
-        });
-      }
-      call.on('stream', (stream) => { if (st.call === call) attachRemote(stream, call); });
-      // O PeerJS avisa a falha de rede com "error" e fecha a chamada logo em seguida.
-      call.on('error', () => { if (st.call === call) { st.mediaFailed = true; renderViewer(); } });
-      call.on('close', () => { if (st.call === call) { st.call = null; renderViewer(); } });
-      renderViewer();
-    });
-
-    peer.on('disconnected', () => reconnectPeer(peer));
-    peer.on('error', (err) => {
-      if (err.type === 'peer-unavailable') {
-        // Só vale como "sala não existe" antes de entrar; depois disso é aviso passageiro do servidor.
-        if (!st.conn || !st.conn.open) endViewer('Sala não encontrada', 'Confira o código com quem criou a sala.');
-        return;
-      }
-      peerError(err);
-    });
+    const typed = cleanName($('nameInput').value);
+    if (typed && typed !== st.name) setName(typed);
+    const name = await ensureName();
+    if (!name) return;
+    const v = await promptDialog('createDialog', 'roomNameField', 'Sala de ' + name);
+    const rn = cleanRoomName(v);
+    if (!rn) return;
+    openRoom({ id: randomId(ROOM_ID_LEN), name: rn });
   }
 
-  function onViewerData(msg) {
-    if (!msg || typeof msg !== 'object') return;
-    switch (msg.t) {
-      case 'welcome':
-        st.hostName = cleanName(msg.host) || 'o host';
-        sysChat('Você entrou na sala de ' + st.hostName + '.');
-        setLive(!!msg.live, !!msg.paused);
-        break;
-      case 'live':
-        setLive(!!msg.live, !!msg.paused);
-        break;
-      case 'paused':
-        st.paused = !!msg.paused;
-        renderViewer();
-        break;
-      case 'people':
-        renderViewerPeople(Array.isArray(msg.list) ? msg.list : []);
-        break;
-      case 'chat': {
-        const text = cleanText(msg.text);
-        if (text) addChat(cleanName(msg.from) || 'Alguém', text);
-        break;
-      }
-      case 'react':
-        if (REACTIONS.includes(msg.e)) floatReaction(msg.e);
-        break;
-      case 'bye':
-        endViewer('O host encerrou a sala', 'Valeu pela sessão!');
-        break;
+  async function joinFlow(text) {
+    let ref = parseRoomRef(text);
+    if (!ref) {
+      const v = await promptDialog('joinDialog', 'joinField', text || '');
+      if (v == null) return;
+      ref = parseRoomRef(v);
     }
+    if (!ref) { notify('Link ou código inválido. O código da sala tem 10 letras e números.', true); return; }
+    const typed = cleanName($('nameInput').value);
+    if (typed && typed !== st.name) setName(typed);
+    openRoom(ref);
   }
 
-  function setLive(live, paused) {
-    st.live = live;
-    st.paused = live && paused;
-    if (!live) clearRemote();
-    renderViewer();
+  $('createBtn').addEventListener('click', createRoomFlow);
+  $('railCreate').addEventListener('click', createRoomFlow);
+  $('railJoin').addEventListener('click', () => joinFlow(''));
+  $('joinForm').addEventListener('submit', (e) => { e.preventDefault(); joinFlow($('codeInput').value); });
+  $('homeBtn').addEventListener('click', () => {
+    // Voltar ao início não sai da sala: dá para ver as outras salas e voltar.
+    $('room').hidden = true;
+    $('home').hidden = false;
+    renderRail();
+    renderRoomCards();
+  });
+  $('inviteBtn').addEventListener('click', invite);
+  $('leaveBtn').addEventListener('click', async () => { if (await confirmLeave()) leaveRoom(); });
+  $('renameBtn').addEventListener('click', renameMe);
+
+  for (const t of document.querySelectorAll('.tab')) t.addEventListener('click', () => setTab(t.dataset.tab));
+  $('qualityChip').addEventListener('click', () => {
+    setTab('quality');
+    if (window.matchMedia('(max-width: 1100px)').matches) $('panel-quality').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  const pickFile = () => $('fileInput').click();
+  $('fileChoice').addEventListener('click', pickFile);
+  $('fileBtn').addEventListener('click', pickFile);
+  $('fileInput').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    startFileShare(f);
+  });
+  $('screenChoice').addEventListener('click', startScreenShare);
+  $('screenBtn').addEventListener('click', startScreenShare);
+  $('stopBtn').addEventListener('click', () => stopShare(true));
+  $('selfViewBtn').addEventListener('click', () => watch('self'));
+  $('stopWatchBtn').addEventListener('click', () => watch(null));
+
+  $('resSel').addEventListener('change', (e) => setQuality({ height: Number(e.target.value) }));
+  $('fpsSel').addEventListener('change', (e) => setQuality({ fps: Number(e.target.value) }));
+  $('prioritySel').addEventListener('change', (e) => setQuality({ priority: e.target.value }));
+  $('codecSel').addEventListener('change', (e) => setQuality({ codec: e.target.value }));
+  $('bitrateRange').addEventListener('input', (e) => setQuality({ mbps: Number(e.target.value) }));
+  $('bitrateInput').addEventListener('change', (e) => {
+    const n = parseFloat(String(e.target.value).replace(',', '.'));
+    if (Number.isFinite(n)) setQuality({ mbps: n });
+    e.target.value = String(st.q.mbps);
+  });
+
+  localVideo.addEventListener('play', () => {
+    updatePlayIcon();
+    if (st.share && st.share.kind === 'file') { broadcast({ t: 'paused', paused: false }); checkFileAudio(); recaptureIfEnded(); }
+    wakeControls();
+  });
+  localVideo.addEventListener('pause', () => {
+    updatePlayIcon();
+    stage.classList.remove('idle');
+    if (st.share && st.share.kind === 'file') broadcast({ t: 'paused', paused: true });
+  });
+  localVideo.addEventListener('timeupdate', () => { if (st.share && st.share.kind === 'file') updateTime(); });
+  localVideo.addEventListener('durationchange', () => {
+    const d = localVideo.duration;
+    $('seek').max = Number.isFinite(d) ? String(d) : '0';
+    updateTime();
+  });
+  localVideo.addEventListener('resize', () => { if (st.share) { applyEncodingAll(); scheduleQualityRecall(); } });
+  localVideo.addEventListener('click', togglePlay);
+  remoteVideo.addEventListener('playing', () => { st.playing = true; renderStage(); });
+  remoteVideo.addEventListener('emptied', () => { st.playing = false; });
+  for (const v of [localVideo, remoteVideo]) {
+    v.addEventListener('volumechange', updateVolumeUi);
+    v.addEventListener('dblclick', toggleFullscreen);
   }
 
-  function clearRemote() {
-    clearInterval(st.statsTimer);
-    $('stats').hidden = true;
-    st.rx = null;
-    if (st.call) { const c = st.call; st.call = null; try { c.close(); } catch { /* ignora */ } }
-    video.srcObject = null;
-    st.playing = false;
-    st.needsClick = false;
-    st.mediaFailed = false;
-  }
+  $('seek').addEventListener('input', () => { st.seeking = true; updateTime(); });
+  // Se o arraste termina no mesmo ponto, "change" não dispara: libera a barra mesmo assim.
+  $('seek').addEventListener('pointerup', () => { setTimeout(() => { st.seeking = false; }, 0); });
+  $('seek').addEventListener('change', (e) => {
+    localVideo.currentTime = Number(e.target.value);
+    st.seeking = false;
+    updateTime();
+  });
+  $('playPauseBtn').addEventListener('click', togglePlay);
+  $('playBtn').addEventListener('click', () => {
+    remoteVideo.muted = false;
+    st.userMuted = false;
+    remoteVideo.play().then(() => { st.needsClick = false; renderStage(); }).catch(() => {});
+  });
+  $('muteBtn').addEventListener('click', toggleMute);
+  $('volume').addEventListener('input', (e) => {
+    const v = activeVideo();
+    v.volume = parseFloat(e.target.value);
+    v.muted = v.volume === 0;
+    if (v === remoteVideo) { st.userMuted = v.muted; storage.set('cinema-volume', String(v.volume)); }
+  });
+  $('fsBtn').addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', () => {
+    const fs = !!document.fullscreenElement;
+    $('iconMax').toggleAttribute('hidden', fs);
+    $('iconMin').toggleAttribute('hidden', !fs);
+  });
+  stage.addEventListener('mousemove', wakeControls);
+  stage.addEventListener('focusin', wakeControls);
+  stage.addEventListener('touchstart', () => {
+    // O primeiro toque com os controles escondidos só mostra os controles, não aperta botão.
+    if (stage.classList.contains('idle')) revealUntil = Date.now() + 400;
+    wakeControls();
+  }, { passive: true });
+  $('controls').addEventListener('click', (e) => {
+    if (Date.now() < revealUntil) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  stage.addEventListener('mouseleave', () => { if (!activeVideo().paused) stage.classList.add('idle'); });
 
-  function attachRemote(stream, call) {
-    st.live = true;
-    if (video.srcObject !== stream) video.srcObject = stream;
-    video.muted = st.userMuted;
-    const p = video.play();
-    if (p && p.then) {
-      p.then(() => { st.needsClick = false; renderViewer(); })
-        .catch((err) => { if (err && err.name === 'NotAllowedError') { st.needsClick = true; renderViewer(); } });
+  document.addEventListener('keydown', (e) => {
+    if (!st.room || $('room').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    const inPlayer = !!(t && t.closest && t.closest('#controls'));
+    if (!inPlayer && t && t.closest && t.closest('input, textarea, select, button, dialog, [role=button]')) return;
+    if (inPlayer && t.type === 'range' && e.key.startsWith('Arrow')) return;
+    const k = e.key.toLowerCase();
+    if (inPlayer && k === ' ') e.preventDefault();
+    if (k === 'f') { e.preventDefault(); toggleFullscreen(); }
+    else if (k === 'm') toggleMute();
+    else if (document.body.dataset.view === 'self-file') {
+      if (k === ' ' || k === 'k') { e.preventDefault(); togglePlay(); }
+      else if (k === 'arrowleft') { e.preventDefault(); localVideo.currentTime = Math.max(0, localVideo.currentTime - 10); }
+      else if (k === 'arrowright') { e.preventDefault(); localVideo.currentTime = Math.min(localVideo.duration || 0, localVideo.currentTime + 10); }
     }
-    const pc = call.peerConnection;
-    if (pc) {
-      // Um pouco mais de buffer = imagem mais lisa (filme não precisa de atraso mínimo).
-      for (const r of pc.getReceivers()) {
-        try { if ('jitterBufferTarget' in r) r.jitterBufferTarget = 250; } catch { /* opcional */ }
-      }
-    }
-    startStats(call);
-    renderViewer();
-  }
+    wakeControls();
+  });
 
-  function startStats(call) {
-    clearInterval(st.statsTimer);
-    st.lastBytes = 0;
-    st.lastTs = 0;
-    st.statsTimer = setInterval(async () => {
-      const pc = call.peerConnection;
-      if (!pc || st.call !== call) return;
-      try {
-        const report = await pc.getStats();
-        let v = null;
-        const codecs = {};
-        report.forEach((r) => {
-          if (r.type === 'inbound-rtp' && r.kind === 'video') v = r;
-          else if (r.type === 'codec') codecs[r.id] = r;
-        });
-        if (!v) return;
-        let mbps = 0;
-        if (st.lastTs && v.timestamp > st.lastTs) mbps = ((v.bytesReceived - st.lastBytes) * 8) / ((v.timestamp - st.lastTs) * 1000);
-        st.lastBytes = v.bytesReceived;
-        st.lastTs = v.timestamp;
-        const codec = codecs[v.codecId];
-        st.rx = {
-          h: v.frameHeight || 0,
-          fps: v.framesPerSecond || 0,
-          mbps,
-          codec: codec && codec.mimeType ? codec.mimeType.split('/')[1].toUpperCase() : '',
-        };
-        const text = statsText(st.rx);
-        $('stats').textContent = text;
-        $('stats').hidden = !text;
-        renderViewerBar();
-      } catch { /* estatística é só informativa */ }
-    }, 2000);
-  }
+  $('chatForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendChat($('chatInput').value);
+    $('chatInput').value = '';
+  });
 
-  function endViewer(title, sub) {
-    if (st.ended || st.role !== 'viewer') return;
-    clearTimeout(st.joinTimer);
-    st.ended = true;
-    st.endedMsg = title;
-    st.endedSub = sub || '';
-    clearRemote();
-    st.live = false;
-    sysChat(title + '.');
+  window.addEventListener('beforeunload', (e) => {
+    if (st.closing) return;
+    if (st.share && st.watchers.size) { e.preventDefault(); e.returnValue = ''; }
+  });
+  window.addEventListener('pagehide', () => {
+    if (st.room) broadcast({ t: 'bye' });
+    try { if (st.lobby) st.lobby.destroy(); } catch { /* ignora */ }
     try { if (st.peer) st.peer.destroy(); } catch { /* ignora */ }
-    renderViewer();
-  }
-
-  function renderViewerPeople(list) {
-    const ul = $('people');
-    ul.textContent = '';
-    const myId = st.peer && st.peer.id;
-    let count = 0;
-    for (const p of list.slice(0, 50)) {
-      if (!p || typeof p !== 'object') continue;
-      const name = cleanName(p.name) || 'Alguém';
-      const tags = [];
-      if (p.host) tags.push('Host');
-      if (p.id === myId) tags.push('Você');
-      ul.appendChild(personItem({ name, tags, state: 'ok', sub: p.host ? 'transmitindo' : 'assistindo' }));
-      count++;
-    }
-    $('peopleCount').textContent = String(count);
-  }
-
-  function renderViewerBar() {
-    const title = st.hostName && st.hostName !== 'o host' ? 'Sessão de ' + st.hostName : 'Sessão de cinema';
-    $('viewerTitle').textContent = title;
-    let sub = 'Conectando…';
-    if (st.ended) sub = st.endedMsg;
-    else if (st.conn && st.conn.open) {
-      if (!st.live) sub = 'Aguardando a transmissão começar';
-      else if (st.playing) sub = (st.paused ? 'Pausado' : 'Assistindo ao vivo') + (st.rx ? ' · ' + statsText(st.rx) : '');
-      else sub = 'Recebendo a transmissão…';
-    }
-    $('viewerSub').textContent = sub;
-  }
-
-  function renderViewer() {
-    if (st.role !== 'viewer') return;
-    let cfg = null;
-    if (st.ended) cfg = { error: true, title: st.endedMsg, sub: st.endedSub, back: true };
-    else if (!st.conn || !st.conn.open) cfg = { spinner: true, title: 'Conectando à sala…', sub: 'Sala ' + st.code };
-    else if (!st.live) cfg = { spinner: true, title: 'Esperando ' + (st.hostName || 'o host') + ' começar', sub: 'Assim que a transmissão começar, ela aparece aqui sozinha.' };
-    else if (st.mediaFailed) cfg = { error: true, title: 'O vídeo não conseguiu chegar até você', sub: 'Provavelmente um bloqueio de rede ou firewall. Tente outra rede, como o 4G do celular.' };
-    else if (st.needsClick) cfg = { title: 'A transmissão começou!', sub: 'Clique para assistir com som.', play: true };
-    else if (!st.playing) cfg = { spinner: true, title: 'Recebendo a transmissão…' };
-    showOverlay(cfg);
-    stage.classList.toggle('no-controls', !!cfg);
-    $('pausedPill').hidden = !(st.live && st.playing && st.paused && !st.ended);
-    const live = st.live && st.playing && !st.ended;
-    setBadge(live, st.ended ? 'Encerrada' : live ? 'Ao vivo' : 'Aguardando');
-    if (!$('people').children.length) $('people').appendChild(personItem({ name: st.name, tags: ['Você'], state: 'ok' }));
-    renderViewerBar();
-  }
-
-  // ---------- eventos ----------
-  const savedName = storage.get('cinema-name');
-  if (savedName) $('nameInput').value = savedName;
-  const hashCode = normCode(location.hash);
-  if (hashCode) {
-    $('codeInput').value = hashCode;
-    if (!savedName) $('nameInput').focus();
-  }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && st.share && !st.wakeLock) keepAwake(true);
+  });
+  window.addEventListener('hashchange', () => {
+    const ref = parseRoomRef(location.hash);
+    if (ref && (!st.room || st.room.id !== ref.id)) openRoom(ref);
+  });
 
   // ---------- app instalável (PWA) ----------
   let installPrompt = null;
@@ -1971,165 +2694,27 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     try { await prompt.userChoice; } catch { /* a pessoa fechou a janela */ }
   });
 
-  // "Abrir com → Sessão de Cinema" num vídeo do Windows já cria a sala com ele.
+  // "Abrir com → Sessão de Cinema" num vídeo do Windows: transmite na sala atual,
+  // ou abre a última sala (ou cria uma) e transmite lá.
   if ('launchQueue' in window) {
     window.launchQueue.setConsumer(async (params) => {
       if (!params || !params.files || !params.files.length) return;
       let file;
       try { file = await params.files[0].getFile(); } catch { return; }
-      if (st.role === 'viewer') { notify('Saia da sala para transmitir um arquivo.', true); return; }
-      if (!st.role) startHost();
-      if (st.role === 'host') useFile(file);
+      if (!st.room) {
+        const name = await ensureName();
+        if (!name) return;
+        const last = st.rooms[0];
+        await openRoom(last ? { id: last.id, name: last.name } : { id: randomId(ROOM_ID_LEN), name: 'Sala de ' + name });
+      }
+      startFileShare(file);
     });
   }
 
-  // Aberto como arquivo local, "./" mostraria a pasta: o logo volta para esta mesma página.
-  document.querySelector('.brand').href = location.href.split('#')[0];
-  $('createBtn').addEventListener('click', startHost);
-  $('joinForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const code = normCode($('codeInput').value);
-    if (code.length < CODE_LEN) { notify('Digite o código da sala (' + CODE_LEN + ' letras e números).', true); $('codeInput').focus(); return; }
-    startViewer(code);
-  });
-
-  $('copyCodeBtn').addEventListener('click', async () => {
-    notify(await copyText(st.code) ? 'Código copiado.' : 'Não consegui copiar. O código é ' + st.code);
-  });
-  $('copyLinkBtn').addEventListener('click', async () => {
-    notify(await copyText(inviteLink()) ? 'Link copiado. Mande para seus amigos.' : 'Não consegui copiar o link.');
-  });
-  $('inviteLink').addEventListener('focus', (e) => e.target.select());
-  $('endBtn').addEventListener('click', endRoom);
-  $('leaveBtn').addEventListener('click', leaveRoom);
-  $('backBtn').addEventListener('click', leaveRoom);
-
-  for (const t of document.querySelectorAll('.tab')) t.addEventListener('click', () => setTab(t.dataset.tab));
-  $('qualityChip').addEventListener('click', () => {
-    setTab('quality');
-    if (window.matchMedia('(max-width: 1040px)').matches) $('panel-quality').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  const pickFile = () => $('fileInput').click();
-  $('fileChoice').addEventListener('click', pickFile);
-  $('fileBtn').addEventListener('click', pickFile);
-  $('fileInput').addEventListener('change', (e) => {
-    const f = e.target.files && e.target.files[0];
-    e.target.value = '';
-    useFile(f);
-  });
-  $('screenChoice').addEventListener('click', useScreen);
-  $('screenBtn').addEventListener('click', useScreen);
-  $('stopBtn').addEventListener('click', () => { stopSource(); publish(null); sysChat('Transmissão encerrada'); });
-
-  $('resSel').addEventListener('change', (e) => setQuality({ height: Number(e.target.value) }));
-  $('fpsSel').addEventListener('change', (e) => setQuality({ fps: Number(e.target.value) }));
-  $('prioritySel').addEventListener('change', (e) => setQuality({ priority: e.target.value }));
-  $('codecSel').addEventListener('change', (e) => setQuality({ codec: e.target.value }));
-  $('bitrateRange').addEventListener('input', (e) => setQuality({ mbps: Number(e.target.value) }));
-  $('bitrateInput').addEventListener('change', (e) => {
-    const n = parseFloat(String(e.target.value).replace(',', '.'));
-    if (Number.isFinite(n)) setQuality({ mbps: n });
-    e.target.value = String(st.q.mbps);
-  });
-
-  video.addEventListener('play', () => {
-    updatePlayIcon();
-    if (st.role === 'host' && st.source === 'file') { broadcast({ t: 'paused', paused: false }); checkFileAudio(); recaptureIfEnded(); }
-    wakeControls();
-  });
-  video.addEventListener('pause', () => {
-    updatePlayIcon();
-    stage.classList.remove('idle');
-    if (st.role === 'host' && st.source === 'file') broadcast({ t: 'paused', paused: true });
-  });
-  video.addEventListener('playing', () => { if (st.role === 'viewer') { st.playing = true; renderViewer(); } });
-  video.addEventListener('emptied', () => { if (st.role === 'viewer') { st.playing = false; renderViewer(); } });
-  video.addEventListener('volumechange', updateVolumeIcon);
-  video.addEventListener('timeupdate', () => { if (st.source === 'file') updateTime(); });
-  video.addEventListener('durationchange', () => {
-    const d = video.duration;
-    $('seek').max = Number.isFinite(d) ? String(d) : '0';
-    updateTime();
-  });
-  video.addEventListener('resize', () => { if (st.role === 'host') { applyEncodingAll(); scheduleQualityRecall(); } });
-  video.addEventListener('dblclick', toggleFullscreen);
-  video.addEventListener('click', () => { if (st.role === 'host' && st.source === 'file') togglePlay(); });
-
-  $('seek').addEventListener('input', () => { st.seeking = true; updateTime(); });
-  // Se o arraste termina no mesmo ponto, "change" não dispara: libera a barra mesmo assim.
-  $('seek').addEventListener('pointerup', () => { setTimeout(() => { st.seeking = false; }, 0); });
-  $('seek').addEventListener('change', (e) => {
-    video.currentTime = Number(e.target.value);
-    st.seeking = false;
-    updateTime();
-  });
-  $('playPauseBtn').addEventListener('click', togglePlay);
-  $('playBtn').addEventListener('click', () => {
-    video.muted = false;
-    st.userMuted = false;
-    video.play().then(() => { st.needsClick = false; renderViewer(); }).catch(() => {});
-  });
-  $('muteBtn').addEventListener('click', toggleMute);
-  $('volume').addEventListener('input', (e) => {
-    video.volume = parseFloat(e.target.value);
-    video.muted = video.volume === 0;
-    st.userMuted = video.muted;
-    storage.set('cinema-volume', String(video.volume));
-  });
-  $('fsBtn').addEventListener('click', toggleFullscreen);
-  document.addEventListener('fullscreenchange', () => {
-    const fs = !!document.fullscreenElement;
-    $('iconMax').toggleAttribute('hidden', fs);
-    $('iconMin').toggleAttribute('hidden', !fs);
-  });
-  stage.addEventListener('mousemove', wakeControls);
-  stage.addEventListener('focusin', wakeControls);
-  stage.addEventListener('touchstart', () => {
-    // O primeiro toque com os controles escondidos só mostra os controles, não aperta botão.
-    if (stage.classList.contains('idle')) revealUntil = Date.now() + 400;
-    wakeControls();
-  }, { passive: true });
-  $('controls').addEventListener('click', (e) => {
-    if (Date.now() < revealUntil) { e.stopPropagation(); e.preventDefault(); }
-  }, true);
-  stage.addEventListener('mouseleave', () => { if (!video.paused) stage.classList.add('idle'); });
-
-  document.addEventListener('keydown', (e) => {
-    if (!st.role || e.ctrlKey || e.metaKey || e.altKey) return;
-    const t = e.target;
-    const inPlayer = !!(t && t.closest && t.closest('#controls'));
-    if (!inPlayer && t && t.closest && t.closest('input, textarea, select, button, dialog')) return;
-    if (inPlayer && t.type === 'range' && e.key.startsWith('Arrow')) return;
-    const k = e.key.toLowerCase();
-    if (inPlayer && k === ' ') e.preventDefault();
-    if (k === 'f') { e.preventDefault(); toggleFullscreen(); }
-    else if (k === 'm') toggleMute();
-    else if (st.role === 'host' && st.source === 'file') {
-      if (k === ' ' || k === 'k') { e.preventDefault(); togglePlay(); }
-      else if (k === 'arrowleft') { e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 10); }
-      else if (k === 'arrowright') { e.preventDefault(); video.currentTime = Math.min(video.duration || 0, video.currentTime + 10); }
-    }
-    wakeControls();
-  });
-
-  $('chatForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    sendChat($('chatInput').value);
-    $('chatInput').value = '';
-  });
-
-  window.addEventListener('beforeunload', (e) => {
-    if (st.closing) return;
-    if (st.role === 'host' && st.viewers.size) { e.preventDefault(); e.returnValue = ''; }
-  });
-  window.addEventListener('pagehide', () => {
-    if (st.role === 'host') broadcast({ t: 'bye' });
-    try { if (st.peer) st.peer.destroy(); } catch { /* ignora */ }
-  });
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && st.stream && !st.wakeLock) keepAwake(true);
-  });
+  // Abriu um link de sala (#r=…): entra direto, pedindo o nome se precisar.
+  const initial = parseRoomRef(location.hash);
+  if (initial) openRoom(initial);
+  else showHome();
 })();
 </script>
 </body>
