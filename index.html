@@ -841,9 +841,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   const DEGRADATION = { resolution: 'maintain-resolution', framerate: 'maintain-framerate', balanced: 'balanced' };
   const CODEC_MIME = { h264: 'video/h264', vp9: 'video/vp9', av1: 'video/av1' };
   const COLORS = ['#f5b544', '#60a5fa', '#34d399', '#f472b6', '#a78bfa', '#fb923c', '#22d3ee', '#facc15'];
-  // Token de leitura da API do TMDB (catálogo de filmes em alta). Vazio = cada navegador
-  // configura o seu na aba Filmes.
-  const TMDB_TOKEN = '';
+  // Token de leitura da API do TMDB (pôsteres, sinopses, "em alta" e onde assistir).
+  // É só de leitura e fica público no site: se for abusado, gere outro em
+  // themoviedb.org → Configurações → API e troque aqui. Vazio = cada navegador configura o seu.
+  const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWZhY2ExYjZmNzQ5NDU0YTgxN2NjNmQxZDM1MzRhNyIsIm5iZiI6MTc5MTc4MzYxMS4wMTcsInN1YiI6IjZhY2M3MmJiMjZlZGE2NWQxNGU3NDRlYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LcqkG5ZN1u_ePfmALmZExeaUZxr7N6aUm2JYmgsjiqQ';
 
   const $ = (id) => document.getElementById(id);
   const localVideo = $('localVideo');
