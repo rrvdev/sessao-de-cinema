@@ -103,7 +103,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 @media (max-width:760px){
   .app{flex-direction:column}
   .rail{position:sticky;top:0;width:auto;height:auto;flex-direction:row;padding:8px 12px;border-right:0;border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden}
-  .rail-rooms{flex-direction:row}
+  .rail{overflow:hidden}
+  .rail-rooms{flex-direction:row;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding:2px 4px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent)}
+  .rail-rooms::-webkit-scrollbar{display:none}
   .rail-sep{width:2px;height:28px}
   .rail-btn,.room-icon{width:40px;height:40px}
   .rail-btn.home svg{width:40px;height:40px}
@@ -116,7 +118,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em}
 .home-inner{max-width:1120px;margin:0 auto;padding:56px 24px 48px}
 .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
-@media (max-width:960px){.hero{grid-template-columns:minmax(0,1fr);gap:32px}.home-inner{padding:28px 16px 40px}}
+@media (max-width:960px){.hero{grid-template-columns:minmax(0,1fr);gap:32px}.home-inner{padding:28px 16px 40px}.start-card{order:-1}}
 @media (max-width:760px){.topbar{padding:0 16px}}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--border-2);background:var(--surface);font-size:12.5px;color:var(--text-2);margin-bottom:20px}
 .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
@@ -200,7 +202,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .status-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(248,113,113,.12);color:var(--bad)}
 .status-icon .i{width:22px;height:22px}
-@media (max-width:600px){.overlay{padding:12px}.choice{width:100%;padding:10px 12px;flex-direction:row;align-items:center;gap:12px}.choice span{display:none}.choice-icon{margin:0;width:32px;height:32px}.empty h2{font-size:16px;margin-bottom:10px}.empty p{display:none}.choices{gap:8px;width:100%}.live-list{margin-bottom:10px}.status-title{font-size:15px}.status-sub{font-size:12.5px}.spinner{width:28px;height:28px}}
+@media (max-width:600px){.overlay{padding:12px}.choice{width:100%;padding:10px 12px;flex-direction:row;align-items:center;gap:12px}.choice > span:not(.choice-icon){display:none}.choice-icon{margin:0;width:32px;height:32px}.empty h2{font-size:16px;margin-bottom:10px}.empty p{display:none}.choices{gap:8px;width:100%}.live-list{margin-bottom:10px}.status-title{font-size:15px}.status-sub{font-size:12.5px}.spinner{width:28px;height:28px}}
 .stage-top{position:absolute;top:12px;left:12px;right:12px;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;transition:opacity .25s}
 .stage.idle .stage-top{opacity:0}
 .chip-dark{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:12px;color:#e4e4e7;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
@@ -1185,7 +1187,12 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     // Se outra abertura começar enquanto esta espera um diálogo, só a mais nova vale.
     const seq = ++openSeq;
     const name = await ensureName();
-    if (!name || seq !== openSeq) return;
+    if (seq !== openSeq) return;
+    if (!name) {
+      // Sem nome não entra: limpa o #r=… para o mesmo link funcionar de novo depois.
+      setHash(st.room ? roomLink(st.room).split('#')[1] : '');
+      return;
+    }
     if (st.room && st.room.id === ref.id) { showRoomView(); return; }
     if (st.room) {
       if (!(await confirmLeave()) || seq !== openSeq) return;
@@ -1283,11 +1290,11 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     });
     conn.on('error', () => { /* tratado pelo timeout */ });
     // Se a portaria existe mas não responde (quem a segurava caiu), tenta assumir.
+    // A conexão continua aberta: se o roster chegar atrasado, ainda vale.
     st.discoverTimer = setTimeout(() => {
       if (st.joined) return;
-      try { conn.close(); } catch { /* ignora */ }
       claimLobby();
-    }, 12000);
+    }, 5000);
   }
 
   function claimLobby() {
@@ -1456,6 +1463,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
         st.members.set(conn.peer, m);
       }
       m.conns.add(conn);
+      m.lastSeen = Date.now();
       st.pending.delete(conn.peer);
       if (m.order != null) st.maxOrder = Math.max(st.maxOrder, m.order);
       conn.send({ t: 'hello', name: st.name, order: st.me.order, share: shareInfo(), paused: isLocalPaused() });
@@ -1472,7 +1480,30 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     conn.on('data', (msg) => onMeshData(conn, msg));
     conn.on('close', () => { clearTimeout(dialTimer); dropConn(conn); });
     conn.on('error', () => { clearTimeout(dialTimer); dropConn(conn); });
+    // Se o PC da pessoa trava ou cai da internet, o PeerJS não fecha a conexão sozinho
+    // (só olha o estado do ICE). O estado geral da conexão chega a "failed" em ~15 s.
+    const pc = conn.peerConnection;
+    if (pc) {
+      pc.addEventListener('connectionstatechange', () => {
+        if (pc.connectionState !== 'failed' && pc.connectionState !== 'closed') return;
+        try { conn.close(); } catch { /* ignora */ }
+        dropConn(conn);
+      });
+    }
   }
+
+  // "Sinal de vida": cada um avisa a cada 5 s; quem ficar 45 s calado sai da sala.
+  // É a rede de segurança para quedas que nem o estado da conexão percebe.
+  const HEARTBEAT_MS = 5000;
+  const SILENCE_MS = 45000;
+  setInterval(() => {
+    if (!st.room || !st.joined) return;
+    const now = Date.now();
+    for (const m of [...st.members.values()]) {
+      if (now - (m.lastSeen || now) > SILENCE_MS) removeMember(m);
+    }
+    broadcast({ t: 'ping' });
+  }, HEARTBEAT_MS);
 
   function dropConn(conn) {
     st.dialing.delete(conn.peer);
@@ -1509,7 +1540,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   function onMeshData(conn, msg) {
     const m = st.members.get(conn.peer);
     if (!m || !m.conns.has(conn) || !msg || typeof msg !== 'object') return;
+    m.lastSeen = Date.now();
     switch (msg.t) {
+      case 'ping':
+        break;
       case 'peers':
         if (Array.isArray(msg.list)) mergeRoster(msg.list.slice(0, MAX_MEMBERS));
         break;
@@ -2234,6 +2268,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     $('home').hidden = name !== 'home';
     $('room').hidden = name !== 'room';
     $('movies').hidden = name !== 'movies';
+    if (name !== 'room') document.title = name === 'movies' ? 'Filmes em alta · Sessão de Cinema' : 'Sessão de Cinema';
     if (name === 'home') renderRoomCards();
     if (name === 'room') renderAll();
     if (name === 'movies') openMovies();
@@ -3003,8 +3038,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 
   async function joinFlow(text) {
     let ref = parseRoomRef(text);
-    if (!ref) {
-      const v = await promptDialog('joinDialog', 'joinField', text || '');
+    if (!ref && !String(text || '').trim()) {
+      const v = await promptDialog('joinDialog', 'joinField', '');
       if (v == null) return;
       ref = parseRoomRef(v);
     }
