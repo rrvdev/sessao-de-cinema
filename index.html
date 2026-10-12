@@ -7,6 +7,9 @@
 <meta name="description" content="Assista filmes com seus amigos: transmita um vídeo ou sua tela, com som, direto no navegador.">
 <title>Sessão de Cinema</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f5b544'/%3E%3Cstop offset='1' stop-color='%23f97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M12.5 9.5v13l10.5-6.5z' fill='%231c1405'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,6 +32,7 @@ body{background:var(--bg);color:var(--text);font:14.5px/1.55 var(--font);min-hei
 [hidden]{display:none!important}
 body[data-role=host] .viewer-only,body[data-role=viewer] .host-only{display:none!important}
 body:not([data-role]) .room-only{display:none!important}
+body[data-role] .home-only{display:none!important}
 body:not([data-role=host][data-source=file]) .host-file-only{display:none!important}
 body[data-role=host][data-source=screen] .vol-group{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -287,6 +291,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
     <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
     <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
   </defs>
 </svg>
@@ -304,6 +309,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   <span id="liveBadge" class="live-badge room-only">Sem transmissão</span>
   <div class="spacer"></div>
   <span id="netStatus" class="net-status"></span>
+  <button id="installBtn" class="btn btn-secondary btn-sm home-only" type="button" aria-label="Instalar app" hidden><svg class="i"><use href="#i-download"/></svg><span class="txt">Instalar app</span></button>
   <button id="endBtn" class="btn btn-danger-ghost btn-sm room-only host-only" type="button" aria-label="Encerrar sala"><svg class="i"><use href="#i-stop"/></svg><span class="txt">Encerrar sala</span></button>
   <button id="leaveBtn" class="btn btn-secondary btn-sm room-only viewer-only" type="button" aria-label="Sair da sala"><svg class="i"><use href="#i-logout"/></svg><span class="txt">Sair</span></button>
 </header>
@@ -340,12 +346,13 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   <section class="faq" aria-labelledby="faqTitle">
     <h2 id="faqTitle">Perguntas frequentes</h2>
     <div class="faq-grid">
-      <details><summary>Como transmitir com som?</summary><p>Para um filme salvo no PC, use <em>Arquivo de vídeo</em>: o som vai perfeito. Em <em>Tela ou guia</em>, na janela do navegador escolha <em>Guia</em> e deixe ligado “Compartilhar também o áudio da guia”, ou <em>Tela inteira</em> e marque “Compartilhar também o áudio do sistema”. Compartilhando só uma <em>Janela</em>, o som não vai.</p></details>
+      <details><summary>Como transmitir com som?</summary><p>Para um filme salvo no PC, use <em>Arquivo de vídeo</em>: o som vai perfeito. Em <em>Tela ou guia</em>, marque a opção de compartilhar o áudio na janela do navegador. Na <em>Janela</em> de um app (VLC, por exemplo) vai só o som daquele app; numa <em>Guia</em>, só o som da guia; na <em>Tela inteira</em>, o som do computador todo. O som só do app exige Chrome ou Edge 141 ou mais novo.</p></details>
       <details><summary>Por que Netflix, Prime e Disney+ ficam pretos?</summary><p>Esses serviços têm proteção contra cópia, e quem assiste vê a tela preta. Acontece com qualquer programa de compartilhar tela.</p></details>
       <details><summary>Qual qualidade escolher?</summary><p>Comece em <em>Padrão</em> (1080p, 8 Mbps). Cada amigo usa o bitrate escolhido do seu <em>upload</em>: com 3 amigos em 8 Mbps, você precisa de uns 25 Mbps de upload. Se travar, diminua o bitrate. Cabo de rede ajuda muito.</p></details>
       <details><summary>Meu arquivo .mkv ficou sem som</summary><p>O navegador não toca áudio AC3 ou DTS, comum em .mkv. Converta para MP4 com áudio AAC, ou abra no VLC e use <em>Tela ou guia</em> com o áudio do sistema.</p></details>
       <details><summary>Precisa instalar alguma coisa?</summary><p>Não. Quem transmite usa Chrome ou Edge no computador. Quem assiste pode usar qualquer navegador atualizado, inclusive no celular.</p></details>
-      <details><summary>Em call no Discord ou WhatsApp ao mesmo tempo?</summary><p>Prefira <em>Arquivo de vídeo</em> ou <em>Guia</em>. Com a tela inteira e o som do sistema, a voz dos amigos volta para eles.</p></details>
+      <details><summary>Dá para instalar como app?</summary><p>Sim. No Chrome ou no Edge, clique em <em>Instalar app</em> no topo da página (ou no ícone de instalar na barra de endereço). Ele ganha ícone no menu Iniciar e abre em janela própria. Depois, clique com o botão direito num vídeo e use <em>Abrir com → Sessão de Cinema</em>: a sala já é criada com o filme.</p></details>
+      <details><summary>Em call no Discord ou WhatsApp ao mesmo tempo?</summary><p>Use <em>Arquivo de vídeo</em>, a <em>Janela</em> do app do filme ou uma <em>Guia</em>: assim só vai o som do filme. Com a tela inteira vai o som do computador todo, e a voz dos amigos volta para eles.</p></details>
     </div>
   </section>
   <footer class="footer"><svg class="i"><use href="#i-lock"/></svg>Vídeo e som vão direto entre os navegadores (WebRTC), criptografados. Um servidor gratuito (PeerJS) só ajuda vocês a se encontrarem.</footer>
@@ -1468,15 +1475,21 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       notify('Este navegador não deixa compartilhar a tela. Use Chrome ou Edge no computador.', true);
       return;
     }
+    // windowAudio: 'window' faz o Chrome/Edge 141+ oferecer só o som do app da janela escolhida,
+    // em vez do som do sistema inteiro. O navegador lê a opção na hora da chamada; se ele não
+    // conhece a opção, o getter nunca roda e dá para avisar que o som pode vazar.
+    let windowAudioKnown = false;
+    const options = {
+      video: screenConstraints(),
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } },
+      systemAudio: 'include',
+      selfBrowserSurface: 'exclude',
+      surfaceSwitching: 'include',
+      get windowAudio() { windowAudioKnown = true; return 'window'; },
+    };
     let s;
     try {
-      s = await navigator.mediaDevices.getDisplayMedia({
-        video: screenConstraints(),
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } },
-        systemAudio: 'include',
-        selfBrowserSurface: 'exclude',
-        surfaceSwitching: 'include',
-      });
+      s = await navigator.mediaDevices.getDisplayMedia(options);
     } catch (e) {
       if (e && e.name !== 'NotAllowedError' && e.name !== 'AbortError') notify('Não foi possível compartilhar a tela: ' + (e.message || e.name), true);
       return;
@@ -1486,16 +1499,23 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     video.srcObject = s;
     video.play().catch(() => {});
     const vt = s.getVideoTracks()[0];
+    let surface = '';
     if (vt) {
       vt.onended = () => { if (st.stream === s) { stopSource(); publish(null); sysChat('Transmissão encerrada'); } };
-      let surface = '';
       try { surface = vt.getSettings().displaySurface || ''; } catch { surface = ''; }
       st.sourceName = { monitor: 'Compartilhando a tela inteira', window: 'Compartilhando uma janela', browser: 'Compartilhando uma guia' }[surface] || 'Tela compartilhada';
     }
     st.source = 'screen';
     publish(s);
-    if (!s.getAudioTracks().length) {
-      showAudioWarn('Você compartilhou sem som. Clique em “Tela ou guia” de novo e escolha “Guia” com “Compartilhar também o áudio da guia” ligado, ou “Tela inteira” com “Compartilhar também o áudio do sistema”. Compartilhando só uma janela, o som não vai.');
+    const hasAudio = s.getAudioTracks().length > 0;
+    if (!hasAudio && surface === 'window' && !windowAudioKnown) {
+      showAudioWarn('Este navegador não captura o som de uma janela só. Atualize o Chrome ou o Edge (versão 141 ou mais nova), ou abra o filme numa guia do navegador ou em “Arquivo de vídeo”.');
+    } else if (!hasAudio) {
+      showAudioWarn('Você compartilhou sem som. Clique em “Tela ou guia” de novo e, na janela do navegador, marque a opção de compartilhar o áudio: na Janela de um app vai só o som daquele app; numa Guia, só o som da guia; na Tela inteira, o som do computador todo.');
+    } else if (surface === 'window' && !windowAudioKnown) {
+      showAudioWarn('Atenção: este navegador está enviando o som do computador inteiro, não só o deste app. Para mandar só o som do app, atualize o Chrome ou o Edge (versão 141 ou mais nova).');
+    } else if (surface === 'monitor') {
+      showAudioWarn('Na Tela inteira vai o som do computador todo, inclusive notificações e chamadas. Para mandar só o som do filme, compartilhe a Janela do app ou uma Guia.');
     }
   }
 
@@ -1925,6 +1945,42 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   if (hashCode) {
     $('codeInput').value = hashCode;
     if (!savedName) $('nameInput').focus();
+  }
+
+  // ---------- app instalável (PWA) ----------
+  let installPrompt = null;
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    navigator.serviceWorker.register('sw.js').catch((e) => console.warn('service worker', e));
+  }
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installPrompt = e;
+    $('installBtn').hidden = false;
+  });
+  window.addEventListener('appinstalled', () => {
+    installPrompt = null;
+    $('installBtn').hidden = true;
+    notify('App instalado. Ele está no menu Iniciar e abre em janela própria.');
+  });
+  $('installBtn').addEventListener('click', async () => {
+    if (!installPrompt) return;
+    const prompt = installPrompt;
+    installPrompt = null;
+    $('installBtn').hidden = true;
+    prompt.prompt();
+    try { await prompt.userChoice; } catch { /* a pessoa fechou a janela */ }
+  });
+
+  // "Abrir com → Sessão de Cinema" num vídeo do Windows já cria a sala com ele.
+  if ('launchQueue' in window) {
+    window.launchQueue.setConsumer(async (params) => {
+      if (!params || !params.files || !params.files.length) return;
+      let file;
+      try { file = await params.files[0].getFile(); } catch { return; }
+      if (st.role === 'viewer') { notify('Saia da sala para transmitir um arquivo.', true); return; }
+      if (!st.role) startHost();
+      if (st.role === 'host') useFile(file);
+    });
   }
 
   // Aberto como arquivo local, "./" mostraria a pasta: o logo volta para esta mesma página.

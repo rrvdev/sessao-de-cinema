@@ -7,8 +7,12 @@ Página para assistir filmes junto com os amigos: quem cria a sala transmite um 
 ## Como usar
 
 1. Quem vai transmitir abre a página no Chrome ou no Edge, clica em **Criar sala** e manda o código (ou o link) para a galera.
-2. Escolhe **Arquivo de vídeo** (melhor qualidade) ou **Tela ou aba** (marque o áudio da guia ou do sistema na janela do Chrome).
+2. Escolhe **Arquivo de vídeo** (melhor qualidade) ou **Tela ou guia**. Ao compartilhar a **janela de um app** com o áudio marcado, vai só o som daquele app (Chrome ou Edge 141+); numa guia, só o som da guia; na tela inteira, o som do computador todo.
 3. Os amigos abrem a página, digitam o código e clicam em **Entrar**.
+
+## Instalar como app
+
+A página é um PWA: no Chrome ou no Edge, clique em **Instalar app** (ou no ícone de instalar na barra de endereço). Ele ganha ícone no menu Iniciar, abre em janela própria e carrega mesmo com a internet oscilando. Depois de instalado, clique com o botão direito num vídeo e use **Abrir com → Sessão de Cinema** para criar a sala já com o filme.
 
 ## Qualidade
 
