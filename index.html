@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="Salas para assistir junto com os amigos: qualquer um transmite a tela, uma janela ou um filme, com som, direto no navegador.">
+<meta name="description" content="Salas para assistir junto com os amigos: qualquer um transmite a tela, uma janela ou uma guia, com som, direto no navegador.">
 <title>Sessão de Cinema</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f5b544'/%3E%3Cstop offset='1' stop-color='%23f97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M12.5 9.5v13l10.5-6.5z' fill='%231c1405'/%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
@@ -30,7 +30,6 @@ html,body{margin:0}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--text);font:14.5px/1.55 var(--font);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
-body:not([data-view=self-file]) .self-file-only{display:none!important}
 body:not([data-view=remote]) .remote-only{display:none!important}
 body[data-view=self-screen] .vol-group{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -207,7 +206,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .stage.idle .stage-top{opacity:0}
 .chip-dark{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:12px;color:#e4e4e7;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
 .chip-dark .live-dot{width:6px;height:6px;border-radius:50%;background:var(--live);flex:none}
-.paused{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.66);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-weight:600;white-space:nowrap}
 .controls{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:32px 12px 10px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.8));display:flex;flex-direction:column;gap:4px;transition:opacity .25s}
 .stage.idle .controls{opacity:0;pointer-events:none}
 .stage.no-controls .controls{display:none}
@@ -469,7 +467,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
           <div>
             <div class="eyebrow"><span class="dot"></span>Grátis · Sem cadastro · Direto no navegador</div>
             <h1>Salas para assistir junto, <span class="hl">do seu jeito</span>.</h1>
-            <p class="lead">Crie uma sala, chame os amigos e qualquer pessoa pode transmitir a tela, a janela de um app ou um filme do computador, com som.</p>
+            <p class="lead">Crie uma sala, chame os amigos e qualquer pessoa pode transmitir a tela, a janela de um app ou uma guia do navegador, com som.</p>
             <div class="features">
               <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-users"/></svg></div><div><strong>Salas como servidores</strong><span>Suas salas ficam na barra à esquerda. O link é sempre o mesmo, é só voltar.</span></div></div>
               <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-cast"/></svg></div><div><strong>Todo mundo pode transmitir</strong><span>Cada um escolhe a quem assistir, inclusive com várias transmissões ao mesmo tempo.</span></div></div>
@@ -504,10 +502,11 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
           <div class="faq-grid">
             <details><summary>Como funcionam as salas?</summary><p>Cada sala tem um link fixo. Quem abre o link escolhe um nome e entra. As salas em que você esteve ficam na barra à esquerda, como os servidores do Discord. Se todo mundo sair, a sala continua existindo: o primeiro que voltar abre de novo.</p></details>
             <details><summary>Quem pode transmitir?</summary><p>Qualquer pessoa na sala, e várias ao mesmo tempo. Quem está na sala escolhe a quem assistir em <em>Pessoas</em> ou na tela principal. Só quem está assistindo usa a internet de quem transmite.</p></details>
-            <details><summary>Como transmitir com som?</summary><p>Para um filme salvo no PC, use <em>Arquivo de vídeo</em>. Em <em>Tela ou janela</em>, marque a opção de áudio na janela do navegador: na <em>Janela</em> de um app vai só o som dele; numa <em>Guia</em>, só o som da guia; na <em>Tela inteira</em>, o som do computador todo.</p></details>
+            <details><summary>Como transmitir com som?</summary><p>Em <em>Tela ou janela</em>, marque a opção de áudio na janela do navegador: na <em>Janela</em> de um app vai só o som dele; numa <em>Guia</em>, só o som da guia; na <em>Tela inteira</em>, o som do computador todo.</p></details>
+            <details><summary>Como passar um filme salvo no PC?</summary><p>Abra o filme no VLC (ou em outro player) e use <em>Tela ou janela</em> → <em>Janela</em>, escolhendo a janela do player com o áudio marcado: vai só o som do filme. Para mais qualidade, deixe o player em tela cheia na tela que você compartilhar.</p></details>
             <details><summary>Por que Netflix, Prime e Disney+ ficam pretos?</summary><p>Esses serviços têm proteção contra cópia, e quem assiste vê a tela preta. Acontece com qualquer programa de compartilhar tela.</p></details>
             <details><summary>Qual qualidade escolher?</summary><p>Comece em <em>Padrão</em> (1080p, 8 Mbps). Cada pessoa que assiste usa o bitrate escolhido do seu <em>upload</em>: com 3 pessoas em 8 Mbps, você precisa de uns 25 Mbps de upload.</p></details>
-            <details><summary>Dá para instalar como app?</summary><p>Sim. No Chrome ou no Edge, clique em <em>Instalar app</em> no topo da página. Depois, clique com o botão direito num vídeo e use <em>Abrir com → Sessão de Cinema</em> para transmitir o filme.</p></details>
+            <details><summary>Dá para instalar como app?</summary><p>Sim. No Chrome ou no Edge, clique em <em>Instalar app</em> no topo da página. Ele ganha ícone no menu Iniciar e abre em janela própria.</p></details>
           </div>
         </section>
         <footer class="footer"><svg class="i"><use href="#i-lock"/></svg>Vídeo e som vão direto entre os navegadores (WebRTC), criptografados. Um servidor gratuito (PeerJS) só ajuda vocês a se encontrarem.</footer>
@@ -647,17 +646,11 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
               <span id="watchChip" class="chip-dark" hidden></span>
               <span id="stats" class="chip-dark" hidden></span>
             </div>
-            <div id="pausedPill" class="paused" hidden><svg class="i"><use href="#i-pause"/></svg><span id="pausedText">Pausado</span></div>
             <div id="floaters" class="floaters"></div>
             <div id="stageToasts" class="stage-toasts"></div>
 
             <div id="controls" class="controls">
-              <input id="seek" class="seek self-file-only" type="range" min="0" max="0" step="0.1" value="0" aria-label="Posição do vídeo">
               <div class="ctrlrow">
-                <button id="playPauseBtn" class="cbtn self-file-only" type="button" title="Reproduzir/pausar (espaço)" aria-label="Reproduzir ou pausar">
-                  <svg id="iconPlay" class="i fill"><use href="#i-play"/></svg>
-                  <svg id="iconPause" class="i fill" hidden><use href="#i-pause"/></svg>
-                </button>
                 <div class="vol-group">
                   <button id="muteBtn" class="cbtn" type="button" title="Som (M)" aria-label="Ligar ou desligar o som">
                     <svg id="iconSound" class="i"><use href="#i-vol"/></svg>
@@ -665,7 +658,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
                   </button>
                   <input id="volume" class="vol" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
                 </div>
-                <span id="timeLabel" class="time self-file-only">0:00</span>
                 <span class="live-tag remote-only">AO VIVO</span>
                 <div class="spacer"></div>
                 <div id="reactions" class="reacts"></div>
@@ -679,11 +671,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
             <div id="overlay" class="overlay">
               <div id="emptyState" class="empty" hidden>
                 <h2 id="emptyTitle">Ninguém está transmitindo</h2>
-                <p id="emptySub">Comece você: transmita a tela, a janela de um app ou um filme do computador.</p>
+                <p id="emptySub">Comece você: transmita a tela, a janela de um app ou uma guia do navegador.</p>
                 <div id="liveList" class="live-list" hidden></div>
                 <div class="choices">
-                  <button id="screenChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-monitor"/></svg></span><strong>Tela ou janela</strong><span>Um app, uma guia ou a tela inteira, com som.</span></button>
-                  <button id="fileChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-film"/></svg></span><strong>Arquivo de vídeo</strong><span>Um filme salvo no computador. Melhor qualidade.</span></button>
+                  <button id="screenChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-monitor"/></svg></span><strong>Transmitir tela ou janela</strong><span>Um app (como o VLC), uma guia ou a tela inteira, com som.</span></button>
                 </div>
               </div>
               <div id="statusBox" class="status" hidden>
@@ -709,12 +700,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
             </div>
             <div class="actions">
               <button id="screenBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-monitor"/></svg>Tela ou janela</button>
-              <button id="fileBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-film"/></svg>Arquivo</button>
               <button id="qualityChip" class="btn btn-ghost btn-sm" type="button" title="Qualidade da sua transmissão"><svg class="i"><use href="#i-sliders"/></svg><span id="qualitySummary"></span></button>
               <button id="selfViewBtn" class="btn btn-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-eye"/></svg>Ver a minha</button>
               <button id="stopBtn" class="btn btn-danger-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-stop"/></svg>Parar</button>
             </div>
-            <input id="fileInput" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.m4v" hidden>
           </div>
           <div id="audioWarn" class="alert warn" hidden><svg class="i"><use href="#i-alert"/></svg><span id="audioWarnText"></span></div>
         </section>
@@ -1160,16 +1149,14 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     room: null, joined: false, closing: false,
     peer: null, lobby: null, lobbyPending: null, lobbyRetry: 0, discoverTimer: 0, electTimer: 0,
     me: { id: null, order: null }, maxOrder: -1,
-    members: new Map(),   // id -> { id, conns: Set, name, order, share, paused }
+    members: new Map(),   // id -> { id, conns: Set, name, order, share, lastSeen }
     pending: new Map(),   // ids que ainda estão conectando: id -> { order, until }
     dialing: new Set(),   // ids para os quais eu já abri conexão
     q: loadQuality(),
     // minha transmissão
-    share: null,          // { kind: 'screen'|'file', stream, title }
-    loadingFile: '',
-    objectUrl: null,
+    share: null,          // { kind: 'screen', stream, title }
     watchers: new Map(),  // id -> { id, call, status, stats, prevOut, maxKbps, codec }
-    recallTimer: 0, qualityRecallTimer: 0, audioCheckTimer: 0, applyTimer: 0, senderStatsTimer: 0, wakeLock: null, seeking: false,
+    qualityRecallTimer: 0, applyTimer: 0, senderStatsTimer: 0, wakeLock: null,
     // o que eu assisto
     watching: null,       // id de quem eu assisto, 'self' ou null
     call: null, playing: false, needsClick: false, mediaFailed: false, rx: null,
@@ -1544,14 +1531,14 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       const isNew = !m;
       if (!m) {
         if (st.members.size + 1 >= MAX_MEMBERS) { conn.close(); return; }
-        m = { id: conn.peer, conns: new Set(), name: info.name, order: info.order, share: info.share, paused: false };
+        m = { id: conn.peer, conns: new Set(), name: info.name, order: info.order, share: info.share };
         st.members.set(conn.peer, m);
       }
       m.conns.add(conn);
       m.lastSeen = Date.now();
       st.pending.delete(conn.peer);
       if (m.order != null) st.maxOrder = Math.max(st.maxOrder, m.order);
-      conn.send({ t: 'hello', name: st.name, order: st.me.order, share: shareInfo(), paused: isLocalPaused() });
+      conn.send({ t: 'hello', name: st.name, order: st.me.order, share: shareInfo() });
       const others = [...st.members.values()].filter((x) => x.id !== m.id).map((x) => ({ id: x.id, name: x.name, order: x.order }));
       if (others.length) conn.send({ t: 'peers', list: others });
       if (isNew) {
@@ -1619,7 +1606,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 
   function cleanShare(s) {
     if (!s || typeof s !== 'object') return null;
-    return { kind: s.kind === 'file' ? 'file' : 'screen', title: cleanText(s.title).slice(0, 80) };
+    return { kind: 'screen', title: cleanText(s.title).slice(0, 80) };
   }
 
   function onMeshData(conn, msg) {
@@ -1637,7 +1624,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
         if (n) m.name = n;
         const o = toOrder(msg.order);
         if (o != null) { m.order = o; st.maxOrder = Math.max(st.maxOrder, o); }
-        m.paused = !!msg.paused;
         setMemberShare(m, cleanShare(msg.share), false);
         electCoordinator();
         renderAll();
@@ -1650,10 +1636,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       }
       case 'share':
         setMemberShare(m, cleanShare(msg.share), true);
-        break;
-      case 'paused':
-        m.paused = !!msg.paused;
-        renderStage();
         break;
       case 'watch':
         onWatchRequest(m);
@@ -1684,7 +1666,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       else if (!share && was) sysChat(m.name + ' parou de transmitir');
     }
     if (!share) {
-      m.paused = false;
       if (st.watching === m.id) { stopRemote(); st.watching = null; autoPickStream(); }
     } else if (!was) {
       autoPickStream();
@@ -1749,13 +1730,11 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   // TRANSMITIR (qualquer pessoa)
   // =====================================================================
   function shareInfo() { return st.share ? { kind: st.share.kind, title: st.share.title } : null; }
-  function isLocalPaused() { return !!st.share && st.share.kind === 'file' && localVideo.paused; }
   function hasLiveTracks() { return !!st.share && !!st.share.stream && st.share.stream.getTracks().length > 0; }
 
   function sourceHeight(track) {
     let h = 0;
     try { h = (track && track.getSettings && track.getSettings().height) || 0; } catch { h = 0; }
-    if (!h && st.share && st.share.kind === 'file') h = localVideo.videoHeight || 0;
     return h;
   }
   function currentSourceHeight() { return sourceHeight(st.share && st.share.stream && st.share.stream.getVideoTracks()[0]); }
@@ -1804,107 +1783,14 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     announceShare();
     publishShare();
     const hasAudio = s.getAudioTracks().length > 0;
-    if (!hasAudio && surface === 'window' && !windowAudioKnown) showAudioWarn('Este navegador não captura o som de uma janela só. Atualize o Chrome ou o Edge (141 ou mais novo), ou use uma guia do navegador ou “Arquivo”.');
+    if (!hasAudio && surface === 'window' && !windowAudioKnown) showAudioWarn('Este navegador não captura o som de uma janela só. Atualize o Chrome ou o Edge (141 ou mais novo), ou compartilhe uma guia do navegador.');
     else if (!hasAudio) showAudioWarn('Você está transmitindo sem som. Clique em “Tela ou janela” de novo e marque a opção de compartilhar o áudio: na janela de um app vai só o som dele; numa guia, só o som da guia; na tela inteira, o som do computador todo.');
     else if (surface === 'window' && !windowAudioKnown) showAudioWarn('Este navegador está enviando o som do computador inteiro, não só o deste app. Atualize o Chrome ou o Edge (141 ou mais novo).');
     else if (surface === 'monitor') showAudioWarn('Na tela inteira vai o som do computador todo, inclusive notificações e chamadas. Para mandar só o som do filme, compartilhe a janela do app ou uma guia.');
   }
 
-  function waitForEvent(target, ok, bad, ms) {
-    return new Promise((resolve) => {
-      let timer = 0;
-      const done = (val) => {
-        clearTimeout(timer);
-        target.removeEventListener(ok, onOk);
-        if (bad) target.removeEventListener(bad, onBad);
-        resolve(val);
-      };
-      const onOk = () => done(true);
-      const onBad = () => done(false);
-      target.addEventListener(ok, onOk);
-      if (bad) target.addEventListener(bad, onBad);
-      timer = setTimeout(() => done(false), ms);
-    });
-  }
-
-  async function waitForTracks(stream, ms) {
-    const end = Date.now() + ms;
-    while (!stream.getVideoTracks().length && Date.now() < end) await new Promise((r) => setTimeout(r, 100));
-  }
-
-  function captureFile() {
-    const capture = localVideo.captureStream ? localVideo.captureStream() : localVideo.mozCaptureStream ? localVideo.mozCaptureStream() : null;
-    if (!capture) return null;
-    // O Chrome repete "addtrack" para trilhas que já existiam: só rechama se elas mudarem de verdade.
-    const trackIds = () => capture.getTracks().map((t) => t.id).join();
-    let lastIds = trackIds();
-    capture.onaddtrack = capture.onremovetrack = () => {
-      const now = trackIds();
-      if (now === lastIds) return;
-      lastIds = now;
-      scheduleRecall();
-    };
-    return capture;
-  }
-
-  async function startFileShare(file) {
-    if (!file || !st.room) return;
-    stopShare(false, true);
-    const url = URL.createObjectURL(file);
-    st.objectUrl = url;
-    st.loadingFile = file.name;
-    renderAll();
-    localVideo.muted = false;
-    localVideo.src = url;
-    const loaded = await waitForEvent(localVideo, 'loadeddata', 'error', 15000);
-    if (st.objectUrl !== url) return;
-    st.loadingFile = '';
-    if (!loaded) {
-      shareFailed();
-      notify('Esse arquivo não abre no navegador. Prefira MP4 (vídeo H.264 e áudio AAC).', true);
-      return;
-    }
-    const capture = captureFile();
-    if (!capture) {
-      shareFailed();
-      notify('Seu navegador não consegue transmitir arquivos. Use Chrome ou Edge.', true);
-      return;
-    }
-    await waitForTracks(capture, 3000);
-    if (st.objectUrl !== url || !st.room) return;
-    st.share = { kind: 'file', stream: capture, title: file.name };
-    announceShare();
-    publishShare();
-    updateTime();
-    updatePlayIcon();
-  }
-
-  // Quando o filme chega ao fim, o Chrome encerra as trilhas capturadas. Versões mais
-  // novas recriam sozinhas ao dar play de novo; nas antigas é preciso capturar outra vez.
-  function recaptureIfEnded() {
-    setTimeout(() => {
-      if (!st.share || st.share.kind !== 'file' || localVideo.paused) return;
-      if (st.share.stream.getTracks().some((t) => t.readyState === 'live')) return;
-      st.share.stream.onaddtrack = st.share.stream.onremovetrack = null;
-      const capture = captureFile();
-      if (capture) { st.share.stream = capture; publishShare(); }
-    }, 400);
-  }
-
-  function checkFileAudio() {
-    clearTimeout(st.audioCheckTimer);
-    if (!st.share || st.share.kind !== 'file') return;
-    st.audioCheckTimer = setTimeout(() => {
-      if (!st.share || st.share.kind !== 'file' || localVideo.paused) return;
-      const noTrack = !st.share.stream.getAudioTracks().length;
-      const noBytes = typeof localVideo.webkitAudioDecodedByteCount === 'number' && localVideo.webkitAudioDecodedByteCount === 0;
-      if (noTrack || noBytes) showAudioWarn('Esse arquivo está sem som no navegador. Provavelmente o áudio é AC3 ou DTS (comum em .mkv). Converta para MP4 com áudio AAC, ou abra no VLC e use “Tela ou janela” com o áudio do app.');
-    }, 2500);
-  }
-
   function announceShare() {
     broadcast({ t: 'share', share: shareInfo() });
-    broadcast({ t: 'paused', paused: isLocalPaused() });
     keepAwake(!!st.share);
     if (st.share) {
       sysChat('Você começou a transmitir: ' + st.share.title);
@@ -1919,29 +1805,15 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     renderAll();
   }
 
-  function scheduleRecall() {
-    clearTimeout(st.recallTimer);
-    st.recallTimer = setTimeout(() => {
-      if (!st.share) return;
-      // Trilhas sumiram (fim do filme): mantém as chamadas e espera o próximo play.
-      if (st.share.stream.getTracks().length) publishShare();
-      else renderAll();
-    }, 500);
-  }
-
   function resetLocalVideo() {
     localVideo.pause();
     localVideo.srcObject = null;
     localVideo.removeAttribute('src');
     localVideo.load();
-    if (st.objectUrl) { URL.revokeObjectURL(st.objectUrl); st.objectUrl = null; }
-    st.loadingFile = '';
   }
 
   // Para a minha transmissão. "replacing": vou começar outra logo em seguida.
   function stopShare(announce, replacing) {
-    clearTimeout(st.recallTimer);
-    clearTimeout(st.audioCheckTimer);
     $('audioWarn').hidden = true;
     const had = !!st.share;
     if (st.share) {
@@ -1960,17 +1832,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       keepAwake(false);
       if (st.watching === 'self') { st.watching = null; autoPickStream(); }
     }
-    renderAll();
-  }
-
-  // O arquivo novo não abriu depois que a transmissão anterior já tinha sido trocada:
-  // avisa todo mundo que eu não estou mais ao vivo.
-  function shareFailed() {
-    resetLocalVideo();
-    for (const id of [...st.watchers.keys()]) closeWatcher(id);
-    broadcast({ t: 'share', share: null });
-    keepAwake(false);
-    if (st.watching === 'self') { st.watching = null; autoPickStream(); }
     renderAll();
   }
 
@@ -1997,7 +1858,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     let w = st.watchers.get(m.id);
     if (!w) { w = { id: m.id, call: null, status: 'conectando', stats: null, prevOut: null }; st.watchers.set(m.id, w); }
     callWatcher(w);
-    sendTo(m, { t: 'paused', paused: isLocalPaused() });
     renderAll();
   }
 
@@ -2474,7 +2334,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       $('emptySub').textContent = 'Escolha quem assistir, ou transmita você também.';
     } else {
       $('emptyTitle').textContent = 'Ninguém está transmitindo';
-      $('emptySub').textContent = st.members.size ? 'Comece você: transmita a tela, a janela de um app ou um filme do computador.' : 'Convide a galera pelo botão Convidar, ou já comece a transmitir.';
+      $('emptySub').textContent = st.members.size ? 'Comece você: transmita a tela, a janela de um app ou uma guia do navegador.' : 'Convide a galera pelo botão Convidar, ou já comece a transmitir.';
     }
   }
 
@@ -2486,10 +2346,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     remoteVideo.hidden = true;
     if (!st.joined) {
       showOverlay({ spinner: true, title: 'Entrando na sala…', sub: st.room.name });
-    } else if (st.loadingFile && !st.share) {
-      showOverlay({ spinner: true, title: 'Abrindo o arquivo…', sub: st.loadingFile });
     } else if (w === 'self' && st.share) {
-      view = st.share.kind === 'file' ? 'self-file' : 'self-screen';
+      view = 'self-screen';
       localVideo.hidden = false;
       showOverlay(null);
     } else if (w && w !== 'self') {
@@ -2507,9 +2365,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     }
     document.body.dataset.view = view;
     stage.classList.toggle('no-controls', !$('overlay').hidden);
-    const m = w && w !== 'self' ? st.members.get(w) : null;
-    $('pausedPill').hidden = !(m && m.paused && st.playing && m.share && m.share.kind === 'file');
-    if (m) $('pausedText').textContent = 'Pausado por ' + m.name;
     renderStageChips();
     updateVolumeUi();
   }
@@ -2541,8 +2396,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     $('meName').textContent = st.name + ' (você)';
     const sub = $('meSub');
     sub.className = 'src-sub';
-    if (st.loadingFile && !st.share) sub.textContent = 'Abrindo ' + st.loadingFile + '…';
-    else if (!st.share) sub.textContent = 'Você não está transmitindo';
+    if (!st.share) sub.textContent = 'Você não está transmitindo';
     else {
       const watching = [...st.watchers.values()].filter((w) => w.status === 'assistindo' && w.stats);
       let text = 'Ao vivo · ' + st.share.title;
@@ -2743,24 +2597,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (!v.muted && v.volume === 0) v.volume = 0.8;
     if (v === remoteVideo) st.userMuted = v.muted;
     updateVolumeUi();
-  }
-
-  function updatePlayIcon() {
-    $('iconPlay').toggleAttribute('hidden', !localVideo.paused);
-    $('iconPause').toggleAttribute('hidden', localVideo.paused);
-  }
-
-  function togglePlay() {
-    if (!st.share || st.share.kind !== 'file') return;
-    if (localVideo.paused) localVideo.play().catch(() => {});
-    else localVideo.pause();
-  }
-
-  function updateTime() {
-    const d = localVideo.duration;
-    if (!st.seeking) $('seek').value = String(localVideo.currentTime || 0);
-    const cur = fmtTime(st.seeking ? Number($('seek').value) : localVideo.currentTime);
-    $('timeLabel').textContent = Number.isFinite(d) ? cur + ' / ' + fmtTime(d) : cur;
   }
 
   let idleTimer = 0;
@@ -3579,14 +3415,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (window.matchMedia('(max-width: 1100px)').matches) $('panel-quality').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  const pickFile = () => $('fileInput').click();
-  $('fileChoice').addEventListener('click', pickFile);
-  $('fileBtn').addEventListener('click', pickFile);
-  $('fileInput').addEventListener('change', (e) => {
-    const f = e.target.files && e.target.files[0];
-    e.target.value = '';
-    startFileShare(f);
-  });
   $('screenChoice').addEventListener('click', startScreenShare);
   $('screenBtn').addEventListener('click', startScreenShare);
   $('stopBtn').addEventListener('click', () => stopShare(true));
@@ -3604,24 +3432,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     e.target.value = String(st.q.mbps);
   });
 
-  localVideo.addEventListener('play', () => {
-    updatePlayIcon();
-    if (st.share && st.share.kind === 'file') { broadcast({ t: 'paused', paused: false }); checkFileAudio(); recaptureIfEnded(); }
-    wakeControls();
-  });
-  localVideo.addEventListener('pause', () => {
-    updatePlayIcon();
-    stage.classList.remove('idle');
-    if (st.share && st.share.kind === 'file') broadcast({ t: 'paused', paused: true });
-  });
-  localVideo.addEventListener('timeupdate', () => { if (st.share && st.share.kind === 'file') updateTime(); });
-  localVideo.addEventListener('durationchange', () => {
-    const d = localVideo.duration;
-    $('seek').max = Number.isFinite(d) ? String(d) : '0';
-    updateTime();
-  });
   localVideo.addEventListener('resize', () => { if (st.share) { applyEncodingAll(); scheduleQualityRecall(); } });
-  localVideo.addEventListener('click', togglePlay);
   remoteVideo.addEventListener('playing', () => { st.playing = true; renderStage(); });
   remoteVideo.addEventListener('emptied', () => { st.playing = false; });
   for (const v of [localVideo, remoteVideo]) {
@@ -3629,15 +3440,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     v.addEventListener('dblclick', toggleFullscreen);
   }
 
-  $('seek').addEventListener('input', () => { st.seeking = true; updateTime(); });
-  // Se o arraste termina no mesmo ponto, "change" não dispara: libera a barra mesmo assim.
-  $('seek').addEventListener('pointerup', () => { setTimeout(() => { st.seeking = false; }, 0); });
-  $('seek').addEventListener('change', (e) => {
-    localVideo.currentTime = Number(e.target.value);
-    st.seeking = false;
-    updateTime();
-  });
-  $('playPauseBtn').addEventListener('click', togglePlay);
   $('playBtn').addEventListener('click', () => {
     remoteVideo.muted = false;
     st.userMuted = false;
@@ -3678,11 +3480,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (inPlayer && k === ' ') e.preventDefault();
     if (k === 'f') { e.preventDefault(); toggleFullscreen(); }
     else if (k === 'm') toggleMute();
-    else if (document.body.dataset.view === 'self-file') {
-      if (k === ' ' || k === 'k') { e.preventDefault(); togglePlay(); }
-      else if (k === 'arrowleft') { e.preventDefault(); localVideo.currentTime = Math.max(0, localVideo.currentTime - 10); }
-      else if (k === 'arrowright') { e.preventDefault(); localVideo.currentTime = Math.min(localVideo.duration || 0, localVideo.currentTime + 10); }
-    }
     wakeControls();
   });
 
@@ -3732,23 +3529,6 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     prompt.prompt();
     try { await prompt.userChoice; } catch { /* a pessoa fechou a janela */ }
   });
-
-  // "Abrir com → Sessão de Cinema" num vídeo do Windows: transmite na sala atual,
-  // ou abre a última sala (ou cria uma) e transmite lá.
-  if ('launchQueue' in window) {
-    window.launchQueue.setConsumer(async (params) => {
-      if (!params || !params.files || !params.files.length) return;
-      let file;
-      try { file = await params.files[0].getFile(); } catch { return; }
-      if (!st.room) {
-        const name = await ensureName();
-        if (!name) return;
-        const last = st.rooms[0];
-        await openRoom(last ? { id: last.id, name: last.name } : { id: randomId(ROOM_ID_LEN), name: 'Sala de ' + name });
-      }
-      startFileShare(file);
-    });
-  }
 
   // Abriu um link de sala (#r=…): entra direto, pedindo o nome se precisar.
   const initial = parseRoomRef(location.hash);

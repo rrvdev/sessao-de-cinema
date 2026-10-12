@@ -1,33 +1,36 @@
 # Sessão de Cinema
 
-Página para assistir filmes junto com os amigos: quem cria a sala transmite um arquivo de vídeo do PC, ou uma tela/aba, **com som**, direto para o navegador de quem assiste. Sem conta e sem instalar nada.
+Salas para assistir junto com os amigos, no estilo dos servidores do Discord: qualquer pessoa na sala transmite a **tela, a janela de um app ou uma guia do navegador, com som**, direto para o navegador de quem quiser assistir. Sem conta e sem instalar nada.
 
 **Abrir:** https://rrvdev.github.io/sessao-de-cinema/
 
 ## Como usar
 
-1. Quem vai transmitir abre a página no Chrome ou no Edge, clica em **Criar sala** e manda o código (ou o link) para a galera.
-2. Escolhe **Arquivo de vídeo** (melhor qualidade) ou **Tela ou guia**. Ao compartilhar a **janela de um app** com o áudio marcado, vai só o som daquele app (Chrome ou Edge 141+); numa guia, só o som da guia; na tela inteira, o som do computador todo.
-3. Os amigos abrem a página, digitam o código e clicam em **Entrar**.
+1. Escolha seu nome e clique em **Criar uma sala**. As salas em que você esteve ficam na barra à esquerda.
+2. Clique em **Convidar** e mande o link para a galera. Quem abre o link escolhe um nome e entra.
+3. Qualquer um clica em **Tela ou janela** para transmitir; os outros escolhem a quem assistir em **Pessoas**. Só quem está assistindo usa a internet de quem transmite.
 
-## Instalar como app
+Som: ao compartilhar a **janela de um app** com o áudio marcado, vai só o som daquele app (Chrome ou Edge 141+); numa guia, só o som da guia; na tela inteira, o som do computador todo. Para um filme salvo no PC, abra no VLC e compartilhe a janela dele.
 
-A página é um PWA: no Chrome ou no Edge, clique em **Instalar app** (ou no ícone de instalar na barra de endereço). Ele ganha ícone no menu Iniciar, abre em janela própria e carrega mesmo com a internet oscilando. Depois de instalado, clique com o botão direito num vídeo e use **Abrir com → Sessão de Cinema** para criar a sala já com o filme.
+## Filmes
+
+A aba **Filmes** ajuda a escolher o que assistir:
+
+- **Catálogo IMDb**: ~19 mil filmes com nota e votos do IMDb, título no Brasil, filtros por gênero, década e nota mínima, e busca. Vem dos [conjuntos de dados não comerciais do IMDb](https://developer.imdb.com/non-commercial-datasets/), convertidos toda semana pelo GitHub Actions (`scripts/build-imdb.mjs` → `data/imdb-movies.json`).
+- **Em alta agora**: listas do [TMDB](https://www.themoviedb.org/) (em alta, populares, nos cinemas), com pôster, sinopse e onde assistir no Brasil (dados da JustWatch).
 
 ## Qualidade
 
-Na aba **Qualidade**, quem transmite escolhe:
+Na aba **Qualidade**, quem transmite escolhe predefinição, resolução (480p até 4K), quadros por segundo (24/30/60), bitrate máximo por pessoa (0,5 a 200 Mbps), prioridade (fluidez, nitidez ou equilibrado) e codec (automático, H.264, VP9 ou AV1). A lista de pessoas mostra o que cada um está recebendo de verdade.
 
-- **Predefinição**: Econômica, Padrão, Alta, Ultra, 4K ou Personalizada.
-- **Resolução** (480p até 4K, ou a original da fonte) e **quadros por segundo** (24, 30 ou 60).
-- **Bitrate máximo por pessoa**, de 0,5 a 200 Mbps.
-- **Prioridade** quando a internet aperta: fluidez, nitidez ou equilibrado.
-- **Codec**: automático (H.264, ou VP9 acima de 1440p), H.264, VP9 ou AV1.
+## Instalar como app
 
-A transmissão já começa na resolução escolhida, e a lista de pessoas mostra o que cada amigo está recebendo de verdade.
+A página é um PWA: no Chrome ou no Edge, clique em **Instalar app**. Ele ganha ícone no menu Iniciar, abre em janela própria e carrega mesmo com a internet oscilando.
 
 ## Como funciona
 
-Tudo fica num único `index.html`. A conexão é WebRTC direta entre os navegadores, criptografada. O [PeerJS](https://peerjs.com/) e o servidor público dele servem só para os navegadores se encontrarem (e, se a rede bloquear a conexão direta, para repassar o tráfego).
+Tudo fica num único `index.html`. A conexão é WebRTC direta entre os navegadores, criptografada. O [PeerJS](https://peerjs.com/) e o servidor público dele servem só para os navegadores se encontrarem. Cada sala tem uma "portaria" (um id fixo no PeerJS) com um coordenador eleito pela ordem de chegada; se ele sair ou cair, outra pessoa assume.
 
 Serviços como Netflix e Prime Video aparecem com tela preta quando transmitidos por causa da proteção contra cópia.
+
+Informações de filmes cortesia do IMDb (imdb.com), usadas com permissão. Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB.
