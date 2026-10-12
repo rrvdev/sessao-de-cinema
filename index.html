@@ -968,6 +968,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     renderRoomCards();
   }
   function forgetRoom(id) {
+    if (st.room && st.room.id === id) return; // primeiro saia da sala
     st.rooms = st.rooms.filter((r) => r.id !== id);
     saveRooms();
     renderRail();
@@ -1035,14 +1036,18 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   // quem chega se conecta nele e recebe a lista de quem está na sala. O coordenador é quem
   // tem o menor número de chegada; se ele sair, o próximo assume o id fixo sozinho.
 
+  let openSeq = 0;
   async function openRoom(ref) {
     if (!ref || !validRoomId(ref.id)) return;
     if (st.room && st.room.id === ref.id) { showRoomView(); return; }
     if (!peerLibOk()) return;
+    // Se outra abertura começar enquanto esta espera um diálogo, só a mais nova vale.
+    const seq = ++openSeq;
     const name = await ensureName();
-    if (!name) return;
+    if (!name || seq !== openSeq) return;
+    if (st.room && st.room.id === ref.id) { showRoomView(); return; }
     if (st.room) {
-      if (!(await confirmLeave())) return;
+      if (!(await confirmLeave()) || seq !== openSeq) return;
       leaveRoom({ keepView: true });
     }
     const saved = st.rooms.find((r) => r.id === ref.id);
@@ -1081,13 +1086,19 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     peer.on('open', (id) => {
       if (st.peer !== peer) return;
       netStatus('');
-      if (!st.me.id) { st.me.id = id; discover(); }
+      if (!st.me.id) st.me.id = id;
+      if (!st.joined) discover();
     });
     peer.on('connection', onMeshConnection);
     peer.on('call', onIncomingCall);
-    peer.on('disconnected', () => reconnectPeer(peer, () => {
-      for (const w of st.watchers.values()) if (!w.call) callWatcher(w);
-    }));
+    peer.on('disconnected', () => {
+      if (st.peer !== peer) return;
+      reconnectPeer(peer, () => {
+        if (st.peer !== peer) return;
+        if (!st.joined) discover();
+        for (const w of st.watchers.values()) if (!w.call) callWatcher(w);
+      });
+    });
     peer.on('error', (err) => onMemberPeerError(peer, err));
   }
 
@@ -1096,8 +1107,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (err.type === 'peer-unavailable') {
       const target = String(err.message || '').split(' ').pop();
       if (st.room && target === ROOM_PREFIX + st.room.id) {
-        // Ninguém segurando a portaria: a sala está vazia, então eu abro.
+        // Ninguém segurando a portaria: a sala está vazia (ou o coordenador caiu), então eu abro.
         if (!st.joined) { clearTimeout(st.discoverTimer); claimLobby(); }
+        else if (isCoordinator() && !st.lobby && !st.lobbyPending) { clearTimeout(st.lobbyRetry); claimLobby(); }
         return;
       }
       st.dialing.delete(target);
@@ -1116,8 +1128,18 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (!st.room || st.joined || !st.peer || st.peer.disconnected) return;
     clearTimeout(st.discoverTimer);
     renderAll();
-    const conn = st.peer.connect(ROOM_PREFIX + st.room.id, { reliable: true, metadata: { room: st.room.id, name: st.name } });
-    conn.on('data', (msg) => { if (msg && msg.t === 'roster') onRoster(msg, conn); });
+    const peer = st.peer;
+    const conn = peer.connect(ROOM_PREFIX + st.room.id, { reliable: true, metadata: { room: st.room.id, name: st.name } });
+    if (!conn) return;
+    conn.on('data', (msg) => {
+      if (st.peer !== peer || !msg) return;
+      if (msg.t === 'roster') onRoster(msg, conn);
+      else if (msg.t === 'full' && !st.joined) {
+        clearTimeout(st.discoverTimer);
+        notify('Esta sala está cheia.', true);
+        leaveRoom();
+      }
+    });
     conn.on('error', () => { /* tratado pelo timeout */ });
     // Se a portaria existe mas não responde (quem a segurava caiu), tenta assumir.
     st.discoverTimer = setTimeout(() => {
@@ -1150,18 +1172,22 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     lobby.on('disconnected', () => {
       if (st.lobby === lobby && !lobby.destroyed) setTimeout(() => { try { if (lobby.disconnected && !lobby.destroyed) lobby.reconnect(); } catch { /* ignora */ } }, 2000);
     });
+    // Qualquer falha que derrube a portaria (id tomado na volta de uma reconexão, servidor fora
+    // do ar antes de abrir) precisa limpar st.lobby/st.lobbyPending, senão ninguém tenta de novo.
     lobby.on('error', (err) => {
-      if (err.type === 'unavailable-id') {
-        try { lobby.destroy(); } catch { /* ignora */ }
-        if (st.lobbyPending === lobby) st.lobbyPending = null;
-        if (!st.room || st.room.id !== roomId) return;
-        // Alguém abriu a sala junto comigo, ou o id antigo ainda não foi liberado.
-        if (!st.joined) st.lobbyRetry = setTimeout(discover, 1500);
-        else if (isCoordinator()) probeLobby();
-        return;
-      }
       if (err.type === 'peer-unavailable') return;
-      console.warn('portaria', err);
+      if (err.type !== 'unavailable-id' && st.lobbyPending !== lobby) { console.warn('portaria', err); return; }
+      try { lobby.destroy(); } catch { /* ignora */ }
+      if (st.lobbyPending === lobby) st.lobbyPending = null;
+      if (st.lobby === lobby) st.lobby = null;
+      if (!st.room || st.room.id !== roomId || st.closing) return;
+      clearTimeout(st.lobbyRetry);
+      // Alguém abriu a sala junto comigo, ou o id antigo ainda não foi liberado.
+      if (!st.joined) st.lobbyRetry = setTimeout(discover, 1500);
+      else if (isCoordinator()) {
+        if (err.type === 'unavailable-id') probeLobby();
+        else st.lobbyRetry = setTimeout(electCoordinator, 3000);
+      }
     });
   }
 
@@ -1172,6 +1198,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (!st.room || !st.peer || st.peer.disconnected) { st.lobbyRetry = setTimeout(claimLobby, 3000); return; }
     clearTimeout(st.lobbyRetry);
     const conn = st.peer.connect(ROOM_PREFIX + st.room.id, { reliable: true, metadata: { room: st.room.id, name: st.name, probe: true } });
+    if (!conn) { st.lobbyRetry = setTimeout(claimLobby, 3000); return; }
     conn.on('data', (msg) => {
       if (!msg || msg.t !== 'roster' || !Array.isArray(msg.members)) return;
       mergeRoster(msg.members.slice(0, MAX_MEMBERS));
@@ -1245,9 +1272,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   }
 
   function connectMember(m) {
-    if (!st.peer || !st.room || st.members.has(m.id) || st.dialing.has(m.id)) return;
-    st.dialing.add(m.id);
+    if (!st.peer || st.peer.disconnected || !st.room || st.members.has(m.id) || st.dialing.has(m.id)) return;
     const conn = st.peer.connect(m.id, { reliable: true, metadata: { room: st.room.id, name: st.name, order: st.me.order } });
+    if (!conn) return;
+    st.dialing.add(m.id);
     bindMeshConn(conn, { name: cleanName(m.name) || 'Alguém', order: toOrder(m.order), share: cleanShare(m.share) }, false);
   }
 
@@ -1276,8 +1304,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     }, 20000);
     conn.on('open', () => {
       clearTimeout(dialTimer);
+      // Conexão do Peer de uma sala anterior (destruído logo depois de trocar de sala).
+      if (!st.room || conn.provider !== st.peer) { try { conn.close(); } catch { /* ignora */ } return; }
       st.dialing.delete(conn.peer);
-      if (!st.room) { conn.close(); return; }
       let m = st.members.get(conn.peer);
       const isNew = !m;
       if (!m) {
@@ -1615,6 +1644,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 
   function announceShare() {
     broadcast({ t: 'share', share: shareInfo() });
+    broadcast({ t: 'paused', paused: isLocalPaused() });
     keepAwake(!!st.share);
     if (st.share) {
       sysChat('Você começou a transmitir: ' + st.share.title);
@@ -1838,7 +1868,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
           w.stats = { h: out.frameHeight || 0, fps: out.framesPerSecond || 0, mbps, limit, codec: codec && codec.mimeType ? codec.mimeType.split('/')[1].toUpperCase() : '' };
         } catch { /* estatística é só informativa */ }
       }
-      renderPeople();
+      updatePeopleSubs();
       renderMeBar();
     }, 2000);
   }
@@ -1883,7 +1913,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   }
 
   function onIncomingCall(call) {
-    if (!st.room || call.peer !== st.watching) { try { call.close(); } catch { /* ignora */ } return; }
+    if (!st.room || call.provider !== st.peer || call.peer !== st.watching) { try { call.close(); } catch { /* ignora */ } return; }
     const old = st.call;
     st.call = call;
     st.mediaFailed = false;
@@ -2097,13 +2127,16 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       const txt = el('div');
       txt.style.minWidth = '0';
       txt.append(el('strong', null, r.name), el('span', null, st.room && st.room.id === r.id ? 'Você está aqui' : 'Código ' + r.id));
-      const x = el('button', 'icon-btn forget');
-      x.type = 'button';
-      x.title = 'Tirar da lista';
-      x.setAttribute('aria-label', 'Tirar ' + r.name + ' da lista');
-      x.appendChild(svgIcon('x'));
-      x.addEventListener('click', (e) => { e.stopPropagation(); forgetRoom(r.id); });
-      card.append(av, txt, x);
+      card.append(av, txt);
+      if (!st.room || st.room.id !== r.id) {
+        const x = el('button', 'icon-btn forget');
+        x.type = 'button';
+        x.title = 'Tirar da lista';
+        x.setAttribute('aria-label', 'Tirar ' + r.name + ' da lista');
+        x.appendChild(svgIcon('x'));
+        x.addEventListener('click', (e) => { e.stopPropagation(); forgetRoom(r.id); });
+        card.appendChild(x);
+      }
       const open = () => openRoom({ id: r.id, name: r.name });
       card.addEventListener('click', open);
       card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
@@ -2273,6 +2306,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     for (const t of p.tags || []) nm.appendChild(el('span', 'tag' + (t === 'Ao vivo' ? ' live' : ''), t));
     main.appendChild(nm);
     if (p.sub) main.appendChild(el('div', 'person-sub' + (p.subCls ? ' ' + p.subCls : ''), p.sub));
+    if (p.id) li.dataset.id = p.id;
     li.append(avatarEl(p.name, null, !!p.live), main);
     if (p.action) {
       const b = el('button', 'btn btn-xs ' + (p.action.cls || 'btn-secondary'));
@@ -2285,30 +2319,48 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     return li;
   }
 
+  function memberSub(m) {
+    const w = st.watchers.get(m.id);
+    let text = m.share ? 'Ao vivo · ' + (m.share.title || 'Tela') : 'na sala';
+    let cls = '';
+    if (w) {
+      if (w.stats && w.status === 'assistindo') {
+        text = 'assistindo você · ' + statsText(w.stats);
+        if (w.stats.limit === 'bandwidth') { text += ' · rede limitando'; cls = 'warn'; }
+        else if (w.stats.limit === 'cpu') { text += ' · processador limitando'; cls = 'warn'; }
+      } else text = 'assistindo você · ' + w.status;
+      if (w.status === 'falhou') cls = 'bad';
+    }
+    return { text, cls };
+  }
+
+  // A cada 2 s só os textos de estatística mudam: atualiza no lugar, sem recriar os botões
+  // (recriar no meio de um clique fazia o clique se perder).
+  function updatePeopleSubs() {
+    for (const li of $('people').children) {
+      const m = li.dataset.id && st.members.get(li.dataset.id);
+      const sub = li.querySelector('.person-sub');
+      if (!m || !sub) continue;
+      const s = memberSub(m);
+      sub.textContent = s.text;
+      sub.className = 'person-sub' + (s.cls ? ' ' + s.cls : '');
+    }
+  }
+
   function renderPeople() {
     if (!st.room) return;
     const ul = $('people');
     ul.textContent = '';
     const meTags = ['Você'];
     if (st.share) meTags.push('Ao vivo');
-    let meSub = st.share ? st.share.title + ' · ' + plural(st.watchers.size, 'pessoa assistindo', 'pessoas assistindo') : 'na sala';
+    const meSub = st.share ? st.share.title + ' · ' + plural(st.watchers.size, 'pessoa assistindo', 'pessoas assistindo') : 'na sala';
     ul.appendChild(personItem({
       name: st.name, tags: meTags, live: !!st.share, sub: meSub, watching: st.watching === 'self',
       action: st.share && st.watching !== 'self' ? { label: 'Ver', icon: 'eye', onClick: () => watch('self') } : null,
     }));
     const others = [...st.members.values()].sort((a, b) => (b.share ? 1 : 0) - (a.share ? 1 : 0) || a.name.localeCompare(b.name));
     for (const m of others) {
-      const w = st.watchers.get(m.id);
-      let sub = m.share ? 'Ao vivo · ' + (m.share.title || 'Tela') : 'na sala';
-      let subCls = '';
-      if (w) {
-        if (w.stats && w.status === 'assistindo') {
-          sub = 'assistindo você · ' + statsText(w.stats);
-          if (w.stats.limit === 'bandwidth') { sub += ' · rede limitando'; subCls = 'warn'; }
-          else if (w.stats.limit === 'cpu') { sub += ' · processador limitando'; subCls = 'warn'; }
-        } else sub = 'assistindo você · ' + w.status;
-        if (w.status === 'falhou') subCls = 'bad';
-      }
+      const { text: sub, cls: subCls } = memberSub(m);
       const tags = m.share ? ['Ao vivo'] : [];
       let action = null;
       if (m.share) {
@@ -2316,7 +2368,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
           ? { label: 'Assistindo', cls: 'btn-ghost', onClick: () => watch(null) }
           : { label: 'Assistir', icon: 'eye', cls: 'btn-live', onClick: () => { watch(m.id); } };
       }
-      ul.appendChild(personItem({ name: m.name, tags, live: !!m.share, sub, subCls, watching: st.watching === m.id, action }));
+      ul.appendChild(personItem({ id: m.id, name: m.name, tags, live: !!m.share, sub, subCls, watching: st.watching === m.id, action }));
     }
     renderUploadEst();
   }
