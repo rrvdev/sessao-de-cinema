@@ -321,9 +321,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .mv-card{display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:transparent;text-align:left;color:var(--text);cursor:pointer;min-width:0}
 .mv-poster{position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:var(--surface-2);border:1px solid var(--border);transition:transform .15s,border-color .15s}
 .mv-card:hover .mv-poster,.mv-card:focus-visible .mv-poster{transform:translateY(-3px);border-color:var(--text-3)}
-.mv-poster img{width:100%;height:100%;object-fit:cover;display:block}
+.mv-poster img{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;display:block}
 .mv-ph{position:absolute;inset:0;display:grid;place-items:center;padding:12px;text-align:center;font-weight:700;color:var(--text-2);background:linear-gradient(135deg,var(--surface-3),var(--surface))}
-.mv-rating{position:absolute;top:8px;left:8px;display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:7px;background:rgba(0,0,0,.72);font-size:12px;font-weight:700}
+.mv-rating{position:absolute;z-index:2;top:8px;left:8px;display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:7px;background:rgba(0,0,0,.72);font-size:12px;font-weight:700}
 .star{color:var(--accent)}
 .mv-title{font-weight:600;font-size:13.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mv-sub{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -341,6 +341,16 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .tmdb-credit{margin-top:36px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .tmdb-credit a{color:var(--text-2)}
 .tmdb-badge{font-weight:800;letter-spacing:.02em;padding:2px 8px;border-radius:6px;background:linear-gradient(90deg,#90cea1,#01b4e4);color:#0d253f;text-decoration:none}
+.imdb-badge{display:inline-block;font-weight:900;letter-spacing:-.02em;padding:1px 6px;border-radius:4px;background:#f5c518;color:#000;text-decoration:none;font-size:12px;line-height:1.4}
+.mv-head .seg button{display:inline-flex;align-items:center;gap:6px}
+.mv-rating.imdb{background:#f5c518;color:#000}
+.mv-rating.imdb b{font-weight:900;letter-spacing:-.02em;margin-right:2px}
+.mv-ph-art{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:14px;text-align:left}
+.mv-ph-art strong{font-size:16px;line-height:1.15;letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.45);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.mv-ph-art span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.mv-poster img.fade{opacity:0;transition:opacity .3s}
+.mv-poster img.fade.on{opacity:1}
+.md-imdb{display:inline-flex;align-items:center;gap:6px}
 .dialog.movie-dialog{width:min(880px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;overflow-y:auto}
 .md-hero{height:220px;background:linear-gradient(135deg,rgba(245,181,68,.2),rgba(20,20,24,0) 70%) center top/cover no-repeat;position:relative}
 .md-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,20,24,.15),var(--surface))}
@@ -418,7 +428,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 <div class="app">
   <nav id="rail" class="rail" aria-label="Suas salas">
     <button id="homeBtn" class="rail-btn home" type="button" title="Início" aria-label="Início"><svg aria-hidden="true"><use href="#i-logo"/></svg></button>
-    <button id="moviesBtn" class="rail-btn movies" type="button" title="Filmes em alta" aria-label="Filmes em alta"><svg class="i"><use href="#i-trending"/></svg></button>
+    <button id="moviesBtn" class="rail-btn movies" type="button" title="Filmes" aria-label="Filmes"><svg class="i"><use href="#i-trending"/></svg></button>
     <div class="rail-sep"></div>
     <div id="railRooms" class="rail-rooms"></div>
     <button id="railCreate" class="rail-btn add" type="button" title="Criar sala" aria-label="Criar sala"><svg class="i"><use href="#i-plus"/></svg></button>
@@ -486,17 +496,45 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     <!-- FILMES -->
     <section id="movies" hidden>
       <header class="topbar">
-        <div class="brand"><svg class="i" style="color:var(--accent)"><use href="#i-trending"/></svg>Filmes em alta</div>
+        <div class="brand"><svg class="i" style="color:var(--accent)"><use href="#i-trending"/></svg>Filmes</div>
         <div class="spacer"></div>
         <button id="mvBackRoom" class="btn btn-secondary btn-sm" type="button" hidden><svg class="i"><use href="#i-logout"/></svg>Voltar para a sala</button>
       </header>
       <div class="movies-inner">
         <div class="mv-head">
           <div>
-            <h1>O que está bombando</h1>
-            <p>Ideias para a próxima sessão: escolha os gêneros e veja onde assistir no Brasil.</p>
+            <h1>O que assistir hoje?</h1>
+            <p>Ideias para a próxima sessão: notas do IMDb, gêneros e onde assistir no Brasil.</p>
+          </div>
+          <div id="mvSource" class="seg" role="group" aria-label="Fonte">
+            <button type="button" data-src="imdb" aria-pressed="true"><span class="imdb-badge">IMDb</span> Catálogo</button>
+            <button type="button" data-src="tmdb" aria-pressed="false">Em alta agora</button>
           </div>
         </div>
+
+        <div id="imdbArea">
+          <div class="mv-toolbar">
+            <div id="imdbSorts" class="seg" role="group" aria-label="Ordem">
+              <button type="button" data-sort="votes" aria-pressed="true">Mais votados</button>
+              <button type="button" data-sort="top" aria-pressed="false">Mais bem avaliados</button>
+              <button type="button" data-sort="recent" aria-pressed="false">Lançamentos</button>
+              <button type="button" data-sort="classics" aria-pressed="false">Clássicos</button>
+            </div>
+            <select id="imdbDecade" class="select" style="width:auto" aria-label="Década">
+              <option value="">Todas as décadas</option>
+            </select>
+            <label class="mv-search">
+              <svg class="i"><use href="#i-search"/></svg>
+              <input id="imdbSearch" class="input" type="search" placeholder="Buscar no catálogo do IMDb (português ou original)" autocomplete="off" aria-label="Buscar no catálogo do IMDb">
+            </label>
+          </div>
+          <div id="imdbGenres" class="chips" role="group" aria-label="Gêneros"></div>
+          <p id="imdbStatus" class="mv-status" aria-live="polite"></p>
+          <div id="imdbGrid" class="mv-grid"></div>
+          <div class="mv-more"><button id="imdbMore" class="btn btn-secondary" type="button" hidden>Carregar mais</button></div>
+        </div>
+
+        <div id="tmdbArea" hidden>
         <div id="mvSetup" class="mv-setup" hidden>
           <h2>Conectar ao catálogo de filmes</h2>
           <p>Os filmes em alta vêm do TMDB, um catálogo gratuito com títulos e sinopses em português e onde assistir no Brasil. Para ligar, é preciso uma chave grátis:</p>
@@ -530,9 +568,14 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
           <div id="mvGrid" class="mv-grid"></div>
           <div class="mv-more"><button id="mvMore" class="btn btn-secondary" type="button" hidden>Carregar mais</button></div>
         </div>
+        </div>
         <footer class="tmdb-credit">
+          <a class="imdb-badge" href="https://www.imdb.com/" target="_blank" rel="noopener">IMDb</a>
+          <span>Informações cortesia do IMDb (imdb.com), conjuntos de dados não comerciais. Usado com permissão.<span id="imdbUpdated"></span></span>
+        </footer>
+        <footer class="tmdb-credit" style="margin-top:12px;border-top:0;padding-top:0">
           <a class="tmdb-badge" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>
-          <span>Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB. Onde assistir: dados da JustWatch.</span>
+          <span>Pôsteres, sinopses e “em alta” usam a API do TMDB, mas este produto não é endossado nem certificado pelo TMDB. Onde assistir: dados da JustWatch.</span>
           <button id="mvKeyChange" class="btn btn-ghost btn-xs" type="button" hidden>Trocar a chave</button>
         </footer>
       </div>
@@ -2268,7 +2311,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     $('home').hidden = name !== 'home';
     $('room').hidden = name !== 'room';
     $('movies').hidden = name !== 'movies';
-    if (name !== 'room') document.title = name === 'movies' ? 'Filmes em alta · Sessão de Cinema' : 'Sessão de Cinema';
+    if (name !== 'room') document.title = name === 'movies' ? 'Filmes · Sessão de Cinema' : 'Sessão de Cinema';
     if (name === 'home') renderRoomCards();
     if (name === 'room') renderAll();
     if (name === 'movies') openMovies();
@@ -2699,7 +2742,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   const TMDB_IMG = 'https://image.tmdb.org/t/p/';
   const MV_MODE_LABEL = { trending: 'Em alta na semana', today: 'Em alta hoje', popular: 'Populares no Brasil', top: 'Mais bem avaliados', now: 'Nos cinemas do Brasil' };
   const PROV_GROUPS = [['flatrate', 'Incluído na assinatura'], ['free', 'Grátis'], ['ads', 'Grátis com anúncios'], ['rent', 'Alugar'], ['buy', 'Comprar']];
-  const mv = { mode: 'trending', genres: new Set(), q: '', page: 1, totalPages: 1, items: [], genreNames: new Map(), seq: 0, started: false, cache: new Map() };
+  const mv = { source: storage.get('cinema-mv-source') === 'tmdb' ? 'tmdb' : 'imdb', mode: 'trending', genres: new Set(), q: '', page: 1, totalPages: 1, items: [], genreNames: new Map(), seq: 0, started: false, cache: new Map() };
 
   const tmdbToken = () => TMDB_TOKEN || (storage.get('cinema-tmdb') || '').trim();
   const isoDate = (d) => d.toISOString().slice(0, 10);
@@ -2729,6 +2772,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 
   function openMovies() {
     $('mvBackRoom').hidden = !st.room;
+    for (const b of $('mvSource').children) b.setAttribute('aria-pressed', String(b.dataset.src === mv.source));
+    $('imdbArea').hidden = mv.source !== 'imdb';
+    $('tmdbArea').hidden = mv.source !== 'tmdb';
+    if (mv.source === 'imdb') { $('mvKeyChange').hidden = !tmdbToken() || !!TMDB_TOKEN; openImdb(); return; }
     const hasKey = !!tmdbToken();
     $('mvSetup').hidden = hasKey;
     $('mvBrowse').hidden = !hasKey;
@@ -2795,8 +2842,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     return ['/discover/movie', d];
   }
 
-  function skeletonCards(n) {
-    const grid = $('mvGrid');
+  function skeletonCards(n, gridId) {
+    const grid = $(gridId || 'mvGrid');
     grid.textContent = '';
     for (let i = 0; i < n; i++) {
       const c = el('div', 'mv-card mv-skel');
@@ -2869,7 +2916,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     }
   }
 
-  async function openMovieDetails(id) {
+  async function openMovieDetails(id, imdbRec) {
     const dlg = $('movieDialog');
     const box = $('mdContent');
     box.textContent = '';
@@ -2884,7 +2931,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
         try { overview = (await tmdb('/movie/' + id, { language: 'en-US' })).overview; } catch { /* sem sinopse */ }
       }
       if (!dlg.open) return;
-      renderMovieDetails(m, overview);
+      renderMovieDetails(m, overview, imdbRec);
     } catch (e) {
       box.textContent = '';
       const err = el('div', 'md-loading');
@@ -2893,7 +2940,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     }
   }
 
-  function renderMovieDetails(m, overview) {
+  function renderMovieDetails(m, overview, imdbRec) {
     const box = $('mdContent');
     box.textContent = '';
     const hero = el('div', 'md-hero');
@@ -2913,12 +2960,13 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     const facts = el('div', 'md-facts');
     if (m.vote_count) {
       const r = el('span');
-      r.append(el('span', 'star', '★ '), document.createTextNode(Number(m.vote_average || 0).toFixed(1) + ' (' + Number(m.vote_count).toLocaleString('pt-BR') + ' votos)'));
+      r.append(el('span', 'star', '★ '), document.createTextNode('TMDB ' + fmtNum(Number(m.vote_average || 0)) + ' (' + fmtVotes(Number(m.vote_count)) + ' votos)'));
       facts.appendChild(r);
     }
     if (yearOf(m)) facts.appendChild(el('span', null, yearOf(m)));
     if (m.runtime) facts.appendChild(el('span', null, Math.floor(m.runtime / 60) + 'h ' + String(m.runtime % 60).padStart(2, '0') + 'min'));
     if (m.genres && m.genres.length) facts.appendChild(el('span', null, m.genres.map((g) => g.name).join(', ')));
+    if (imdbRec) facts.prepend(imdbFact(imdbRec));
     info.appendChild(facts);
     if (m.tagline) info.appendChild(el('div', 'md-tagline', m.tagline));
     info.appendChild(el('p', 'md-overview', overview || 'Sem sinopse disponível.'));
@@ -2972,6 +3020,278 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     info.appendChild(actions);
     body.append(poster, info);
     box.append(hero, body);
+  }
+
+  // ---------- catálogo do IMDb ----------
+  // Vem dos conjuntos de dados oficiais (não comerciais) do IMDb, convertidos toda semana pelo
+  // GitHub Actions (scripts/build-imdb.mjs) em data/imdb-movies.json. Não precisa de chave.
+  // Com o token do TMDB, cada filme ganha pôster, sinopse e onde assistir (busca pelo código do IMDb).
+  const IMDB_GENRE_PT = {
+    Action: 'Ação', Adventure: 'Aventura', Animation: 'Animação', Biography: 'Biografia', Comedy: 'Comédia',
+    Crime: 'Crime', Documentary: 'Documentário', Drama: 'Drama', Family: 'Família', Fantasy: 'Fantasia',
+    'Film-Noir': 'Noir', History: 'História', Horror: 'Terror', Music: 'Música', Musical: 'Musical',
+    Mystery: 'Mistério', Romance: 'Romance', 'Sci-Fi': 'Ficção científica', Sport: 'Esporte',
+    Thriller: 'Suspense', War: 'Guerra', Western: 'Faroeste',
+  };
+  const IMDB_PAGE = 48;
+  const imdb = { rows: null, genreList: [], loading: null, sort: 'votes', genres: new Set(), decade: '', q: '', list: [], shown: 0, posters: new Map(), queue: [], inflight: 0, observer: null, updated: '' };
+  const normText = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+  const genrePt = (name) => IMDB_GENRE_PT[name] || name || '';
+  const imdbIdOf = (n) => 'tt' + String(n).padStart(7, '0');
+
+  function fmtVotes(v) {
+    if (v >= 1e6) return fmtNum(v / 1e6) + ' mi';
+    if (v >= 1e3) return fmtNum(v / 1e3, v >= 1e5 ? 0 : 1) + ' mil';
+    return String(v);
+  }
+
+  function imdbFact(rec) {
+    const s = el('span', 'md-imdb');
+    s.append(el('span', 'imdb-badge', 'IMDb'), document.createTextNode(fmtNum(rec.r) + ' (' + fmtVotes(rec.v) + ' votos)'));
+    return s;
+  }
+
+  function loadImdbData() {
+    if (imdb.loading) return imdb.loading;
+    imdb.loading = fetch('data/imdb-movies.json')
+      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then((d) => {
+        imdb.genreList = Array.isArray(d.genres) ? d.genres.map(String) : [];
+        imdb.rows = (Array.isArray(d.rows) ? d.rows : []).filter(Array.isArray).map((r) => {
+          const m = { id: imdbIdOf(Number(r[0]) || 0), br: String(r[1] || ''), title: String(r[2] || ''), orig: String(r[3] || ''), year: Number(r[4]) || 0, min: Number(r[5]) || 0, g: Array.isArray(r[6]) ? r[6].filter(Number.isInteger) : [], r: (Number(r[7]) || 0) / 10, v: Number(r[8]) || 0 };
+          m.key = normText(m.br + ' ' + m.title + ' ' + m.orig);
+          return m;
+        });
+        imdb.updated = /^\d{4}-\d{2}-\d{2}$/.test(d.updated || '') ? d.updated : '';
+        return imdb;
+      });
+    imdb.loading.catch(() => { imdb.loading = null; });
+    return imdb.loading;
+  }
+
+  async function openImdb() {
+    if (imdb.rows) return;
+    $('imdbStatus').textContent = 'Carregando o catálogo do IMDb…';
+    skeletonCards(12, 'imdbGrid');
+    try {
+      await loadImdbData();
+      buildImdbFilters();
+      refreshImdb();
+    } catch {
+      $('imdbGrid').textContent = '';
+      $('imdbGrid').appendChild(el('div', 'mv-empty', location.protocol === 'file:'
+        ? 'O catálogo do IMDb carrega quando a página é aberta pelo site (rrvdev.github.io/sessao-de-cinema).'
+        : 'Não deu para carregar o catálogo do IMDb agora. Tente de novo em instantes.'));
+      $('imdbStatus').textContent = '';
+    }
+  }
+
+  function buildImdbFilters() {
+    const box = $('imdbGenres');
+    box.textContent = '';
+    const order = imdb.genreList.map((name, i) => ({ i, pt: genrePt(name) })).sort((a, b) => a.pt.localeCompare(b.pt, 'pt-BR'));
+    for (const g of order) {
+      const b = el('button', 'chip', g.pt);
+      b.type = 'button';
+      b.dataset.g = String(g.i);
+      b.setAttribute('aria-pressed', 'false');
+      box.appendChild(b);
+    }
+    const clear = el('button', 'chip clear', 'Limpar');
+    clear.type = 'button';
+    clear.dataset.g = 'clear';
+    box.appendChild(clear);
+    const decades = [...new Set(imdb.rows.filter((m) => m.year).map((m) => Math.floor(m.year / 10) * 10))].sort((a, b) => b - a);
+    const sel = $('imdbDecade');
+    for (const d of decades) {
+      const o = el('option', null, 'Anos ' + d);
+      o.value = String(d);
+      sel.appendChild(o);
+    }
+    if (imdb.updated) {
+      const [y, mo, da] = imdb.updated.split('-');
+      $('imdbUpdated').textContent = ' Atualizado em ' + da + '/' + mo + '/' + y + '.';
+    }
+  }
+
+  function imdbSortLabel() {
+    const y = new Date().getFullYear();
+    return { votes: 'Mais votados no IMDb', top: 'Mais bem avaliados no IMDb', recent: 'Lançamentos de ' + (y - 1) + ' e ' + y, classics: 'Clássicos (antes de 1980)' }[imdb.sort];
+  }
+
+  // As linhas já vêm ordenadas por número de votos; os filtros mantêm essa ordem.
+  function imdbList() {
+    let list = imdb.rows;
+    if (imdb.genres.size) list = list.filter((m) => m.g.some((g) => imdb.genres.has(g)));
+    if (imdb.decade) { const d = Number(imdb.decade); list = list.filter((m) => m.year >= d && m.year < d + 10); }
+    if (imdb.q) {
+      const terms = normText(imdb.q).split(/\s+/).filter(Boolean);
+      return list.filter((m) => terms.every((t) => m.key.includes(t)));
+    }
+    const y = new Date().getFullYear();
+    if (imdb.sort === 'top') return list.filter((m) => m.v >= 25000).sort((a, b) => b.r - a.r || b.v - a.v);
+    if (imdb.sort === 'recent') return list.filter((m) => m.year >= y - 1);
+    if (imdb.sort === 'classics') return list.filter((m) => m.year && m.year < 1980 && m.v >= 10000).sort((a, b) => b.r - a.r || b.v - a.v);
+    return list;
+  }
+
+  function refreshImdb() {
+    if (!imdb.rows) return;
+    imdb.list = imdbList();
+    renderImdb(true);
+  }
+
+  function renderImdb(reset) {
+    const grid = $('imdbGrid');
+    if (reset) { grid.textContent = ''; imdb.shown = 0; imdb.queue = []; if (imdb.observer) imdb.observer.disconnect(); }
+    const parts = [imdb.q ? 'Resultados para “' + imdb.q + '”' : imdbSortLabel()];
+    const names = [...imdb.genres].map((g) => genrePt(imdb.genreList[g])).filter(Boolean);
+    if (names.length) parts.push(names.join(' ou '));
+    if (imdb.decade) parts.push('anos ' + imdb.decade);
+    parts.push(imdb.list.length.toLocaleString('pt-BR') + (imdb.list.length === 1 ? ' filme' : ' filmes'));
+    $('imdbStatus').textContent = parts.join(' · ');
+    if (!imdb.list.length) {
+      grid.appendChild(el('div', 'mv-empty', 'Nenhum filme com esses filtros.'));
+      $('imdbMore').hidden = true;
+      return;
+    }
+    const next = imdb.list.slice(imdb.shown, imdb.shown + IMDB_PAGE);
+    for (const m of next) grid.appendChild(imdbCard(m));
+    imdb.shown += next.length;
+    $('imdbMore').hidden = imdb.shown >= imdb.list.length;
+  }
+
+  function imdbCard(m) {
+    const card = el('button', 'mv-card');
+    card.type = 'button';
+    card.dataset.imdb = m.id;
+    const poster = el('div', 'mv-poster');
+    const hue = (parseInt(m.id.slice(2), 10) * 47) % 360;
+    poster.style.background = 'linear-gradient(160deg,hsl(' + hue + ',45%,30%),hsl(' + ((hue + 50) % 360) + ',55%,10%))';
+    const art = el('div', 'mv-ph-art');
+    art.append(el('span', null, genrePt(imdb.genreList[m.g[0]]) || 'Filme'), el('strong', null, m.br || m.title));
+    poster.appendChild(art);
+    const r = el('span', 'mv-rating imdb');
+    r.append(el('b', null, 'IMDb'), document.createTextNode(fmtNum(m.r)));
+    poster.appendChild(r);
+    const cached = imdb.posters.get(m.id);
+    if (cached && cached.poster) addPosterImg(poster, cached.poster);
+    else if (cached === undefined && tmdbToken()) observePoster(card);
+    const genres = m.g.slice(0, 2).map((g) => genrePt(imdb.genreList[g])).filter(Boolean).join(', ');
+    card.append(poster, el('div', 'mv-title', m.br || m.title), el('div', 'mv-sub', [m.year || '', genres].filter(Boolean).join(' · ')));
+    return card;
+  }
+
+  // Pôsteres: só para os cards visíveis, poucos de cada vez.
+  function observePoster(card) {
+    if (!('IntersectionObserver' in window)) return;
+    if (!imdb.observer) {
+      imdb.observer = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          imdb.observer.unobserve(e.target);
+          imdb.queue.push(e.target);
+        }
+        pumpPosters();
+      }, { rootMargin: '300px' });
+    }
+    imdb.observer.observe(card);
+  }
+
+  function pumpPosters() {
+    while (imdb.inflight < 4 && imdb.queue.length) {
+      const card = imdb.queue.shift();
+      if (!card.isConnected) continue;
+      imdb.inflight++;
+      findTmdb(card.dataset.imdb)
+        .then((res) => { if (res && res.poster && card.isConnected) addPosterImg(card.querySelector('.mv-poster'), res.poster); })
+        .catch(() => { /* sem pôster */ })
+        .finally(() => { imdb.inflight--; pumpPosters(); });
+    }
+  }
+
+  async function findTmdb(id) {
+    if (imdb.posters.has(id)) return imdb.posters.get(id);
+    const d = await tmdb('/find/' + id, { external_source: 'imdb_id', language: 'pt-BR' });
+    const m = d && Array.isArray(d.movie_results) ? d.movie_results[0] : null;
+    const res = m && Number.isInteger(m.id) ? { tmdbId: m.id, poster: typeof m.poster_path === 'string' ? m.poster_path : '' } : null;
+    imdb.posters.set(id, res);
+    return res;
+  }
+
+  function addPosterImg(poster, path) {
+    if (!poster || poster.querySelector('img')) return;
+    const img = el('img', 'fade');
+    img.alt = '';
+    img.loading = 'lazy';
+    img.onload = () => img.classList.add('on');
+    img.src = TMDB_IMG + 'w342' + path;
+    poster.appendChild(img);
+  }
+
+  async function openImdbDetails(id) {
+    const rec = imdb.rows && imdb.rows.find((m) => m.id === id);
+    if (!rec) return;
+    if (tmdbToken()) {
+      const dlg = $('movieDialog');
+      $('mdContent').textContent = '';
+      const loading = el('div', 'md-loading');
+      loading.appendChild(el('div', 'spinner'));
+      $('mdContent').appendChild(loading);
+      if (!dlg.open) dlg.showModal();
+      try {
+        const res = await findTmdb(id);
+        if (res) { openMovieDetails(res.tmdbId, rec); return; }
+      } catch { /* mostra o resumo do IMDb */ }
+    }
+    renderImdbOnly(rec);
+  }
+
+  function suggestButton(title, year) {
+    const b = el('button', 'btn btn-primary btn-sm');
+    b.type = 'button';
+    b.append(svgIcon('chat'), document.createTextNode('Sugerir na sala'));
+    b.addEventListener('click', () => {
+      sendChat('🎬 Que tal assistir “' + title + '”' + (year ? ' (' + year + ')' : '') + '?');
+      notify('Sugestão enviada no chat da sala ' + st.room.name + '.');
+    });
+    return b;
+  }
+
+  function renderImdbOnly(rec) {
+    const dlg = $('movieDialog');
+    const box = $('mdContent');
+    box.textContent = '';
+    const hue = (parseInt(rec.id.slice(2), 10) * 47) % 360;
+    const hero = el('div', 'md-hero');
+    hero.style.background = 'linear-gradient(135deg,hsl(' + hue + ',45%,28%),rgba(20,20,24,0) 75%)';
+    const body = el('div', 'md-body');
+    const poster = el('div', 'md-poster');
+    poster.style.background = 'linear-gradient(160deg,hsl(' + hue + ',45%,30%),hsl(' + ((hue + 50) % 360) + ',55%,10%))';
+    const art = el('div', 'mv-ph-art');
+    art.append(el('span', null, genrePt(imdb.genreList[rec.g[0]]) || 'Filme'), el('strong', null, rec.br || rec.title));
+    poster.appendChild(art);
+    const info = el('div', 'md-info');
+    info.appendChild(el('h2', null, rec.br || rec.title));
+    const other = [rec.br && rec.title !== rec.br ? rec.title : '', rec.orig && rec.orig !== rec.title ? rec.orig : ''].filter(Boolean).join(' · ');
+    if (other) info.appendChild(el('div', 'md-orig', other));
+    const facts = el('div', 'md-facts');
+    facts.appendChild(imdbFact(rec));
+    if (rec.year) facts.appendChild(el('span', null, String(rec.year)));
+    if (rec.min) facts.appendChild(el('span', null, Math.floor(rec.min / 60) + 'h ' + String(rec.min % 60).padStart(2, '0') + 'min'));
+    if (rec.g.length) facts.appendChild(el('span', null, rec.g.map((g) => genrePt(imdb.genreList[g])).join(', ')));
+    info.appendChild(facts);
+    info.appendChild(el('p', 'md-orig', tmdbToken()
+      ? 'Sem pôster, sinopse ou onde assistir para este filme no TMDB.'
+      : 'Para ver pôster, sinopse e onde assistir no Brasil, conecte o TMDB em “Em alta agora”.'));
+    const actions = el('div', 'md-actions');
+    if (st.room && st.joined) actions.appendChild(suggestButton(rec.br || rec.title, rec.year));
+    actions.appendChild(actionLink('Ver no IMDb', 'external', 'https://www.imdb.com/title/' + rec.id + '/', 'btn-secondary'));
+    actions.appendChild(actionLink('Trailer', 'play', 'https://www.youtube.com/results?search_query=' + encodeURIComponent((rec.br || rec.title) + ' ' + (rec.year || '') + ' trailer'), 'btn-ghost'));
+    info.appendChild(actions);
+    body.append(poster, info);
+    box.append(hero, body);
+    if (!dlg.open) dlg.showModal();
   }
 
   function linkEl(text, href) {
@@ -3111,7 +3431,55 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       $('mvKeyMsg').textContent = err.code === 'badkey' ? 'Essa chave não funcionou. Confira se copiou o "Token de leitura da API" inteiro.' : err.message;
     }
   });
-  $('mvKeyChange').addEventListener('click', () => showKeySetup(''));
+  $('mvKeyChange').addEventListener('click', () => {
+    mv.source = 'tmdb';
+    storage.set('cinema-mv-source', 'tmdb');
+    openMovies();
+    showKeySetup('');
+  });
+
+  $('mvSource').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-src]');
+    if (!b || b.dataset.src === mv.source) return;
+    mv.source = b.dataset.src;
+    storage.set('cinema-mv-source', mv.source);
+    openMovies();
+  });
+  $('imdbSorts').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-sort]');
+    if (!b) return;
+    imdb.sort = b.dataset.sort;
+    for (const x of $('imdbSorts').children) x.setAttribute('aria-pressed', String(x === b));
+    if (imdb.q) { imdb.q = ''; $('imdbSearch').value = ''; }
+    refreshImdb();
+  });
+  $('imdbDecade').addEventListener('change', (e) => { imdb.decade = e.target.value; refreshImdb(); });
+  $('imdbGenres').addEventListener('click', (e) => {
+    const c = e.target.closest('.chip[data-g]');
+    if (!c) return;
+    if (c.dataset.g === 'clear') imdb.genres.clear();
+    else {
+      const i = Number(c.dataset.g);
+      if (imdb.genres.has(i)) imdb.genres.delete(i); else imdb.genres.add(i);
+    }
+    for (const b of $('imdbGenres').children) if (b.dataset.g !== 'clear') b.setAttribute('aria-pressed', String(imdb.genres.has(Number(b.dataset.g))));
+    refreshImdb();
+  });
+  let imdbSearchTimer = 0;
+  $('imdbSearch').addEventListener('input', (e) => {
+    clearTimeout(imdbSearchTimer);
+    imdbSearchTimer = setTimeout(() => {
+      const q = cleanText(e.target.value).slice(0, 100);
+      if (q === imdb.q) return;
+      imdb.q = q;
+      refreshImdb();
+    }, 250);
+  });
+  $('imdbMore').addEventListener('click', () => renderImdb(false));
+  $('imdbGrid').addEventListener('click', (e) => {
+    const c = e.target.closest('.mv-card[data-imdb]');
+    if (c) openImdbDetails(c.dataset.imdb);
+  });
   $('inviteBtn').addEventListener('click', invite);
   $('leaveBtn').addEventListener('click', async () => { if (await confirmLeave()) leaveRoom(); });
   $('renameBtn').addEventListener('click', renameMe);

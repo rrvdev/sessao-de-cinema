@@ -1,0 +1,42 @@
+# Atualiza o catálogo de filmes do IMDb usado na aba Filmes.
+# Fonte: conjuntos de dados não comerciais do IMDb (https://developer.imdb.com/non-commercial-datasets/).
+# Roda uma vez por semana (e quando acionado à mão) para o repositório não crescer demais.
+name: Dados do IMDb
+
+on:
+  schedule:
+    - cron: '23 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: imdb-data
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Gerar catálogo
+        run: node scripts/build-imdb.mjs data/imdb-movies.json
+
+      - name: Publicar se mudou
+        run: |
+          if git diff --quiet -- data/imdb-movies.json && git ls-files --error-unmatch data/imdb-movies.json >/dev/null 2>&1; then
+            echo "Sem mudanças."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/imdb-movies.json
+          git commit -m "Atualiza catálogo do IMDb"
+          git push
