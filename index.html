@@ -316,6 +316,27 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .chip.clear{border-style:dashed}
 .mv-status{font-size:13px;color:var(--text-2);margin-bottom:12px;min-height:20px}
+.mv-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.mv-filters .mv-search{flex:1 1 280px}
+.dd-select{width:auto;min-width:0;flex:none}
+.dd{position:relative;flex:none}
+.dd-btn{display:block;text-align:left;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.dd-select.on,.dd-btn.on{border-color:rgba(245,181,68,.6);background-color:var(--accent-soft);color:var(--accent)}
+.dd-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:45;width:340px;max-height:min(500px,70vh);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border-2);border-radius:12px;box-shadow:0 18px 48px rgba(0,0,0,.55);overflow:hidden}
+.dd-list{overflow-y:auto;padding:6px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.dd-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13.5px;cursor:pointer;user-select:none;min-width:0}
+.dd-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-item:hover{background:var(--surface-2)}
+.dd-item input{accent-color:var(--accent);width:16px;height:16px;margin:0;flex:none;cursor:pointer}
+.dd-foot{display:flex;justify-content:space-between;gap:8px;padding:8px;border-top:1px solid var(--border)}
+@media (max-width:640px){
+  .mv-filters{gap:8px}
+  .mv-filters .mv-search{flex-basis:100%}
+  .mv-filters .dd-select,.mv-filters .dd{flex:1 1 calc(50% - 4px);min-width:0}
+  .dd-select{width:100%}
+  .dd-btn{width:100%;max-width:none}
+  .dd-menu{position:fixed;left:12px;right:12px;top:auto;bottom:12px;width:auto;max-height:70vh}
+}
 .mv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px 16px}
 @media (max-width:560px){.mv-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:16px 12px}.seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}.mv-toolbar{flex-direction:column;align-items:stretch}.mv-search{flex:none}}
 .mv-card{display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:transparent;text-align:left;color:var(--text);cursor:pointer;min-width:0}
@@ -513,22 +534,35 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
         </div>
 
         <div id="imdbArea">
-          <div class="mv-toolbar">
-            <div id="imdbSorts" class="seg" role="group" aria-label="Ordem">
-              <button type="button" data-sort="votes" aria-pressed="true">Mais votados</button>
-              <button type="button" data-sort="top" aria-pressed="false">Mais bem avaliados</button>
-              <button type="button" data-sort="recent" aria-pressed="false">Lançamentos</button>
-              <button type="button" data-sort="classics" aria-pressed="false">Clássicos</button>
-            </div>
-            <select id="imdbDecade" class="select" style="width:auto" aria-label="Década">
-              <option value="">Todas as décadas</option>
-            </select>
+          <div class="mv-filters">
             <label class="mv-search">
               <svg class="i"><use href="#i-search"/></svg>
-              <input id="imdbSearch" class="input" type="search" placeholder="Buscar no catálogo do IMDb (português ou original)" autocomplete="off" aria-label="Buscar no catálogo do IMDb">
+              <input id="imdbSearch" class="input" type="search" placeholder="Buscar no IMDb (português ou original)" autocomplete="off" aria-label="Buscar no catálogo do IMDb">
             </label>
+            <select id="imdbSort" class="select dd-select" aria-label="Ordenar">
+              <option value="votes">Mais votados</option>
+              <option value="top">Mais bem avaliados</option>
+              <option value="recent">Lançamentos</option>
+              <option value="classics">Clássicos</option>
+            </select>
+            <div id="imdbGenreDd" class="dd">
+              <button class="select dd-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Gêneros"><span class="dd-label">Todos os gêneros</span></button>
+              <div class="dd-menu" role="group" aria-label="Gêneros" hidden>
+                <div class="dd-list"></div>
+                <div class="dd-foot"><button class="btn btn-ghost btn-xs" type="button" data-clear>Limpar</button><button class="btn btn-primary btn-xs" type="button" data-close>Pronto</button></div>
+              </div>
+            </div>
+            <select id="imdbDecade" class="select dd-select" aria-label="Década">
+              <option value="">Todas as décadas</option>
+            </select>
+            <select id="imdbMinRating" class="select dd-select" aria-label="Nota mínima">
+              <option value="0">Qualquer nota</option>
+              <option value="6">Nota 6+</option>
+              <option value="7">Nota 7+</option>
+              <option value="8">Nota 8+</option>
+            </select>
+            <button id="imdbReset" class="btn btn-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-x"/></svg>Limpar filtros</button>
           </div>
-          <div id="imdbGenres" class="chips" role="group" aria-label="Gêneros"></div>
           <p id="imdbStatus" class="mv-status" aria-live="polite"></p>
           <div id="imdbGrid" class="mv-grid"></div>
           <div class="mv-more"><button id="imdbMore" class="btn btn-secondary" type="button" hidden>Carregar mais</button></div>
@@ -550,20 +584,27 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
           <p id="mvKeyMsg" class="hint" style="margin-top:8px"></p>
         </div>
         <div id="mvBrowse" hidden>
-          <div class="mv-toolbar">
-            <div id="mvModes" class="seg" role="group" aria-label="Listas">
-              <button type="button" data-mode="trending" aria-pressed="true">Em alta na semana</button>
-              <button type="button" data-mode="today" aria-pressed="false">Em alta hoje</button>
-              <button type="button" data-mode="popular" aria-pressed="false">Populares</button>
-              <button type="button" data-mode="top" aria-pressed="false">Mais bem avaliados</button>
-              <button type="button" data-mode="now" aria-pressed="false">Nos cinemas</button>
-            </div>
+          <div class="mv-filters">
             <label class="mv-search">
               <svg class="i"><use href="#i-search"/></svg>
               <input id="mvSearch" class="input" type="search" placeholder="Buscar um filme" autocomplete="off" aria-label="Buscar um filme">
             </label>
+            <select id="mvMode" class="select dd-select" aria-label="Lista">
+              <option value="trending">Em alta na semana</option>
+              <option value="today">Em alta hoje</option>
+              <option value="popular">Populares</option>
+              <option value="top">Mais bem avaliados</option>
+              <option value="now">Nos cinemas</option>
+            </select>
+            <div id="mvGenreDd" class="dd">
+              <button class="select dd-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Gêneros"><span class="dd-label">Todos os gêneros</span></button>
+              <div class="dd-menu" role="group" aria-label="Gêneros" hidden>
+                <div class="dd-list"></div>
+                <div class="dd-foot"><button class="btn btn-ghost btn-xs" type="button" data-clear>Limpar</button><button class="btn btn-primary btn-xs" type="button" data-close>Pronto</button></div>
+              </div>
+            </div>
+            <button id="mvReset" class="btn btn-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-x"/></svg>Limpar filtros</button>
           </div>
-          <div id="mvGenres" class="chips" role="group" aria-label="Gêneros"></div>
           <p id="mvStatus" class="mv-status" aria-live="polite"></p>
           <div id="mvGrid" class="mv-grid"></div>
           <div class="mv-more"><button id="mvMore" class="btn btn-secondary" type="button" hidden>Carregar mais</button></div>
@@ -2797,23 +2838,63 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     $('mvKeyInput').focus();
   }
 
+  // ---------- menus de filtro ----------
+  // Menu suspenso com caixinhas (vários gêneros). onChange(acao, valor, marcado).
+  function setupDropdown(rootId, onChange) {
+    const root = $(rootId);
+    const btn = root.querySelector('.dd-btn');
+    const menu = root.querySelector('.dd-menu');
+    const open = (v) => {
+      menu.hidden = !v;
+      btn.setAttribute('aria-expanded', String(v));
+      if (v) { const first = menu.querySelector('input'); if (first) first.focus(); }
+    };
+    btn.addEventListener('click', () => open(menu.hidden));
+    menu.addEventListener('change', (e) => {
+      if (e.target.matches('input[type=checkbox]')) onChange('toggle', Number(e.target.value), e.target.checked);
+    });
+    menu.querySelector('[data-clear]').addEventListener('click', () => {
+      for (const cb of menu.querySelectorAll('input[type=checkbox]')) cb.checked = false;
+      onChange('clear');
+    });
+    menu.querySelector('[data-close]').addEventListener('click', () => { open(false); btn.focus(); });
+    document.addEventListener('click', (e) => { if (!menu.hidden && !root.contains(e.target)) open(false); });
+    root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { e.stopPropagation(); open(false); btn.focus(); } });
+  }
+
+  function fillChecks(rootId, items, selected) {
+    const list = $(rootId).querySelector('.dd-list');
+    list.textContent = '';
+    for (const it of items) {
+      const lab = el('label', 'dd-item');
+      const cb = el('input');
+      cb.type = 'checkbox';
+      cb.value = String(it.value);
+      cb.checked = selected.has(it.value);
+      lab.append(cb, el('span', null, it.label));
+      list.appendChild(lab);
+    }
+  }
+
+  function setDropdownLabel(rootId, names) {
+    const btn = $(rootId).querySelector('.dd-btn');
+    btn.querySelector('.dd-label').textContent = !names.length ? 'Todos os gêneros' : names.length <= 2 ? names.join(', ') : names.length + ' gêneros';
+    btn.classList.toggle('on', names.length > 0);
+    btn.title = names.join(', ');
+  }
+
+  function updateMvFilters() {
+    setDropdownLabel('mvGenreDd', [...mv.genres].map((g) => mv.genreNames.get(g)).filter(Boolean));
+    $('mvMode').classList.toggle('on', mv.mode !== 'trending');
+    $('mvReset').hidden = !(mv.genres.size || mv.mode !== 'trending' || mv.q);
+  }
+
   async function loadGenres() {
-    const box = $('mvGenres');
     try {
       const { genres } = await tmdb('/genre/movie/list', { language: 'pt-BR' });
       mv.genreNames = new Map(genres.map((g) => [g.id, g.name]));
-      box.textContent = '';
-      for (const g of genres) {
-        const b = el('button', 'chip', g.name);
-        b.type = 'button';
-        b.dataset.g = String(g.id);
-        b.setAttribute('aria-pressed', String(mv.genres.has(g.id)));
-        box.appendChild(b);
-      }
-      const clear = el('button', 'chip clear', 'Limpar');
-      clear.type = 'button';
-      clear.dataset.g = 'clear';
-      box.appendChild(clear);
+      fillChecks('mvGenreDd', genres.slice().sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')).map((g) => ({ value: g.id, label: g.name })), mv.genres);
+      updateMvFilters();
       if (mv.items.length) renderMovies();
     } catch (e) {
       if (e.code === 'badkey' && !TMDB_TOKEN) showKeySetup('Essa chave não funcionou. Confira se copiou o "Token de leitura da API" inteiro.');
@@ -2857,6 +2938,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   }
 
   async function loadMovies(reset) {
+    updateMvFilters();
     const seq = ++mv.seq;
     if (reset) { mv.page = 1; mv.items = []; skeletonCards(12); }
     else mv.page++;
@@ -3035,7 +3117,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     Thriller: 'Suspense', War: 'Guerra', Western: 'Faroeste',
   };
   const IMDB_PAGE = 48;
-  const imdb = { rows: null, genreList: [], loading: null, sort: 'votes', genres: new Set(), decade: '', q: '', list: [], shown: 0, posters: new Map(), queue: [], inflight: 0, observer: null, updated: '' };
+  const imdb = { rows: null, genreList: [], loading: null, sort: 'votes', genres: new Set(), decade: '', minRating: 0, q: '', list: [], shown: 0, posters: new Map(), queue: [], inflight: 0, observer: null, updated: '' };
   const normText = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
   const genrePt = (name) => IMDB_GENRE_PT[name] || name || '';
   const imdbIdOf = (n) => 'tt' + String(n).padStart(7, '0');
@@ -3087,21 +3169,17 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     }
   }
 
+  function updateImdbFilters() {
+    setDropdownLabel('imdbGenreDd', [...imdb.genres].map((g) => genrePt(imdb.genreList[g])).filter(Boolean));
+    $('imdbSort').classList.toggle('on', imdb.sort !== 'votes');
+    $('imdbDecade').classList.toggle('on', !!imdb.decade);
+    $('imdbMinRating').classList.toggle('on', imdb.minRating > 0);
+    $('imdbReset').hidden = !(imdb.genres.size || imdb.sort !== 'votes' || imdb.decade || imdb.minRating || imdb.q);
+  }
+
   function buildImdbFilters() {
-    const box = $('imdbGenres');
-    box.textContent = '';
-    const order = imdb.genreList.map((name, i) => ({ i, pt: genrePt(name) })).sort((a, b) => a.pt.localeCompare(b.pt, 'pt-BR'));
-    for (const g of order) {
-      const b = el('button', 'chip', g.pt);
-      b.type = 'button';
-      b.dataset.g = String(g.i);
-      b.setAttribute('aria-pressed', 'false');
-      box.appendChild(b);
-    }
-    const clear = el('button', 'chip clear', 'Limpar');
-    clear.type = 'button';
-    clear.dataset.g = 'clear';
-    box.appendChild(clear);
+    const order = imdb.genreList.map((name, i) => ({ value: i, label: genrePt(name) })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+    fillChecks('imdbGenreDd', order, imdb.genres);
     const decades = [...new Set(imdb.rows.filter((m) => m.year).map((m) => Math.floor(m.year / 10) * 10))].sort((a, b) => b - a);
     const sel = $('imdbDecade');
     for (const d of decades) {
@@ -3125,6 +3203,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     let list = imdb.rows;
     if (imdb.genres.size) list = list.filter((m) => m.g.some((g) => imdb.genres.has(g)));
     if (imdb.decade) { const d = Number(imdb.decade); list = list.filter((m) => m.year >= d && m.year < d + 10); }
+    if (imdb.minRating) list = list.filter((m) => m.r >= imdb.minRating);
     if (imdb.q) {
       const terms = normText(imdb.q).split(/\s+/).filter(Boolean);
       return list.filter((m) => terms.every((t) => m.key.includes(t)));
@@ -3139,6 +3218,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   function refreshImdb() {
     if (!imdb.rows) return;
     imdb.list = imdbList();
+    updateImdbFilters();
     renderImdb(true);
   }
 
@@ -3149,6 +3229,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     const names = [...imdb.genres].map((g) => genrePt(imdb.genreList[g])).filter(Boolean);
     if (names.length) parts.push(names.join(' ou '));
     if (imdb.decade) parts.push('anos ' + imdb.decade);
+    if (imdb.minRating) parts.push('nota ' + imdb.minRating + '+');
     parts.push(imdb.list.length.toLocaleString('pt-BR') + (imdb.list.length === 1 ? ' filme' : ' filmes'));
     $('imdbStatus').textContent = parts.join(' · ');
     if (!imdb.list.length) {
@@ -3379,23 +3460,24 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   $('moviesBtn').addEventListener('click', () => showView('movies'));
   $('mvBackRoom').addEventListener('click', () => showView('room'));
 
-  $('mvModes').addEventListener('click', (e) => {
-    const b = e.target.closest('button[data-mode]');
-    if (!b || b.dataset.mode === mv.mode) return;
-    mv.mode = b.dataset.mode;
-    for (const x of $('mvModes').children) x.setAttribute('aria-pressed', String(x === b));
+  $('mvMode').addEventListener('change', (e) => {
+    mv.mode = e.target.value;
     if (mv.q) { mv.q = ''; $('mvSearch').value = ''; }
     loadMovies(true);
   });
-  $('mvGenres').addEventListener('click', (e) => {
-    const c = e.target.closest('.chip[data-g]');
-    if (!c) return;
-    if (c.dataset.g === 'clear') mv.genres.clear();
-    else {
-      const id = Number(c.dataset.g);
-      if (mv.genres.has(id)) mv.genres.delete(id); else mv.genres.add(id);
-    }
-    for (const b of $('mvGenres').children) if (b.dataset.g !== 'clear') b.setAttribute('aria-pressed', String(mv.genres.has(Number(b.dataset.g))));
+  setupDropdown('mvGenreDd', (action, id, checked) => {
+    if (action === 'clear') mv.genres.clear();
+    else if (checked) mv.genres.add(id);
+    else mv.genres.delete(id);
+    loadMovies(true);
+  });
+  $('mvReset').addEventListener('click', () => {
+    mv.genres.clear();
+    mv.mode = 'trending';
+    mv.q = '';
+    $('mvMode').value = 'trending';
+    $('mvSearch').value = '';
+    for (const cb of $('mvGenreDd').querySelectorAll('input[type=checkbox]')) cb.checked = false;
     loadMovies(true);
   });
   let mvSearchTimer = 0;
@@ -3446,24 +3528,30 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     storage.set('cinema-mv-source', mv.source);
     openMovies();
   });
-  $('imdbSorts').addEventListener('click', (e) => {
-    const b = e.target.closest('button[data-sort]');
-    if (!b) return;
-    imdb.sort = b.dataset.sort;
-    for (const x of $('imdbSorts').children) x.setAttribute('aria-pressed', String(x === b));
+  $('imdbSort').addEventListener('change', (e) => {
+    imdb.sort = e.target.value;
     if (imdb.q) { imdb.q = ''; $('imdbSearch').value = ''; }
     refreshImdb();
   });
   $('imdbDecade').addEventListener('change', (e) => { imdb.decade = e.target.value; refreshImdb(); });
-  $('imdbGenres').addEventListener('click', (e) => {
-    const c = e.target.closest('.chip[data-g]');
-    if (!c) return;
-    if (c.dataset.g === 'clear') imdb.genres.clear();
-    else {
-      const i = Number(c.dataset.g);
-      if (imdb.genres.has(i)) imdb.genres.delete(i); else imdb.genres.add(i);
-    }
-    for (const b of $('imdbGenres').children) if (b.dataset.g !== 'clear') b.setAttribute('aria-pressed', String(imdb.genres.has(Number(b.dataset.g))));
+  $('imdbMinRating').addEventListener('change', (e) => { imdb.minRating = Number(e.target.value) || 0; refreshImdb(); });
+  setupDropdown('imdbGenreDd', (action, i, checked) => {
+    if (action === 'clear') imdb.genres.clear();
+    else if (checked) imdb.genres.add(i);
+    else imdb.genres.delete(i);
+    refreshImdb();
+  });
+  $('imdbReset').addEventListener('click', () => {
+    imdb.genres.clear();
+    imdb.sort = 'votes';
+    imdb.decade = '';
+    imdb.minRating = 0;
+    imdb.q = '';
+    $('imdbSort').value = 'votes';
+    $('imdbDecade').value = '';
+    $('imdbMinRating').value = '0';
+    $('imdbSearch').value = '';
+    for (const cb of $('imdbGenreDd').querySelectorAll('input[type=checkbox]')) cb.checked = false;
     refreshImdb();
   });
   let imdbSearchTimer = 0;
