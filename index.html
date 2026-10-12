@@ -2,260 +2,539 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
+<meta name="description" content="Assista filmes com seus amigos: transmita um vídeo ou sua tela, com som, direto no navegador.">
 <title>Sessão de Cinema</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f5b544'/%3E%3Cstop offset='1' stop-color='%23f97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M12.5 9.5v13l10.5-6.5z' fill='%231c1405'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0d12;--surface:#141821;--surface-2:#1b2030;--line:#283044;--line-2:#3a4560;
-  --text:#eef1f7;--muted:#9aa4b8;--accent:#ffb84d;--accent-ink:#221500;
-  --ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--live:#ef4444;--r:14px;
+  --bg:#0a0a0c;--bg-elev:#0e0e11;--surface:#141418;--surface-2:#1b1b20;--surface-3:#25252c;
+  --border:#26262d;--border-2:#34343d;
+  --text:#f4f4f5;--text-2:#a1a1aa;--text-3:#71717a;
+  --accent:#f5b544;--accent-2:#ffc65c;--accent-ink:#1c1405;--accent-soft:rgba(245,181,68,.12);
+  --live:#ef4444;--ok:#22c55e;--warn:#f59e0b;--bad:#f87171;
+  --r:12px;--r-lg:16px;
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;overflow-x:hidden}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:14.5px/1.55 var(--font);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
 body[data-role=host] .viewer-only,body[data-role=viewer] .host-only{display:none!important}
-button,input,select{font:inherit;color:inherit}
-h1,h2,h3{margin:0}
-.wrap{max-width:1280px;margin:0 auto;padding:16px}
-.muted{color:var(--muted)}
-.small{font-size:13px}
-.row{display:flex;gap:8px;align-items:center}
-.wrap-row{flex-wrap:wrap}
+body:not([data-role]) .room-only{display:none!important}
+body:not([data-role=host][data-source=file]) .host-file-only{display:none!important}
+body[data-role=host][data-source=screen] .vol-group{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.i.fill{fill:currentColor;stroke:none}
+.muted{color:var(--text-2)}
+.small{font-size:12.5px}
 
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
-.brand svg{width:26px;height:26px;color:var(--accent);flex:none}
+/* botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid transparent;font-weight:600;font-size:14px;white-space:nowrap;transition:background .15s,border-color .15s,color .15s;user-select:none;text-decoration:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover:not(:disabled){background:var(--accent-2)}
+.btn-secondary{background:var(--surface-2);border-color:var(--border-2);color:var(--text)}
+.btn-secondary:hover:not(:disabled){background:var(--surface-3)}
+.btn-ghost{background:transparent;color:var(--text-2)}
+.btn-ghost:hover:not(:disabled){background:var(--surface-2);color:var(--text)}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-danger:hover:not(:disabled){background:#ef4444}
+.btn-danger-ghost{background:transparent;color:var(--bad);border-color:rgba(248,113,113,.35)}
+.btn-danger-ghost:hover:not(:disabled){background:rgba(248,113,113,.1)}
+.btn-sm{height:34px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn-lg{height:48px;padding:0 20px;font-size:15px;border-radius:12px}
+.btn-block{width:100%}
+.icon-btn{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:0;background:transparent;color:var(--text-2)}
+.icon-btn:hover{background:var(--surface-3);color:var(--text)}
+.icon-btn .i{width:16px;height:16px}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;font-weight:600;white-space:nowrap;transition:background .15s,border-color .15s}
-.btn:hover{border-color:var(--line-2);background:#222839}
-.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
-.btn.primary:hover{filter:brightness(1.06);background:var(--accent)}
-.btn.danger{color:var(--bad)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn:focus-visible,input:focus-visible,select:focus-visible,.choice:focus-visible,.icon-btn:focus-visible,.reactions button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-input[type=text],select{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
-input[type=text]::placeholder{color:#6b7488}
+/* campos */
+.input,.select{height:40px;width:100%;min-width:0;background:var(--bg-elev);border:1px solid var(--border-2);border-radius:10px;padding:0 12px;transition:border-color .15s,box-shadow .15s}
+.input:focus,.select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.input::placeholder{color:var(--text-3)}
+.select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.select option{background:#1b1b20;color:var(--text)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field-label{font-size:12.5px;font-weight:500;color:var(--text-2)}
+.code-input{font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase}
+.code-input::placeholder{letter-spacing:normal;text-transform:none;font-family:var(--font)}
+input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
+.hint{font-size:12px;color:var(--text-3)}
+.hint.warn{color:var(--warn)}
 
-.hero{padding:32px 0 20px;max-width:760px}
-.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin-bottom:12px;letter-spacing:-.5px}
-.lead{font-size:17px;margin:0}
-.field{display:flex;flex-direction:column;gap:6px;max-width:360px}
-.label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin:0}
-.card h2{font-size:19px}
-.card p{margin:0}
-.card .row{width:100%}
-.card .row input{flex:1}
-.tips{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px}
-.tips summary{cursor:pointer;font-weight:600}
-.tips ul{margin:12px 0 4px;padding-left:20px;display:flex;flex-direction:column;gap:8px;color:#d3d8e3}
+/* barra superior */
+.appbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;height:60px;padding:0 20px;background:rgba(10,10,12,.85);-webkit-backdrop-filter:saturate(1.4) blur(12px);backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em;color:inherit;text-decoration:none}
+.logo{width:30px;height:30px;flex:none;display:block}
+.spacer{flex:1}
+.room-chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 4px 0 12px;border:1px solid var(--border-2);border-radius:999px;background:var(--surface)}
+.room-chip .lbl{font-size:12px;color:var(--text-3)}
+.room-chip .code{font-family:var(--mono);font-weight:600;letter-spacing:.12em;font-size:14px}
+.live-badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--surface-2);color:var(--text-3);border:1px solid var(--border);white-space:nowrap}
+.live-badge.on{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.45);color:#fecaca}
+.live-badge.on::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--live);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.net-status{font-size:12.5px;color:var(--warn);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:700px){.appbar{padding:0 12px;gap:8px}.brand .name{display:none}.room-chip .lbl{display:none}.appbar .btn .txt{display:none}.appbar .btn{padding:0 10px}.net-status{display:none}}
+@media (max-width:400px){.appbar{padding:0 8px;gap:6px}}
 
-.roombar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-.roominfo{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.code{font:700 28px/1.1 ui-monospace,Consolas,monospace;letter-spacing:4px}
-.badge{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
-.badge.live{background:rgba(239,68,68,.15);color:#fecaca;border-color:rgba(239,68,68,.5)}
-.badge.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live);margin-right:6px;vertical-align:1px;animation:pulse 1.6s infinite}
-@keyframes pulse{50%{opacity:.35}}
+/* início */
+.home{max-width:1120px;margin:0 auto;padding:64px 20px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr);gap:32px}.home{padding:32px 16px 48px}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--border-2);background:var(--surface);font-size:12.5px;color:var(--text-2);margin-bottom:20px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.hero h1{font-size:clamp(32px,5vw,52px);line-height:1.06;letter-spacing:-.035em;font-weight:700;margin-bottom:16px}
+.hl{background:linear-gradient(90deg,var(--accent),#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:17px;color:var(--text-2);max-width:540px;margin-bottom:32px}
+.features{display:grid;gap:16px}
+.feature{display:flex;gap:14px;align-items:flex-start}
+.feature-icon{width:38px;height:38px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.feature strong{display:block;font-weight:600}
+.feature span{color:var(--text-2);font-size:13.5px}
+.start-card{background:linear-gradient(180deg,var(--surface),var(--bg-elev));border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;box-shadow:var(--shadow)}
+.start-card h2{font-size:20px;letter-spacing:-.015em;margin-bottom:4px}
+.start-card .sub{color:var(--text-2);margin-bottom:22px}
+.divider{display:flex;align-items:center;gap:12px;color:var(--text-3);font-size:11.5px;margin:22px 0;text-transform:uppercase;letter-spacing:.1em}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.join-row{display:flex;gap:8px}
+.join-row .input{flex:1}
+@media (max-width:420px){.start-card{padding:20px}}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--r);border:1px solid;font-size:13.5px}
+.alert .i{margin-top:1px}
+.alert.warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.35);color:#fde68a}
+.alert.bad{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35);color:#fecaca}
+.alert em{font-style:normal;font-weight:600}
+#libError{margin-top:16px}
+.faq{margin-top:72px}
+.faq h2{font-size:20px;margin-bottom:16px;letter-spacing:-.015em}
+.faq-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+@media (max-width:760px){.faq-grid{grid-template-columns:minmax(0,1fr)}}
+.faq details{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0 16px}
+.faq summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;font-weight:600}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--text-3);font-size:18px;font-weight:400;line-height:1}
+.faq details[open] summary::after{content:"–"}
+.faq details p{color:var(--text-2);padding-bottom:14px;font-size:13.5px}
+.faq em{font-style:normal;color:var(--text)}
+.footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);color:var(--text-3);font-size:12.5px;display:flex;align-items:center;gap:8px}
 
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
-@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
-
-.stage{position:relative;background:#000;border-radius:var(--r);overflow:hidden;aspect-ratio:16/9;border:1px solid var(--line)}
+/* sala */
+.room{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;padding:20px;max-width:1640px;margin:0 auto;align-items:start}
+@media (max-width:1040px){.room{grid-template-columns:minmax(0,1fr);padding:12px;gap:12px}}
+.room-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+.stage{position:relative;background:#000;border-radius:var(--r-lg);overflow:hidden;aspect-ratio:16/9;border:1px solid var(--border);box-shadow:var(--shadow)}
 .stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 .stage:fullscreen{border-radius:0;border:0;aspect-ratio:auto;width:100vw;height:100vh}
-.overlay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:rgba(5,6,10,.86)}
-.overlay-title{font-size:18px;font-weight:600;margin:0;max-width:520px}
-.choices{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px}
-.choice{display:flex;flex-direction:column;gap:4px;align-items:center;padding:18px 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;width:230px;transition:border-color .15s,background .15s}
-.choice:hover{border-color:var(--accent);background:var(--surface-2)}
-.choice strong{font-size:16px}
-.choice span{font-size:13px;color:var(--muted)}
-@media (max-width:560px){.choice{width:100%;padding:10px}.choice span{display:none}.choices{margin-top:4px;gap:8px}.overlay{padding:12px;gap:8px}.overlay-title{font-size:15px}}
-.corner{position:absolute;top:10px;right:10px;display:flex;gap:6px;align-items:center;z-index:3}
-.icon-btn{width:36px;height:36px;border-radius:9px;border:0;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;display:grid;place-items:center}
-.icon-btn:hover{background:rgba(0,0,0,.8)}
-.icon-btn svg{width:20px;height:20px}
-.vol{width:90px;accent-color:var(--accent)}
-.stats{position:absolute;top:10px;left:10px;z-index:3;font-size:12px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:7px;color:#d6dbe6}
-.pill-center{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,.7);padding:6px 14px;border-radius:999px;font-weight:600;font-size:14px}
-.floaters{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4}
-.floater{position:absolute;bottom:10%;font-size:36px;animation:float 2.6s ease-out forwards}
+.stage.idle{cursor:none}
+.overlay{position:absolute;inset:0;z-index:7;display:grid;place-items:center;padding:24px;text-align:center;background:radial-gradient(ellipse at center,rgba(22,22,28,.94),rgba(6,6,9,.98))}
+.empty h2{font-size:22px;letter-spacing:-.02em;margin-bottom:6px}
+.empty p{color:var(--text-2);margin-bottom:22px}
+.choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.choice{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:250px;padding:18px;text-align:left;border-radius:14px;border:1px solid var(--border-2);background:var(--surface);color:var(--text);transition:border-color .15s,background .15s,transform .15s}
+.choice:hover{border-color:var(--accent);background:var(--surface-2);transform:translateY(-2px)}
+.choice-icon{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);margin-bottom:8px}
+.choice strong{font-size:15px}
+.choice span{font-size:13px;color:var(--text-2)}
+.status{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:460px}
+.status-title{font-size:17px;font-weight:600}
+.status-sub{color:var(--text-2);font-size:13.5px}
+.status-actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--accent);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(248,113,113,.12);color:var(--bad)}
+.status-icon .i{width:22px;height:22px}
+@media (max-width:600px){.overlay{padding:12px}.choice{width:100%;padding:12px;flex-direction:row;align-items:center;gap:12px}.choice span{display:none}.choice-icon{margin:0;width:34px;height:34px}.empty h2{font-size:17px;margin-bottom:12px}.empty p{display:none}.choices{gap:8px}.status-title{font-size:15px}.status-sub{font-size:12.5px}.spinner{width:28px;height:28px}}
+.stage-top{position:absolute;top:12px;left:12px;right:12px;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;transition:opacity .25s}
+.stage.idle .stage-top{opacity:0}
+.chip-dark{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:12px;color:#e4e4e7;font-variant-numeric:tabular-nums;white-space:nowrap}
+.paused{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.66);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-weight:600;white-space:nowrap}
+.controls{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:32px 12px 10px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.8));display:flex;flex-direction:column;gap:4px;transition:opacity .25s}
+.stage.idle .controls{opacity:0;pointer-events:none}
+.stage.no-controls .controls{display:none}
+.ctrlrow{display:flex;align-items:center;gap:2px}
+.cbtn{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:9px;background:transparent;color:#fff;flex:none}
+.cbtn:hover{background:rgba(255,255,255,.14)}
+.cbtn .i{width:20px;height:20px}
+.vol-group{display:flex;align-items:center;gap:4px}
+.vol{width:92px}
+.time{font-size:12.5px;color:#e4e4e7;font-variant-numeric:tabular-nums;margin-left:8px;white-space:nowrap}
+.live-tag{font-size:11px;font-weight:700;letter-spacing:.08em;color:#fecaca;display:inline-flex;align-items:center;gap:6px;margin-left:8px}
+.live-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--live)}
+.reacts{display:flex;gap:2px}
+.reacts button{width:32px;height:32px;border:0;border-radius:8px;background:transparent;font-size:17px;line-height:1;padding:0}
+.reacts button:hover{background:rgba(255,255,255,.14)}
+.seek{width:100%;height:16px}
+@media (max-width:560px){.vol{display:none}.time{display:none}.reacts button{width:27px;font-size:15px}.controls{padding:20px 4px 4px}.cbtn{width:32px;height:32px}.chip-dark{font-size:11px;height:22px;padding:0 8px}.stage-top{top:8px;left:8px;right:8px}}
+.floaters{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:8}
+.floater{position:absolute;bottom:12%;font-size:38px;animation:float 2.6s ease-out forwards}
 @keyframes float{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-20px) scale(1)}100%{transform:translateY(-280px) scale(1.15);opacity:0}}
-.stage-toasts{position:absolute;left:12px;bottom:64px;z-index:4;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:60%}
-.stage-toast{background:rgba(0,0,0,.7);padding:6px 10px;border-radius:9px;font-size:15px;animation:fadeout 7s forwards}
+.stage-toasts{position:absolute;left:14px;bottom:84px;z-index:8;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:60%}
+.stage-toast{background:rgba(0,0,0,.72);padding:6px 12px;border-radius:10px;font-size:15px;animation:fadeout 7s forwards}
 @keyframes fadeout{0%,85%{opacity:1}100%{opacity:0}}
-@media (max-width:560px){.vol{display:none}.pill-center{top:auto;bottom:12px}}
 
-.sourcebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
-.quality{display:flex;align-items:center;gap:8px;margin-left:auto;color:var(--muted);font-size:14px}
-@media (max-width:560px){.quality{margin-left:0}}
-.banner{margin:12px 0 0;padding:12px 14px;border-radius:10px;border:1px solid}
-.banner.warn{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.35);color:#fde7a8}
-.banner.bad{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.4);color:#fecaca}
-.hint{margin:10px 0 0}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+.src{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 260px}
+.src-icon{width:40px;height:40px;border-radius:10px;background:var(--surface-3);display:grid;place-items:center;color:var(--text-2);flex:none}
+.src-text{min-width:0}
+.src-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src-sub{font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.src-sub.warn{color:var(--warn)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
 
-.side{display:flex;flex-direction:column;gap:16px;min-width:0}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
-.panel h3{font-size:14px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.count{font-size:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted)}
-.people{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.people li{display:flex;align-items:center;gap:8px;font-size:14px;min-width:0}
-.people .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.people .st{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
-.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
-#uploadEst{margin:10px 0 0}
-.reactions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.reactions button{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:3px 8px;font-size:18px;cursor:pointer;line-height:1.4}
-.reactions button:hover{border-color:var(--line-2)}
-.chatlog{height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:4px;margin-bottom:10px}
-.msg{font-size:14px;overflow-wrap:anywhere}
-.msg b{color:var(--accent);font-weight:600}
-.msg.sys{color:var(--muted);font-size:13px;font-style:italic}
-#chatForm input{flex:1}
+.sidebar{display:flex;flex-direction:column;gap:12px;position:sticky;top:80px;height:calc(100vh - 100px);min-height:520px}
+@media (max-width:1040px){.sidebar{position:static;height:auto;min-height:0}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+.invite{padding:14px}
+.invite-head{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:10px}
+.invite-head .i{color:var(--accent)}
+.invite-row{display:flex;gap:8px}
+.invite-row .input{height:34px;font-size:12.5px;color:var(--text-2)}
+.invite-help{margin-top:8px;font-size:12.5px;color:var(--text-2)}
+.code-inline{font-family:var(--mono);color:var(--text);letter-spacing:.1em;font-weight:600}
+.panelbox{display:flex;flex-direction:column;min-height:0;flex:1}
+@media (max-width:1040px){.panelbox{min-height:440px}}
+.tabs{display:flex;gap:4px;padding:6px;border-bottom:1px solid var(--border)}
+.tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--text-2);font-weight:600;font-size:13px}
+.tab:hover{color:var(--text);background:var(--surface-2)}
+.tab[aria-selected=true]{background:var(--surface-3);color:var(--text)}
+.tab .i{width:15px;height:15px}
+.count{font-size:11px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--surface-3);color:var(--text-2);display:inline-grid;place-items:center;font-variant-numeric:tabular-nums}
+.tab[aria-selected=true] .count{background:var(--border-2)}
+.count.unread{background:var(--accent);color:var(--accent-ink)}
+.tabpanel{display:flex;flex-direction:column;min-height:0;flex:1;padding:12px}
+.chatlog{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:2px 4px 10px 2px}
+@media (max-width:1040px){.chatlog{height:320px;flex:none}}
+.msg{display:flex;flex-direction:column;gap:1px;font-size:13.5px}
+.msg-head{display:flex;align-items:baseline;gap:8px}
+.msg-name{font-weight:600}
+.msg-time{font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.msg-text{color:#e4e4e7;overflow-wrap:anywhere}
+.msg.sys{align-self:center;font-size:12px;color:var(--text-3);text-align:center;padding:0 8px}
+.chat-empty{margin:auto;text-align:center;color:var(--text-3);font-size:13px;padding:24px 8px}
+.chatform{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border)}
+.chatform .btn{width:40px;padding:0}
+.people{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.person{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px}
+.person:hover{background:var(--surface-2)}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12.5px;color:#0a0a0c;flex:none;position:relative}
+.avatar .st{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;border:2px solid var(--surface);background:var(--text-3)}
+.st.ok{background:var(--ok)}.st.warn{background:var(--warn)}.st.bad{background:var(--bad)}
+.person-main{min-width:0;flex:1}
+.person-name{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:6px;min-width:0}
+.person-name .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:var(--surface-3);color:var(--text-2);flex:none}
+.tag.host{background:var(--accent-soft);color:var(--accent)}
+.person-sub{font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-sub.warn{color:var(--warn)}.person-sub.bad{color:var(--bad)}
+.q{display:flex;flex-direction:column;gap:18px;overflow-y:auto;padding-right:2px}
+.q-section{display:flex;flex-direction:column;gap:8px}
+.presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.preset{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:9px 12px;border-radius:10px;border:1px solid var(--border-2);background:var(--bg-elev);text-align:left;color:var(--text)}
+.preset:hover{border-color:var(--text-3)}
+.preset[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.preset strong{font-size:13px}
+.preset span{font-size:11.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.q-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bitrate-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.num-wrap{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2)}
+.num-wrap .input{width:86px;height:32px;text-align:right;font-variant-numeric:tabular-nums}
+.ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
 
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;background:#232a3b;border:1px solid var(--line-2);padding:10px 16px;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:calc(100vw - 32px)}
-.toast.bad{border-color:rgba(248,113,113,.6)}
+.dialog{border:1px solid var(--border-2);border-radius:var(--r-lg);background:var(--surface);color:var(--text);padding:24px;width:min(420px,calc(100vw - 32px));box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.dialog::backdrop{background:rgba(0,0,0,.6)}
+.dialog h3{font-size:17px;margin-bottom:6px}
+.dialog p{color:var(--text-2);margin-bottom:22px}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:#1f1f25;border:1px solid var(--border-2);box-shadow:var(--shadow);font-size:13.5px;max-width:calc(100vw - 32px);animation:toastIn .2s ease-out}
+.toast.bad{border-color:rgba(248,113,113,.5)}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,8px)}}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="brand">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 5l2 4M12 5l2 4M17 5l2 4"/></svg>
-    <span>Sessão de Cinema</span>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5b544"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 8h5M2 16h5M17 8h5M17 16h5M2 12h20"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></symbol>
+    <symbol id="i-max" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
+    <symbol id="i-min" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-userplus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+  </defs>
+</svg>
+
+<header class="appbar">
+  <a class="brand" href="./" aria-label="Sessão de Cinema, início">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="url(#logoGrad)"/><path d="M12.5 9.5v13l10.5-6.5z" fill="#1c1405"/></svg>
+    <span class="name">Sessão de Cinema</span>
+  </a>
+  <div class="room-chip room-only">
+    <span class="lbl">Sala</span>
+    <span id="roomCode" class="code">······</span>
+    <button id="copyCodeBtn" class="icon-btn" type="button" title="Copiar código" aria-label="Copiar código da sala" disabled><svg class="i"><use href="#i-copy"/></svg></button>
   </div>
-  <span id="netStatus" class="small muted"></span>
+  <span id="liveBadge" class="live-badge room-only">Sem transmissão</span>
+  <div class="spacer"></div>
+  <span id="netStatus" class="net-status"></span>
+  <button id="endBtn" class="btn btn-danger-ghost btn-sm room-only host-only" type="button" aria-label="Encerrar sala"><svg class="i"><use href="#i-stop"/></svg><span class="txt">Encerrar sala</span></button>
+  <button id="leaveBtn" class="btn btn-secondary btn-sm room-only viewer-only" type="button" aria-label="Sair da sala"><svg class="i"><use href="#i-logout"/></svg><span class="txt">Sair</span></button>
 </header>
 
-<main id="home" class="wrap">
+<main id="home" class="home">
   <section class="hero">
-    <h1>Assista filmes junto com seus amigos</h1>
-    <p class="muted lead">Transmita um filme do seu computador, ou qualquer tela ou aba, <strong>com som</strong>, direto para o navegador dos seus amigos. Sem conta e sem instalar nada.</p>
-  </section>
-  <label class="field">
-    <span class="label">Seu apelido</span>
-    <input id="nameInput" type="text" maxlength="24" placeholder="Como seus amigos vão te ver" autocomplete="nickname">
-  </label>
-  <div class="cards">
-    <div class="card">
-      <h2>Vou transmitir</h2>
-      <p class="muted">Crie uma sala e mande o código para a galera.</p>
-      <button id="createBtn" class="btn primary" type="button">Criar sala</button>
-    </div>
-    <form id="joinForm" class="card">
-      <h2>Vou assistir</h2>
-      <p class="muted">Digite o código que seu amigo mandou.</p>
-      <div class="row">
-        <input id="codeInput" type="text" maxlength="200" placeholder="Código da sala" autocomplete="off" spellcheck="false">
-        <button class="btn primary" type="submit">Entrar</button>
+    <div>
+      <div class="eyebrow"><span class="dot"></span>Grátis · Sem cadastro · Direto no navegador</div>
+      <h1>Assista filmes com seus amigos, <span class="hl">juntos e ao vivo</span>.</h1>
+      <p class="lead">Transmita um filme do seu computador, ou qualquer tela ou guia, com som, direto para o navegador de quem você convidar.</p>
+      <div class="features">
+        <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-music"/></svg></div><div><strong>Som estéreo de verdade</strong><span>Áudio em alta qualidade, não só o microfone.</span></div></div>
+        <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-gauge"/></svg></div><div><strong>Até 4K e 60 fps</strong><span>Você escolhe a resolução, os quadros e o bitrate.</span></div></div>
+        <div class="feature"><div class="feature-icon"><svg class="i"><use href="#i-lock"/></svg></div><div><strong>Conexão direta e criptografada</strong><span>O vídeo vai do seu PC para os seus amigos, sem passar por um servidor de vídeo.</span></div></div>
       </div>
-    </form>
-  </div>
-  <p id="libError" class="banner bad" hidden>Não consegui carregar a parte que faz a conexão. Verifique sua internet e recarregue a página.</p>
-  <details class="tips">
-    <summary>Dicas para a sessão ficar boa</summary>
-    <ul>
-      <li><strong>Filme salvo no PC?</strong> Use <em>Arquivo de vídeo</em>: é a melhor qualidade e o som vai perfeito. MP4 funciona melhor. Alguns .mkv abrem sem som (áudio AC3/DTS). Se acontecer, converta para MP4 ou abra no VLC e use <em>Tela ou aba</em>.</li>
-      <li><strong>Netflix, Prime Video, Disney+, Max…</strong> aparecem com <strong>tela preta</strong> para quem assiste. É a proteção contra cópia desses serviços e acontece com qualquer programa de compartilhar tela.</li>
-      <li><strong>Som em <em>Tela ou aba</em>:</strong> na janela que o navegador abre, escolha <em>Guia</em> (uma aba do Chrome) e deixe ligado “Compartilhar também o áudio da guia”, ou escolha <em>Tela inteira</em> e marque “Compartilhar também o áudio do sistema”. Compartilhando só uma <em>Janela</em>, o som não vai.</li>
-      <li><strong>Em call no Discord ou WhatsApp ao mesmo tempo?</strong> Prefira <em>Arquivo de vídeo</em> ou <em>Guia</em>. Com a tela inteira e o som do sistema, a voz dos amigos volta para eles.</li>
-      <li><strong>Internet de quem transmite:</strong> cada amigo usa a qualidade escolhida do seu <em>upload</em>. Exemplo: 3 amigos em “Boa” ≈ 12 Mbps de upload. Se travar, baixe a qualidade. Cabo de rede ajuda.</li>
-      <li>Quem transmite deve usar <strong>Chrome ou Edge</strong> no computador e deixar a aba desta página aberta. Quem assiste pode usar qualquer navegador atualizado.</li>
-      <li>O vídeo vai direto entre vocês, criptografado. Um servidor gratuito (PeerJS) só ajuda os navegadores a se encontrarem.</li>
-    </ul>
-  </details>
+    </div>
+    <div class="start-card">
+      <h2>Comece agora</h2>
+      <p class="sub">Crie uma sala ou entre com o código de um amigo.</p>
+      <label class="field">
+        <span class="field-label">Seu apelido</span>
+        <input id="nameInput" class="input" type="text" maxlength="24" placeholder="Como seus amigos vão te ver" autocomplete="nickname">
+      </label>
+      <button id="createBtn" class="btn btn-primary btn-lg btn-block" type="button" style="margin-top:16px"><svg class="i"><use href="#i-film"/></svg>Criar uma sala</button>
+      <div class="divider">ou entre em uma sala</div>
+      <form id="joinForm" class="join-row">
+        <input id="codeInput" class="input code-input" type="text" maxlength="200" placeholder="Código da sala" autocomplete="off" spellcheck="false" aria-label="Código da sala">
+        <button class="btn btn-secondary" type="submit">Entrar</button>
+      </form>
+      <div id="libError" class="alert bad" hidden><svg class="i"><use href="#i-alert"/></svg><span>Não consegui carregar a parte que faz a conexão. Verifique sua internet e recarregue a página.</span></div>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="faqTitle">
+    <h2 id="faqTitle">Perguntas frequentes</h2>
+    <div class="faq-grid">
+      <details><summary>Como transmitir com som?</summary><p>Para um filme salvo no PC, use <em>Arquivo de vídeo</em>: o som vai perfeito. Em <em>Tela ou guia</em>, na janela do navegador escolha <em>Guia</em> e deixe ligado “Compartilhar também o áudio da guia”, ou <em>Tela inteira</em> e marque “Compartilhar também o áudio do sistema”. Compartilhando só uma <em>Janela</em>, o som não vai.</p></details>
+      <details><summary>Por que Netflix, Prime e Disney+ ficam pretos?</summary><p>Esses serviços têm proteção contra cópia, e quem assiste vê a tela preta. Acontece com qualquer programa de compartilhar tela.</p></details>
+      <details><summary>Qual qualidade escolher?</summary><p>Comece em <em>Padrão</em> (1080p, 8 Mbps). Cada amigo usa o bitrate escolhido do seu <em>upload</em>: com 3 amigos em 8 Mbps, você precisa de uns 25 Mbps de upload. Se travar, diminua o bitrate. Cabo de rede ajuda muito.</p></details>
+      <details><summary>Meu arquivo .mkv ficou sem som</summary><p>O navegador não toca áudio AC3 ou DTS, comum em .mkv. Converta para MP4 com áudio AAC, ou abra no VLC e use <em>Tela ou guia</em> com o áudio do sistema.</p></details>
+      <details><summary>Precisa instalar alguma coisa?</summary><p>Não. Quem transmite usa Chrome ou Edge no computador. Quem assiste pode usar qualquer navegador atualizado, inclusive no celular.</p></details>
+      <details><summary>Em call no Discord ou WhatsApp ao mesmo tempo?</summary><p>Prefira <em>Arquivo de vídeo</em> ou <em>Guia</em>. Com a tela inteira e o som do sistema, a voz dos amigos volta para eles.</p></details>
+    </div>
+  </section>
+  <footer class="footer"><svg class="i"><use href="#i-lock"/></svg>Vídeo e som vão direto entre os navegadores (WebRTC), criptografados. Um servidor gratuito (PeerJS) só ajuda vocês a se encontrarem.</footer>
 </main>
 
-<main id="room" class="wrap" hidden>
-  <div class="roombar">
-    <div class="roominfo">
-      <div>
-        <div class="label">Código da sala</div>
-        <div id="roomCode" class="code">······</div>
+<main id="room" class="room" hidden>
+  <section class="room-main">
+    <div id="stage" class="stage no-controls">
+      <video id="video" playsinline></video>
+      <div class="stage-top">
+        <span id="stats" class="chip-dark viewer-only" hidden></span>
+        <span></span>
       </div>
-      <span id="liveBadge" class="badge">Sem transmissão</span>
-    </div>
-    <div class="row wrap-row">
-      <button id="copyCodeBtn" class="btn host-only" type="button" disabled>Copiar código</button>
-      <button id="copyLinkBtn" class="btn host-only" type="button" hidden disabled>Copiar link</button>
-      <button id="endBtn" class="btn danger host-only" type="button">Encerrar sala</button>
-      <button id="leaveBtn" class="btn viewer-only" type="button">Sair</button>
-    </div>
-  </div>
+      <div id="pausedPill" class="paused viewer-only" hidden><svg class="i"><use href="#i-pause"/></svg>Pausado pelo host</div>
+      <div id="floaters" class="floaters"></div>
+      <div id="stageToasts" class="stage-toasts"></div>
 
-  <div class="layout">
-    <section>
-      <div id="stage" class="stage">
-        <video id="video" playsinline></video>
-        <div id="stats" class="stats viewer-only" hidden></div>
-        <div id="pausedPill" class="pill-center viewer-only" hidden>⏸ Pausado pelo host</div>
-        <div class="corner">
-          <button id="muteBtn" class="icon-btn viewer-only" type="button" title="Som" aria-label="Ligar ou desligar o som">
-            <svg id="iconSound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>
-            <svg id="iconMuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9l5 6M21 9l-5 6"/></svg>
+      <div id="controls" class="controls">
+        <input id="seek" class="seek host-file-only" type="range" min="0" max="0" step="0.1" value="0" aria-label="Posição do vídeo">
+        <div class="ctrlrow">
+          <button id="playPauseBtn" class="cbtn host-file-only" type="button" title="Reproduzir/pausar (espaço)" aria-label="Reproduzir ou pausar">
+            <svg id="iconPlay" class="i fill"><use href="#i-play"/></svg>
+            <svg id="iconPause" class="i fill" hidden><use href="#i-pause"/></svg>
           </button>
-          <input id="volume" class="vol viewer-only" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
-          <button id="fsBtn" class="icon-btn" type="button" title="Tela cheia" aria-label="Tela cheia">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
-          </button>
-        </div>
-        <div id="floaters" class="floaters"></div>
-        <div id="stageToasts" class="stage-toasts"></div>
-        <div id="overlay" class="overlay">
-          <div class="host-only">
-            <p class="overlay-title">O que vocês vão assistir?</p>
-            <div class="choices">
-              <button id="fileChoice" class="choice" type="button"><strong>🎞️ Arquivo de vídeo</strong><span>Um filme salvo no seu PC. Melhor qualidade e som.</span></button>
-              <button id="screenChoice" class="choice" type="button"><strong>🖥️ Tela ou aba</strong><span>Qualquer coisa aberta no PC, com som.</span></button>
-            </div>
+          <div class="vol-group">
+            <button id="muteBtn" class="cbtn" type="button" title="Som (M)" aria-label="Ligar ou desligar o som">
+              <svg id="iconSound" class="i"><use href="#i-vol"/></svg>
+              <svg id="iconMuted" class="i" hidden><use href="#i-mute"/></svg>
+            </button>
+            <input id="volume" class="vol" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
           </div>
-          <p id="overlayMsg" class="overlay-title viewer-only"></p>
-          <button id="playBtn" class="btn primary viewer-only" type="button" hidden>▶ Assistir com som</button>
-          <button id="backBtn" class="btn viewer-only" type="button" hidden>Voltar ao início</button>
+          <span id="timeLabel" class="time host-file-only">0:00 / 0:00</span>
+          <span class="live-tag viewer-only">AO VIVO</span>
+          <div class="spacer"></div>
+          <div id="reactions" class="reacts"></div>
+          <button id="fsBtn" class="cbtn" type="button" title="Tela cheia (F)" aria-label="Tela cheia">
+            <svg id="iconMax" class="i"><use href="#i-max"/></svg>
+            <svg id="iconMin" class="i" hidden><use href="#i-min"/></svg>
+          </button>
         </div>
       </div>
 
-      <div class="sourcebar host-only">
-        <button id="fileBtn" class="btn" type="button">🎞️ Arquivo de vídeo</button>
-        <button id="screenBtn" class="btn" type="button">🖥️ Tela ou aba</button>
-        <button id="stopBtn" class="btn danger" type="button" hidden>Parar transmissão</button>
-        <label class="quality">Qualidade
-          <select id="qualitySel">
-            <option value="2000000">Leve · 2 Mbps</option>
-            <option value="4000000" selected>Boa · 4 Mbps</option>
-            <option value="6000000">Alta · 6 Mbps</option>
-            <option value="10000000">Máxima · 10 Mbps</option>
-          </select>
-        </label>
-        <input id="fileInput" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.m4v" hidden>
+      <div id="overlay" class="overlay">
+        <div id="emptyState" class="empty host-only">
+          <h2>O que vocês vão assistir?</h2>
+          <p>Seus amigos já podem entrar enquanto você escolhe.</p>
+          <div class="choices">
+            <button id="fileChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-film"/></svg></span><strong>Arquivo de vídeo</strong><span>Filme salvo no seu computador. Melhor qualidade e som.</span></button>
+            <button id="screenChoice" class="choice" type="button"><span class="choice-icon"><svg class="i"><use href="#i-monitor"/></svg></span><strong>Tela ou guia</strong><span>Qualquer coisa aberta no PC, com som.</span></button>
+          </div>
+        </div>
+        <div id="statusBox" class="status" hidden>
+          <div id="spinner" class="spinner"></div>
+          <div id="statusIcon" class="status-icon" hidden><svg class="i"><use href="#i-alert"/></svg></div>
+          <p id="overlayMsg" class="status-title"></p>
+          <p id="overlaySub" class="status-sub"></p>
+          <div class="status-actions">
+            <button id="playBtn" class="btn btn-primary" type="button" hidden><svg class="i fill"><use href="#i-play"/></svg>Assistir com som</button>
+            <button id="backBtn" class="btn btn-secondary" type="button" hidden>Voltar ao início</button>
+          </div>
+        </div>
       </div>
-      <div id="audioWarn" class="banner warn host-only" hidden></div>
-      <p id="hint" class="hint muted small"></p>
+    </div>
+
+    <div class="bar host-only">
+      <div class="src">
+        <div class="src-icon"><svg class="i"><use id="sourceIcon" href="#i-film"/></svg></div>
+        <div class="src-text">
+          <div id="sourceName" class="src-name">Nenhuma fonte selecionada</div>
+          <div id="sendStats" class="src-sub"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="fileBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-film"/></svg>Arquivo</button>
+        <button id="screenBtn" class="btn btn-secondary btn-sm" type="button"><svg class="i"><use href="#i-monitor"/></svg>Tela ou guia</button>
+        <button id="qualityChip" class="btn btn-ghost btn-sm" type="button" title="Configurar qualidade"><svg class="i"><use href="#i-sliders"/></svg><span id="qualitySummary"></span></button>
+        <button id="stopBtn" class="btn btn-danger-ghost btn-sm" type="button" hidden><svg class="i"><use href="#i-stop"/></svg>Parar</button>
+      </div>
+      <input id="fileInput" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.m4v" hidden>
+    </div>
+    <div class="bar viewer-only">
+      <div class="src">
+        <div class="src-icon"><svg class="i"><use href="#i-film"/></svg></div>
+        <div class="src-text">
+          <div id="viewerTitle" class="src-name">Sessão de cinema</div>
+          <div id="viewerSub" class="src-sub">Conectando…</div>
+        </div>
+      </div>
+    </div>
+    <div id="audioWarn" class="alert warn host-only" hidden><svg class="i"><use href="#i-alert"/></svg><span id="audioWarnText"></span></div>
+  </section>
+
+  <aside class="sidebar">
+    <section class="card invite host-only">
+      <div class="invite-head"><svg class="i"><use href="#i-userplus"/></svg>Convide seus amigos</div>
+      <div id="inviteRow" class="invite-row">
+        <input id="inviteLink" class="input" type="text" readonly aria-label="Link de convite">
+        <button id="copyLinkBtn" class="btn btn-primary btn-sm" type="button" disabled>Copiar link</button>
+      </div>
+      <p id="inviteHelp" class="invite-help"></p>
     </section>
 
-    <aside class="side">
-      <div class="panel">
-        <h3>Na sala <span id="peopleCount" class="count">1</span></h3>
-        <ul id="people" class="people"></ul>
-        <p id="uploadEst" class="small muted host-only" hidden></p>
+    <section class="card panelbox">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" type="button" data-tab="chat" aria-controls="panel-chat" aria-selected="true"><svg class="i"><use href="#i-chat"/></svg>Chat<span id="unreadCount" class="count unread" hidden>0</span></button>
+        <button class="tab" role="tab" type="button" data-tab="people" aria-controls="panel-people" aria-selected="false"><svg class="i"><use href="#i-users"/></svg>Pessoas<span id="peopleCount" class="count">1</span></button>
+        <button class="tab host-only" role="tab" type="button" data-tab="quality" aria-controls="panel-quality" aria-selected="false"><svg class="i"><use href="#i-sliders"/></svg>Qualidade</button>
       </div>
-      <div class="panel">
-        <h3>Chat</h3>
-        <div id="reactions" class="reactions"></div>
+
+      <div id="panel-chat" class="tabpanel" role="tabpanel">
         <div id="chatlog" class="chatlog" aria-live="polite"></div>
-        <form id="chatForm" class="row">
-          <input id="chatInput" type="text" maxlength="300" placeholder="Mensagem" autocomplete="off">
-          <button class="btn" type="submit">Enviar</button>
+        <form id="chatForm" class="chatform">
+          <input id="chatInput" class="input" type="text" maxlength="300" placeholder="Escreva uma mensagem" autocomplete="off" aria-label="Mensagem">
+          <button class="btn btn-primary" type="submit" aria-label="Enviar"><svg class="i"><use href="#i-send"/></svg></button>
         </form>
       </div>
-    </aside>
-  </div>
+
+      <div id="panel-people" class="tabpanel" role="tabpanel" hidden>
+        <ul id="people" class="people"></ul>
+      </div>
+
+      <div id="panel-quality" class="tabpanel host-only" role="tabpanel" hidden>
+        <div class="q">
+          <div class="q-section">
+            <span class="field-label">Predefinição</span>
+            <div id="presets" class="presets"></div>
+          </div>
+          <div class="q-grid">
+            <label class="field"><span class="field-label">Resolução</span>
+              <select id="resSel" class="select">
+                <option value="0">Original da fonte</option>
+                <option value="2160">2160p (4K)</option>
+                <option value="1440">1440p</option>
+                <option value="1080">1080p (Full HD)</option>
+                <option value="720">720p (HD)</option>
+                <option value="480">480p</option>
+              </select>
+            </label>
+            <label class="field"><span class="field-label">Quadros por segundo</span>
+              <select id="fpsSel" class="select">
+                <option value="24">24 fps (cinema)</option>
+                <option value="30">30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </label>
+          </div>
+          <div class="q-section">
+            <div class="bitrate-head">
+              <label class="field-label" for="bitrateInput">Bitrate máximo por pessoa</label>
+              <span class="num-wrap"><input id="bitrateInput" class="input" type="number" min="0.5" max="200" step="0.5" inputmode="decimal">Mbps</span>
+            </div>
+            <input id="bitrateRange" type="range" min="1" max="100" step="1" aria-label="Bitrate máximo">
+            <div class="ticks"><span>1</span><span>25</span><span>50</span><span>75</span><span>100 Mbps</span></div>
+            <p id="uploadEst" class="hint"></p>
+          </div>
+          <label class="field"><span class="field-label">Se a internet apertar, priorizar</span>
+            <select id="prioritySel" class="select">
+              <option value="framerate">Fluidez (recomendado)</option>
+              <option value="resolution">Nitidez</option>
+              <option value="balanced">Equilibrado</option>
+            </select>
+            <span class="hint">Fluidez reduz a resolução para não travar. Nitidez mantém a resolução e reduz os quadros.</span>
+          </label>
+          <label class="field"><span class="field-label">Codec de vídeo</span>
+            <select id="codecSel" class="select">
+              <option value="auto">Automático (recomendado)</option>
+              <option value="h264">H.264</option>
+              <option value="vp9">VP9</option>
+              <option value="av1">AV1</option>
+            </select>
+            <span class="hint">Automático usa H.264 (placa de vídeo) e VP9 acima de 1440p. VP9 e AV1 dão mais qualidade por Mbps, mas AV1 pesa no processador. Trocar o codec ou subir o bitrate reconecta os amigos por 1 a 2 segundos.</span>
+          </label>
+          <p class="hint">O limite real é a sua internet. Se o vídeo travar ou ficar borrado, diminua o bitrate ou a resolução.</p>
+        </div>
+      </div>
+    </section>
+  </aside>
 </main>
+
+<dialog id="confirmDialog" class="dialog">
+  <form method="dialog">
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmText"></p>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" value="cancel">Cancelar</button>
+      <button id="confirmOk" class="btn btn-danger" value="ok"></button>
+    </div>
+  </form>
+</dialog>
 
 <div id="toast" class="toast" role="status" hidden></div>
 
@@ -270,9 +549,24 @@ input[type=text]::placeholder{color:#6b7488}
   const REACTIONS = ['😂', '😱', '😍', '👏', '🍿', '😴'];
   const AUDIO_BPS = 256000;
   const JOIN_TIMEOUT_MS = 25000;
+  const MAX_MBPS = 200;
+  const HEIGHTS = [0, 480, 720, 1080, 1440, 2160];
+  const PRESETS = [
+    { id: 'eco', name: 'Econômica', height: 720, fps: 30, mbps: 3 },
+    { id: 'padrao', name: 'Padrão', height: 1080, fps: 30, mbps: 8 },
+    { id: 'alta', name: 'Alta', height: 1080, fps: 60, mbps: 15 },
+    { id: 'ultra', name: 'Ultra', height: 1440, fps: 60, mbps: 25 },
+    { id: '4k', name: '4K', height: 2160, fps: 30, mbps: 40 },
+    { id: 'custom', name: 'Personalizada' },
+  ];
+  const DEFAULT_Q = { preset: 'padrao', height: 1080, fps: 30, mbps: 8, priority: 'framerate', codec: 'auto' };
+  const DEGRADATION = { resolution: 'maintain-resolution', framerate: 'maintain-framerate', balanced: 'balanced' };
+  const CODEC_MIME = { h264: 'video/h264', vp9: 'video/vp9', av1: 'video/av1' };
+  const COLORS = ['#f5b544', '#60a5fa', '#34d399', '#f472b6', '#a78bfa', '#fb923c', '#22d3ee', '#facc15'];
 
   const $ = (id) => document.getElementById(id);
   const video = $('video');
+  const stage = $('stage');
 
   const storage = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
@@ -280,25 +574,71 @@ input[type=text]::placeholder{color:#6b7488}
   };
 
   const st = {
-    role: null, name: '', code: '', peer: null, closing: false, lastReact: 0,
+    role: null, name: '', code: '', peer: null, closing: false, lastReact: 0, tab: 'chat', unread: 0,
+    q: loadQuality(),
     // host
-    viewers: new Map(), stream: null, source: null, bitrate: 4000000,
-    objectUrl: null, recallTimer: 0, audioCheckTimer: 0, wakeLock: null,
-    // viewer
+    viewers: new Map(), stream: null, source: null, sourceName: '', loading: false,
+    objectUrl: null, recallTimer: 0, audioCheckTimer: 0, applyTimer: 0, wakeLock: null, hostStatsTimer: 0, seeking: false,
+    // quem assiste
     conn: null, call: null, hostName: '', live: false, paused: false, playing: false,
-    needsClick: false, mediaFailed: false, ended: false, endedMsg: '',
-    statsTimer: 0, lastBytes: 0, lastTs: 0, joinTimer: 0,
+    needsClick: false, mediaFailed: false, ended: false, endedMsg: '', endedSub: '', userMuted: false,
+    statsTimer: 0, lastBytes: 0, lastTs: 0, joinTimer: 0, rx: null,
   };
 
   // ---------- utilidades ----------
   const cleanName = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 24);
   const cleanText = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   const normCode = (s) => String(s || '').split('#').pop().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+  function clamp(n, a, b) { return Math.min(b, Math.max(a, n)); }
+  const fmtNum = (n, d = 1) => Number(n).toFixed(d).replace('.', ',');
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+
+  function fmtMbps(n) { return (Number.isInteger(n) ? String(n) : fmtNum(n)) + ' Mbps'; }
+
+  function fmtTime(s) {
+    if (!Number.isFinite(s) || s < 0) s = 0;
+    s = Math.floor(s);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = String(s % 60).padStart(2, '0');
+    return h ? h + ':' + String(m).padStart(2, '0') + ':' + sec : m + ':' + sec;
+  }
 
   function randomCode() {
     const a = new Uint32Array(CODE_LEN);
     crypto.getRandomValues(a);
     return Array.from(a, (n) => ALPHABET[n % ALPHABET.length]).join('');
+  }
+
+  function colorFor(name) {
+    let h = 0;
+    for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+    return COLORS[h % COLORS.length];
+  }
+
+  function initials(name) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = Array.from(parts[0] || '?')[0];
+    const last = parts.length > 1 ? Array.from(parts[parts.length - 1])[0] : '';
+    return (first + last).toUpperCase();
+  }
+
+  function svgIcon(name, cls) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const s = document.createElementNS(NS, 'svg');
+    s.setAttribute('class', 'i' + (cls ? ' ' + cls : ''));
+    s.setAttribute('aria-hidden', 'true');
+    const u = document.createElementNS(NS, 'use');
+    u.setAttribute('href', '#i-' + name);
+    s.appendChild(u);
+    return s;
+  }
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
   }
 
   let toastTimer = 0;
@@ -327,8 +667,85 @@ input[type=text]::placeholder{color:#6b7488}
     return ok;
   }
 
+  function confirmDialog(title, text, okLabel) {
+    const d = $('confirmDialog');
+    if (typeof d.showModal !== 'function') return Promise.resolve(window.confirm(text));
+    $('confirmTitle').textContent = title;
+    $('confirmText').textContent = text;
+    $('confirmOk').textContent = okLabel;
+    d.returnValue = '';
+    d.showModal();
+    return new Promise((resolve) => {
+      d.addEventListener('close', () => resolve(d.returnValue === 'ok'), { once: true });
+    });
+  }
+
+  // ---------- qualidade ----------
+  function sanitizeQuality(q) {
+    const preset = PRESETS.some((p) => p.id === q.preset) ? q.preset : 'custom';
+    const raw = Number(q.mbps);
+    const mbps = Math.round(clamp(Number.isFinite(raw) ? raw : DEFAULT_Q.mbps, 0.5, MAX_MBPS) * 2) / 2;
+    return {
+      preset,
+      height: HEIGHTS.includes(Number(q.height)) ? Number(q.height) : DEFAULT_Q.height,
+      fps: [24, 30, 60].includes(Number(q.fps)) ? Number(q.fps) : DEFAULT_Q.fps,
+      mbps,
+      priority: DEGRADATION[q.priority] ? q.priority : DEFAULT_Q.priority,
+      codec: (q.codec === 'auto' || CODEC_MIME[q.codec]) ? q.codec : 'auto',
+    };
+  }
+
+  function loadQuality() {
+    let saved = null;
+    try { saved = JSON.parse(storage.get('cinema-quality') || 'null'); } catch { saved = null; }
+    return sanitizeQuality(Object.assign({}, DEFAULT_Q, saved && typeof saved === 'object' ? saved : {}));
+  }
+
+  function matchPreset(q) {
+    const p = PRESETS.find((x) => x.height === q.height && x.fps === q.fps && x.mbps === q.mbps);
+    return p ? p.id : 'custom';
+  }
+
+  function resLabel(h) {
+    return h === 0 ? 'Original' : h === 2160 ? '4K' : h + 'p';
+  }
+
+  function qualitySummary(q) {
+    return resLabel(q.height) + ' · ' + q.fps + ' fps · ' + fmtMbps(q.mbps);
+  }
+
+  // Altura que vai de fato para os amigos: a escolhida, sem passar da fonte.
+  function effectiveHeight(q, srcH) {
+    if (!q.height) return srcH || 1080;
+    return srcH ? Math.min(q.height, srcH) : q.height;
+  }
+
+  // Bitrate inicial por resolução. Sem ele o WebRTC começa estimando ~300 kbps e a
+  // imagem nasce em 180p, levando 20 s ou mais para chegar a 1080p.
+  function videoKbps(q, srcH) {
+    const h = effectiveHeight(q, srcH);
+    const start = h >= 2000 ? 12000 : h >= 1300 ? 8000 : h >= 1000 ? 5000 : h >= 650 ? 2500 : 1200;
+    const max = Math.round(q.mbps * 1000);
+    return { start: Math.min(start, max), max };
+  }
+
+  // "Automático" usa H.264 (codificado pela placa de vídeo na maioria dos PCs) e VP9 acima de 1440p.
+  function effectiveCodec(q, srcH) {
+    if (q.codec !== 'auto') return q.codec;
+    if (effectiveHeight(q, srcH) > 1440) return codecSupported('vp9') ? 'vp9' : 'auto';
+    return codecSupported('h264') ? 'h264' : 'auto';
+  }
+
+  function sanitizeKbps(k) {
+    if (!k || typeof k !== 'object') return null;
+    const start = Math.round(Number(k.start));
+    const max = Math.round(Number(k.max));
+    if (!Number.isFinite(start) || !Number.isFinite(max)) return null;
+    return { start: clamp(start, 100, 50000), max: clamp(max, 100, MAX_MBPS * 1000) };
+  }
+
   // Áudio de filme: estéreo e com bitrate alto (o padrão do WebRTC é pensado para voz).
-  function tuneSdp(sdp) {
+  function tuneOpus(sdp) {
     const m = /a=rtpmap:(\d+) opus\/48000\/2/i.exec(sdp);
     if (!m) return sdp;
     const pt = m[1];
@@ -342,6 +759,72 @@ input[type=text]::placeholder{color:#6b7488}
     });
   }
 
+  function tuneVideo(sdp, k) {
+    const lines = sdp.split('\r\n');
+    const pts = new Set();
+    let inVideo = false;
+    for (const l of lines) {
+      if (l.startsWith('m=')) inVideo = l.startsWith('m=video');
+      else if (inVideo) {
+        const m = /^a=rtpmap:(\d+) (VP8|VP9|H264|AV1)\//i.exec(l);
+        if (m) pts.add(m[1]);
+      }
+    }
+    if (!pts.size) return sdp;
+    const extra = 'x-google-start-bitrate=' + k.start + ';x-google-max-bitrate=' + k.max;
+    const withFmtp = new Set();
+    const out = lines.map((l) => {
+      const m = /^a=fmtp:(\d+) (.*)$/.exec(l);
+      if (!m || !pts.has(m[1])) return l;
+      withFmtp.add(m[1]);
+      const keep = m[2].split(';').map((s) => s.trim()).filter((s) => s && !/^x-google-(start|max)-bitrate=/i.test(s));
+      return 'a=fmtp:' + m[1] + ' ' + keep.concat(extra).join(';');
+    });
+    const result = [];
+    for (const l of out) {
+      result.push(l);
+      const m = /^a=rtpmap:(\d+) /.exec(l);
+      if (m && pts.has(m[1]) && !withFmtp.has(m[1])) result.push('a=fmtp:' + m[1] + ' ' + extra);
+    }
+    return result.join('\r\n');
+  }
+
+  // O Chrome só respeita o x-google-*-bitrate na RESPOSTA, então quem aplica é quem assiste,
+  // com os valores que o host manda junto da chamada.
+  function tuneSdp(sdp, kbps) {
+    sdp = tuneOpus(sdp);
+    return kbps ? tuneVideo(sdp, kbps) : sdp;
+  }
+
+  function codecSupported(codec) {
+    if (codec === 'auto') return true;
+    try {
+      const caps = RTCRtpSender.getCapabilities && RTCRtpSender.getCapabilities('video');
+      return !!(caps && caps.codecs.some((c) => c.mimeType.toLowerCase() === CODEC_MIME[codec]));
+    } catch { return false; }
+  }
+
+  // O PeerJS cria a oferta dentro de peer.call(), antes de dar tempo de usar setCodecPreferences.
+  // Por isso o codec escolhido vai para o começo da linha m=video da oferta.
+  function preferCodecSdp(sdp, codec) {
+    const name = { h264: 'H264', vp9: 'VP9', av1: 'AV1' }[codec];
+    if (!name) return sdp;
+    const lines = sdp.split('\r\n');
+    const mi = lines.findIndex((l) => l.startsWith('m=video'));
+    if (mi < 0) return sdp;
+    const pts = new Set();
+    for (let i = mi + 1; i < lines.length && !lines[i].startsWith('m='); i++) {
+      const m = /^a=rtpmap:(\d+) ([^/]+)\//.exec(lines[i]);
+      if (m && m[2].toUpperCase() === name) pts.add(m[1]);
+    }
+    if (!pts.size) return sdp;
+    const parts = lines[mi].split(' ');
+    const fmts = parts.slice(3);
+    lines[mi] = parts.slice(0, 3).concat(fmts.filter((x) => pts.has(x)), fmts.filter((x) => !pts.has(x))).join(' ');
+    return lines.join('\r\n');
+  }
+
+  // ---------- conexão ----------
   function peerLibOk() {
     if (typeof window.Peer === 'function') return true;
     $('libError').hidden = false;
@@ -386,7 +869,7 @@ input[type=text]::placeholder{color:#6b7488}
     location.href = location.href.split('#')[0];
   }
 
-  // ---------- tela inicial ----------
+  // ---------- sala: comum ----------
   function enterRoom() {
     document.body.dataset.role = st.role;
     $('home').hidden = true;
@@ -394,55 +877,120 @@ input[type=text]::placeholder{color:#6b7488}
     const r = $('reactions');
     r.textContent = '';
     for (const e of REACTIONS) {
-      const b = document.createElement('button');
+      const b = el('button', null, e);
       b.type = 'button';
-      b.textContent = e;
       b.title = 'Reagir com ' + e;
       b.addEventListener('click', () => sendReaction(e));
       r.appendChild(b);
     }
+    const vol = parseFloat(storage.get('cinema-volume'));
+    if (!Number.isNaN(vol)) { video.volume = clamp(vol, 0, 1); $('volume').value = String(video.volume); }
+    updateVolumeIcon();
+    setTab('chat');
     renderCode();
+    renderChatEmpty();
   }
 
   function renderCode() {
-    $('roomCode').textContent = st.code || '······';
-    const ready = !!st.code;
-    $('copyCodeBtn').disabled = !ready;
-    $('copyLinkBtn').disabled = !ready;
-    $('copyLinkBtn').hidden = !/^https?:$/.test(location.protocol);
+    const code = st.code;
+    $('roomCode').textContent = code || '······';
+    $('copyCodeBtn').disabled = !code;
+    const web = /^https?:$/.test(location.protocol);
+    $('inviteRow').hidden = !web;
+    $('copyLinkBtn').disabled = !code;
+    $('inviteLink').value = code && web ? inviteLink() : '';
+    const help = $('inviteHelp');
+    help.textContent = '';
+    if (!code) { help.textContent = 'Criando a sala…'; return; }
+    const c = el('span', 'code-inline', code);
+    if (web) help.append('Ou passe o código ', c, '.');
+    else help.append('Mande este arquivo e o código ', c, ' para seus amigos.');
   }
+
+  function inviteLink() { return location.href.split('#')[0] + '#' + st.code; }
 
   function readName(fallback) {
     st.name = cleanName($('nameInput').value) || fallback;
     if (cleanName($('nameInput').value)) storage.set('cinema-name', st.name);
   }
 
+  function setBadge(on, text) {
+    const b = $('liveBadge');
+    b.textContent = text;
+    b.classList.toggle('on', on);
+  }
+
+  function setTab(name) {
+    st.tab = name;
+    for (const t of document.querySelectorAll('.tab')) t.setAttribute('aria-selected', String(t.dataset.tab === name));
+    for (const p of ['chat', 'people', 'quality']) $('panel-' + p).hidden = p !== name;
+    if (name === 'chat') {
+      st.unread = 0;
+      renderUnread();
+      const log = $('chatlog');
+      log.scrollTop = log.scrollHeight;
+    }
+  }
+
+  function renderUnread() {
+    const u = $('unreadCount');
+    u.hidden = !st.unread;
+    u.textContent = st.unread > 99 ? '99+' : String(st.unread);
+  }
+
+  function showOverlay(cfg) {
+    const o = $('overlay');
+    if (!cfg) { o.hidden = true; return; }
+    o.hidden = false;
+    $('emptyState').hidden = !cfg.empty;
+    $('statusBox').hidden = !!cfg.empty;
+    if (cfg.empty) return;
+    $('spinner').hidden = !cfg.spinner;
+    $('statusIcon').hidden = !cfg.error;
+    $('overlayMsg').textContent = cfg.title || '';
+    $('overlaySub').textContent = cfg.sub || '';
+    $('overlaySub').hidden = !cfg.sub;
+    $('playBtn').hidden = !cfg.play;
+    $('backBtn').hidden = !cfg.back;
+  }
+
   // ---------- chat e reações ----------
+  function renderChatEmpty() {
+    const log = $('chatlog');
+    if (!log.children.length) log.appendChild(el('div', 'chat-empty', 'As mensagens da sala aparecem aqui.'));
+  }
+
   function addChat(from, text, opts) {
     opts = opts || {};
     const log = $('chatlog');
-    const div = document.createElement('div');
-    div.className = 'msg' + (opts.sys ? ' sys' : '');
+    const empty = log.querySelector('.chat-empty');
+    if (empty) empty.remove();
+    let div;
     if (opts.sys) {
-      div.textContent = text;
+      div = el('div', 'msg sys', text);
     } else {
-      const b = document.createElement('b');
-      b.textContent = from + ': ';
-      div.append(b, document.createTextNode(text));
+      div = el('div', 'msg');
+      const head = el('div', 'msg-head');
+      const name = el('span', 'msg-name', from);
+      name.style.color = colorFor(from);
+      const now = new Date();
+      head.append(name, el('span', 'msg-time', String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')));
+      div.append(head, el('div', 'msg-text', text));
     }
-    const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+    const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 60;
     log.appendChild(div);
-    while (log.children.length > 200) log.firstChild.remove();
+    while (log.children.length > 300) log.firstChild.remove();
     if (atBottom || opts.mine) log.scrollTop = log.scrollHeight;
-    if (!opts.sys && !opts.mine && document.fullscreenElement) stageToast(from + ': ' + text);
+    if (!opts.sys && !opts.mine) {
+      if (st.tab !== 'chat') { st.unread++; renderUnread(); }
+      if (document.fullscreenElement) stageToast(from + ': ' + text);
+    }
   }
   const sysChat = (text) => addChat('', text, { sys: true });
 
   function stageToast(text) {
     const box = $('stageToasts');
-    const d = document.createElement('div');
-    d.className = 'stage-toast';
-    d.textContent = text;
+    const d = el('div', 'stage-toast', text);
     box.appendChild(d);
     while (box.children.length > 4) box.firstChild.remove();
     setTimeout(() => d.remove(), 7000);
@@ -451,9 +999,7 @@ input[type=text]::placeholder{color:#6b7488}
   function floatReaction(e) {
     const box = $('floaters');
     if (box.children.length > 30) return;
-    const s = document.createElement('span');
-    s.className = 'floater';
-    s.textContent = e;
+    const s = el('span', 'floater', e);
     s.style.left = (8 + Math.random() * 84) + '%';
     box.appendChild(s);
     setTimeout(() => s.remove(), 2700);
@@ -476,29 +1022,72 @@ input[type=text]::placeholder{color:#6b7488}
     else if (st.conn && st.conn.open) st.conn.send({ t: 'react', e });
   }
 
-  function addPerson(ul, name, kind, status) {
-    const li = document.createElement('li');
-    const dot = document.createElement('span');
-    dot.className = 'dot ' + kind;
-    const nm = document.createElement('span');
-    nm.className = 'nm';
-    nm.textContent = name;
-    li.append(dot, nm);
-    if (status) {
-      const s = document.createElement('span');
-      s.className = 'st';
-      s.textContent = status;
-      li.appendChild(s);
-    }
-    ul.appendChild(li);
+  function personItem(p) {
+    const li = el('li', 'person');
+    const av = el('div', 'avatar', initials(p.name));
+    av.style.background = colorFor(p.name);
+    av.appendChild(el('span', 'st ' + (p.state || 'ok')));
+    const main = el('div', 'person-main');
+    const nm = el('div', 'person-name');
+    nm.appendChild(el('span', 'nm', p.name));
+    for (const t of p.tags || []) nm.appendChild(el('span', 'tag' + (t === 'Host' ? ' host' : ''), t));
+    main.appendChild(nm);
+    if (p.sub) main.appendChild(el('div', 'person-sub' + (p.subCls ? ' ' + p.subCls : ''), p.sub));
+    li.append(av, main);
+    return li;
   }
 
+  // ---------- player ----------
   function toggleFullscreen() {
-    const stage = $('stage');
     if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
     if (stage.requestFullscreen) stage.requestFullscreen().catch(() => {});
     else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
     else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+  }
+
+  function updateVolumeIcon() {
+    const muted = video.muted || video.volume === 0;
+    $('iconSound').toggleAttribute('hidden', muted);
+    $('iconMuted').toggleAttribute('hidden', !muted);
+  }
+
+  function toggleMute() {
+    if (st.role === 'host' && st.source === 'screen') return;
+    video.muted = !video.muted;
+    if (!video.muted && video.volume === 0) { video.volume = 0.8; $('volume').value = '0.8'; }
+    st.userMuted = video.muted;
+  }
+
+  function updatePlayIcon() {
+    $('iconPlay').toggleAttribute('hidden', !video.paused);
+    $('iconPause').toggleAttribute('hidden', video.paused);
+  }
+
+  function togglePlay() {
+    if (st.role !== 'host' || st.source !== 'file') return;
+    if (video.paused) video.play().catch(() => {});
+    else video.pause();
+  }
+
+  function updateTime() {
+    const d = video.duration;
+    if (!st.seeking) $('seek').value = String(video.currentTime || 0);
+    const cur = fmtTime(st.seeking ? Number($('seek').value) : video.currentTime);
+    $('timeLabel').textContent = Number.isFinite(d) ? cur + ' / ' + fmtTime(d) : cur;
+  }
+
+  let idleTimer = 0;
+  let revealUntil = 0;
+  const canHover = window.matchMedia('(hover: hover)').matches;
+  function wakeControls() {
+    stage.classList.remove('idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      const ctrls = $('controls');
+      if (video.paused || ctrls.querySelector(':focus-visible')) return;
+      if (canHover && ctrls.matches(':hover')) return;
+      stage.classList.add('idle');
+    }, 2800);
   }
 
   // =====================================================================
@@ -509,8 +1098,11 @@ input[type=text]::placeholder{color:#6b7488}
     readName('Host');
     st.role = 'host';
     enterRoom();
+    renderPresets();
+    renderQualityForm();
     renderHost();
     openHostPeer(0);
+    startHostStats();
   }
 
   function openHostPeer(attempt) {
@@ -523,7 +1115,7 @@ input[type=text]::placeholder{color:#6b7488}
       if (!st.code) {
         st.code = code;
         renderCode();
-        sysChat('Sala criada! Mande o código ' + code + ' para seus amigos.');
+        sysChat('Sala criada. Convide seus amigos com o link ou o código ' + code + '.');
       }
       for (const v of st.viewers.values()) if (st.stream && !v.call) callViewer(v);
     });
@@ -547,7 +1139,7 @@ input[type=text]::placeholder{color:#6b7488}
       const old = st.viewers.get(id);
       if (old && old.conn !== conn) removeViewer(id, true);
       const name = cleanName(conn.metadata && conn.metadata.name) || 'Convidado';
-      const v = { id, conn, call: null, name, status: 'na sala' };
+      const v = { id, conn, call: null, name, status: 'na sala', stats: null, prevOut: null };
       st.viewers.set(id, v);
       conn.send({ t: 'welcome', host: st.name, live: !!st.stream, paused: isHostPaused() });
       sysChat(name + ' entrou na sala');
@@ -599,25 +1191,38 @@ input[type=text]::placeholder{color:#6b7488}
   }
 
   function isHostPaused() { return st.source === 'file' && video.paused; }
+  function hasLiveTracks() { return !!st.stream && st.stream.getTracks().length > 0; }
 
   function callViewer(v) {
     if (v.call) { const c = v.call; v.call = null; try { c.close(); } catch { /* ignora */ } }
-    if (!st.stream || !st.stream.getTracks().length || !st.peer || st.peer.disconnected) {
+    v.stats = null;
+    v.prevOut = null;
+    if (!hasLiveTracks() || !st.peer || st.peer.disconnected) {
       v.status = 'na sala';
       renderHost();
       return;
     }
-    const call = st.peer.call(v.id, st.stream, { sdpTransform: tuneSdp });
+    const srcH = currentSourceHeight();
+    const kbps = videoKbps(st.q, srcH);
+    const codec = effectiveCodec(st.q, srcH);
+    const call = st.peer.call(v.id, st.stream, {
+      sdpTransform: (sdp) => preferCodecSdp(tuneOpus(sdp), codec),
+      metadata: { q: kbps },
+    });
     if (!call) return;
     v.call = call;
+    v.maxKbps = kbps.max;
+    v.codec = codec;
     v.status = 'conectando vídeo';
+    // Aplicar já (antes de conectar) faz a primeira imagem sair na resolução certa.
+    applyEncoding(call);
     renderHost();
     const pc = call.peerConnection;
     if (pc) {
       pc.addEventListener('connectionstatechange', () => {
         if (v.call !== call) return;
         const s = pc.connectionState;
-        if (s === 'connected') { v.status = 'assistindo'; applyBitrate(call); }
+        if (s === 'connected') { v.status = 'assistindo'; applyEncoding(call); }
         else if (s === 'disconnected') v.status = 'instável';
         else if (s === 'failed') v.status = 'falhou';
         renderHost();
@@ -632,25 +1237,96 @@ input[type=text]::placeholder{color:#6b7488}
     call.on('error', () => { if (v.call === call) { v.status = 'falhou'; renderHost(); } });
   }
 
-  async function applyBitrate(call) {
+  function sourceHeight(track) {
+    let h = 0;
+    try { h = (track && track.getSettings && track.getSettings().height) || 0; } catch { h = 0; }
+    if (!h && st.source === 'file') h = video.videoHeight || 0;
+    return h;
+  }
+
+  function currentSourceHeight() {
+    return sourceHeight(st.stream && st.stream.getVideoTracks()[0]);
+  }
+
+  // Subir o bitrate acima do combinado na conexão, ou mudar o codec, exige refazer a chamada.
+  function scheduleQualityRecall() {
+    clearTimeout(st.qualityRecallTimer);
+    st.qualityRecallTimer = setTimeout(() => {
+      if (!hasLiveTracks()) return;
+      const srcH = currentSourceHeight();
+      const max = videoKbps(st.q, srcH).max;
+      const codec = effectiveCodec(st.q, srcH);
+      let changed = false;
+      for (const v of st.viewers.values()) {
+        if (v.call && (v.maxKbps < max || v.codec !== codec)) { callViewer(v); changed = true; }
+      }
+      if (changed) renderHost();
+    }, 900);
+  }
+
+  async function applyEncoding(call) {
     const pc = call && call.peerConnection;
     if (!pc) return;
+    const q = st.q;
     for (const sender of pc.getSenders()) {
-      if (!sender.track || sender.track.kind !== 'video') continue;
-      try {
+      const track = sender.track;
+      if (!track || track.kind !== 'video') continue;
+      const srcH = sourceHeight(track);
+      const scale = q.height && srcH > q.height ? srcH / q.height : 1;
+      const build = (withDegradation) => {
         const p = sender.getParameters();
-        if (!p.encodings || !p.encodings.length) continue;
-        p.encodings[0].maxBitrate = st.bitrate;
-        await sender.setParameters(p);
-      } catch (e) { console.warn('bitrate', e); }
+        if (!p.encodings || !p.encodings.length) return null;
+        const e = p.encodings[0];
+        e.maxBitrate = Math.round(q.mbps * 1e6);
+        e.maxFramerate = q.fps;
+        e.scaleResolutionDownBy = scale;
+        if (withDegradation) p.degradationPreference = DEGRADATION[q.priority];
+        return p;
+      };
+      try {
+        const p = build(true);
+        if (p) await sender.setParameters(p);
+      } catch (e) {
+        try { const p = build(false); if (p) await sender.setParameters(p); } catch (e2) { console.warn('encoding', e2); }
+      }
+    }
+  }
+
+  function applyEncodingAll() {
+    clearTimeout(st.applyTimer);
+    st.applyTimer = setTimeout(() => {
+      for (const v of st.viewers.values()) if (v.call) applyEncoding(v.call);
+    }, 120);
+  }
+
+  // Sempre "motion": a prioridade vai pelo degradationPreference. Com "detail" o Chrome
+  // nunca reduz a resolução, mesmo pedindo fluidez; e o padrão da tela é o modo "slides".
+  function applyTrackHints() {
+    if (!st.stream) return;
+    for (const t of st.stream.getVideoTracks()) {
+      try { t.contentHint = 'motion'; } catch { /* opcional */ }
+    }
+  }
+
+  function screenConstraints() {
+    const c = { frameRate: { ideal: st.q.fps, max: st.q.fps } };
+    if (st.q.height) c.height = { max: st.q.height };
+    return c;
+  }
+
+  function applyCaptureConstraints() {
+    if (st.source !== 'screen' || !st.stream) return;
+    for (const t of st.stream.getVideoTracks()) {
+      t.applyConstraints(screenConstraints()).catch(() => {}).then(applyEncodingAll);
     }
   }
 
   function publish(stream) {
     st.stream = stream;
+    applyTrackHints();
     for (const v of st.viewers.values()) {
       if (stream) callViewer(v);
-      else if (v.call) { const c = v.call; v.call = null; v.status = 'na sala'; try { c.close(); } catch { /* ignora */ } }
+      else if (v.call) { const c = v.call; v.call = null; v.status = 'na sala'; v.stats = null; try { c.close(); } catch { /* ignora */ } }
     }
     broadcast({ t: 'live', live: !!stream, paused: isHostPaused() });
     keepAwake(!!stream);
@@ -682,22 +1358,24 @@ input[type=text]::placeholder{color:#6b7488}
     video.load();
     if (st.objectUrl) { URL.revokeObjectURL(st.objectUrl); st.objectUrl = null; }
     st.source = null;
+    st.sourceName = '';
+    st.loading = false;
     $('audioWarn').hidden = true;
   }
 
-  function waitForEvent(el, ok, bad, ms) {
+  function waitForEvent(target, ok, bad, ms) {
     return new Promise((resolve) => {
       let timer = 0;
       const done = (val) => {
         clearTimeout(timer);
-        el.removeEventListener(ok, onOk);
-        if (bad) el.removeEventListener(bad, onBad);
+        target.removeEventListener(ok, onOk);
+        if (bad) target.removeEventListener(bad, onBad);
         resolve(val);
       };
       const onOk = () => done(true);
       const onBad = () => done(false);
-      el.addEventListener(ok, onOk);
-      if (bad) el.addEventListener(bad, onBad);
+      target.addEventListener(ok, onOk);
+      if (bad) target.addEventListener(bad, onBad);
       timer = setTimeout(() => done(false), ms);
     });
   }
@@ -712,7 +1390,6 @@ input[type=text]::placeholder{color:#6b7488}
   function captureFile() {
     const capture = video.captureStream ? video.captureStream() : video.mozCaptureStream ? video.mozCaptureStream() : null;
     if (!capture) return null;
-    capture.getVideoTracks().forEach((t) => { t.contentHint = 'motion'; });
     // O Chrome repete "addtrack" para trilhas que já existiam: só rechama os amigos se elas mudarem de verdade.
     const trackIds = () => capture.getTracks().map((t) => t.id).join();
     let lastIds = trackIds();
@@ -720,7 +1397,6 @@ input[type=text]::placeholder{color:#6b7488}
       const now = trackIds();
       if (now === lastIds) return;
       lastIds = now;
-      capture.getVideoTracks().forEach((t) => { t.contentHint = 'motion'; });
       scheduleRecall();
     };
     return capture;
@@ -744,16 +1420,17 @@ input[type=text]::placeholder{color:#6b7488}
     publish(null);
     const url = URL.createObjectURL(file);
     st.objectUrl = url;
+    st.loading = true;
+    st.sourceName = file.name;
+    renderHost();
     video.muted = false;
-    video.controls = true;
     video.src = url;
     const loaded = await waitForEvent(video, 'loadeddata', 'error', 15000);
-    if (!loaded || st.objectUrl !== url) {
-      if (st.objectUrl === url) {
-        stopSource();
-        renderHost();
-        notify('Esse arquivo não abre no navegador. Prefira MP4 (vídeo H.264 e áudio AAC).', true);
-      }
+    if (st.objectUrl !== url) return;
+    if (!loaded) {
+      stopSource();
+      renderHost();
+      notify('Esse arquivo não abre no navegador. Prefira MP4 (vídeo H.264 e áudio AAC).', true);
       return;
     }
     const capture = captureFile();
@@ -765,8 +1442,11 @@ input[type=text]::placeholder{color:#6b7488}
     }
     await waitForTracks(capture, 3000);
     if (st.objectUrl !== url) return;
+    st.loading = false;
     st.source = 'file';
     publish(capture);
+    updateTime();
+    updatePlayIcon();
     sysChat('Transmitindo: ' + file.name);
   }
 
@@ -778,7 +1458,7 @@ input[type=text]::placeholder{color:#6b7488}
       const noTrack = !st.stream.getAudioTracks().length;
       const noBytes = typeof video.webkitAudioDecodedByteCount === 'number' && video.webkitAudioDecodedByteCount === 0;
       if (noTrack || noBytes) {
-        showAudioWarn('<strong>Esse arquivo está sem som no navegador.</strong> Provavelmente o áudio é AC3 ou DTS (comum em .mkv). Converta para MP4 com áudio AAC, ou abra no VLC e use <em>Tela ou aba</em> → <em>Tela inteira</em> com “Compartilhar também o áudio do sistema”.');
+        showAudioWarn('Esse arquivo está sem som no navegador. Provavelmente o áudio é AC3 ou DTS (comum em .mkv). Converta para MP4 com áudio AAC, ou abra no VLC e use “Tela ou guia” → “Tela inteira” com “Compartilhar também o áudio do sistema”.');
       }
     }, 2500);
   }
@@ -791,7 +1471,7 @@ input[type=text]::placeholder{color:#6b7488}
     let s;
     try {
       s = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 30, max: 30 }, height: { max: 1080 } },
+        video: screenConstraints(),
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } },
         systemAudio: 'include',
         selfBrowserSurface: 'exclude',
@@ -802,25 +1482,26 @@ input[type=text]::placeholder{color:#6b7488}
       return;
     }
     stopSource();
-    video.controls = false;
     video.muted = true;
     video.srcObject = s;
     video.play().catch(() => {});
-    s.getVideoTracks().forEach((t) => {
-      t.contentHint = 'motion';
-      t.onended = () => { if (st.stream === s) { stopSource(); publish(null); sysChat('Transmissão encerrada'); } };
-    });
+    const vt = s.getVideoTracks()[0];
+    if (vt) {
+      vt.onended = () => { if (st.stream === s) { stopSource(); publish(null); sysChat('Transmissão encerrada'); } };
+      let surface = '';
+      try { surface = vt.getSettings().displaySurface || ''; } catch { surface = ''; }
+      st.sourceName = { monitor: 'Compartilhando a tela inteira', window: 'Compartilhando uma janela', browser: 'Compartilhando uma guia' }[surface] || 'Tela compartilhada';
+    }
     st.source = 'screen';
     publish(s);
     if (!s.getAudioTracks().length) {
-      showAudioWarn('<strong>Sem som!</strong> Você compartilhou sem áudio. Clique em <em>Tela ou aba</em> de novo e escolha <em>Guia</em> com “Compartilhar também o áudio da guia” ligado, ou <em>Tela inteira</em> com “Compartilhar também o áudio do sistema” marcado. Compartilhando só uma <em>Janela</em>, o som não vai.');
+      showAudioWarn('Você compartilhou sem som. Clique em “Tela ou guia” de novo e escolha “Guia” com “Compartilhar também o áudio da guia” ligado, ou “Tela inteira” com “Compartilhar também o áudio do sistema”. Compartilhando só uma janela, o som não vai.');
     }
   }
 
-  function showAudioWarn(html) {
-    const w = $('audioWarn');
-    w.innerHTML = html;
-    w.hidden = false;
+  function showAudioWarn(text) {
+    $('audioWarnText').textContent = text;
+    $('audioWarn').hidden = false;
   }
 
   async function keepAwake(on) {
@@ -835,42 +1516,172 @@ input[type=text]::placeholder{color:#6b7488}
     } catch { /* sem wake lock, tudo bem */ }
   }
 
+  function startHostStats() {
+    clearInterval(st.hostStatsTimer);
+    st.hostStatsTimer = setInterval(async () => {
+      for (const v of st.viewers.values()) {
+        const pc = v.call && v.call.peerConnection;
+        if (!pc || pc.connectionState !== 'connected') { v.stats = null; continue; }
+        try {
+          const report = await pc.getStats();
+          let out = null;
+          let avail = 0;
+          const codecs = {};
+          report.forEach((r) => {
+            if (r.type === 'outbound-rtp' && r.kind === 'video') out = r;
+            else if (r.type === 'codec') codecs[r.id] = r;
+            else if (r.type === 'candidate-pair' && r.nominated && r.state === 'succeeded' && r.availableOutgoingBitrate) avail = r.availableOutgoingBitrate;
+          });
+          if (!out) continue;
+          let mbps = 0;
+          if (v.prevOut && out.timestamp > v.prevOut.ts) mbps = ((out.bytesSent - v.prevOut.bytes) * 8) / ((out.timestamp - v.prevOut.ts) * 1000);
+          v.prevOut = { bytes: out.bytesSent, ts: out.timestamp };
+          const codec = codecs[out.codecId];
+          let limit = out.qualityLimitationReason || 'none';
+          // No teto escolhido o Chrome também diz "bandwidth": aí o limite é a configuração, não a internet.
+          if (limit === 'bandwidth' && avail >= 0.95 * st.q.mbps * 1e6) limit = 'cap';
+          v.stats = {
+            h: out.frameHeight || 0,
+            fps: out.framesPerSecond || 0,
+            mbps,
+            limit,
+            codec: codec && codec.mimeType ? codec.mimeType.split('/')[1].toUpperCase() : '',
+          };
+        } catch { /* estatística é só informativa */ }
+      }
+      renderHost();
+    }, 2000);
+  }
+
+  function statsText(s) {
+    const parts = [];
+    if (s.h) parts.push(s.h + 'p');
+    if (s.fps) parts.push(Math.round(s.fps) + ' fps');
+    if (s.mbps > 0) parts.push(fmtNum(s.mbps) + ' Mbps');
+    if (s.codec) parts.push(s.codec);
+    return parts.join(' · ');
+  }
+
   function renderHost() {
     if (st.role !== 'host') return;
-    const live = !!st.stream && st.stream.getTracks().length > 0;
-    $('overlay').hidden = live || !!st.source;
-    $('stopBtn').hidden = !live;
-    const badge = $('liveBadge');
-    badge.textContent = live ? 'Ao vivo' : 'Sem transmissão';
-    badge.classList.toggle('live', live);
+    const live = hasLiveTracks();
+    document.body.dataset.source = st.source || 'none';
+    if (st.source) showOverlay(null);
+    else if (st.loading) showOverlay({ spinner: true, title: 'Abrindo o arquivo…', sub: st.sourceName });
+    else showOverlay({ empty: true });
+    stage.classList.toggle('no-controls', !st.source);
+    $('stopBtn').hidden = !st.source;
+    setBadge(live, live ? 'Ao vivo' : 'Sem transmissão');
+
+    $('sourceIcon').setAttribute('href', st.source === 'screen' ? '#i-monitor' : '#i-film');
+    $('sourceName').textContent = st.source ? st.sourceName : st.loading ? 'Abrindo ' + st.sourceName + '…' : 'Nenhuma fonte selecionada';
+
+    const sub = $('sendStats');
+    sub.classList.remove('warn');
+    const watching = [...st.viewers.values()].filter((v) => v.status === 'assistindo' && v.stats);
+    if (!st.source) sub.textContent = 'Escolha um arquivo de vídeo ou compartilhe uma tela. Seus amigos já podem entrar.';
+    else if (!st.viewers.size) sub.textContent = 'Pronto. Assim que alguém entrar, recebe a transmissão na hora.';
+    else if (!watching.length) sub.textContent = 'Conectando o vídeo para ' + plural(st.viewers.size, 'pessoa', 'pessoas') + '…';
+    else {
+      const minH = Math.min(...watching.map((v) => v.stats.h || 0));
+      const fps = watching.reduce((a, v) => a + v.stats.fps, 0) / watching.length;
+      const mbps = watching.reduce((a, v) => a + v.stats.mbps, 0) / watching.length;
+      let text = 'Enviando ' + (minH ? minH + 'p · ' : '') + Math.round(fps) + ' fps · ' + fmtNum(mbps) + ' Mbps para ' + plural(watching.length, 'pessoa', 'pessoas');
+      if (watching.some((v) => v.stats.limit === 'bandwidth')) { text += ' · limitado pela internet'; sub.classList.add('warn'); }
+      else if (watching.some((v) => v.stats.limit === 'cpu')) { text += ' · limitado pelo processador'; sub.classList.add('warn'); }
+      else if (watching.some((v) => v.stats.limit === 'cap')) text += ' · no teto de ' + fmtMbps(st.q.mbps);
+      sub.textContent = text;
+    }
 
     const ul = $('people');
     ul.textContent = '';
-    addPerson(ul, st.name + ' (você, host)', 'ok', live ? 'transmitindo' : '');
+    ul.appendChild(personItem({ name: st.name, tags: ['Host', 'Você'], state: 'ok', sub: live ? 'transmitindo' : 'na sala' }));
     for (const v of st.viewers.values()) {
-      const kind = v.status === 'assistindo' ? 'ok' : v.status === 'falhou' ? 'bad' : 'warn';
-      addPerson(ul, v.name, kind, v.status);
+      const state = v.status === 'assistindo' ? 'ok' : v.status === 'falhou' ? 'bad' : 'warn';
+      let subText = v.status;
+      let subCls = v.status === 'falhou' ? 'bad' : '';
+      if (v.stats && v.status === 'assistindo') {
+        subText = statsText(v.stats);
+        if (v.stats.limit === 'bandwidth') { subText += ' · rede limitando'; subCls = 'warn'; }
+        else if (v.stats.limit === 'cpu') { subText += ' · processador limitando'; subCls = 'warn'; }
+        else if (v.stats.limit === 'cap') subText += ' · no teto escolhido';
+      }
+      ul.appendChild(personItem({ name: v.name, state, sub: subText, subCls }));
     }
     $('peopleCount').textContent = String(st.viewers.size + 1);
-
-    const n = st.viewers.size;
-    const est = $('uploadEst');
-    if (live && n) {
-      const per = st.bitrate / 1e6 + AUDIO_BPS / 1e6;
-      est.textContent = 'Usando até ~' + (n * per).toFixed(1).replace('.', ',') + ' Mbps do seu upload (' + n + ' × ' + per.toFixed(1).replace('.', ',') + ' Mbps).';
-      est.hidden = false;
-    } else {
-      est.hidden = true;
-    }
-
-    let hint = 'Escolha um arquivo de vídeo ou compartilhe uma tela/aba. Seus amigos podem ir entrando antes.';
-    if (st.source === 'file') hint = 'Use os controles do vídeo para dar play, pausar e avançar: todo mundo vê igual. Espere a galera entrar antes de dar play e deixe esta aba aberta na frente (pode pôr em tela cheia).';
-    else if (st.source === 'screen') hint = 'Transmitindo sua tela. Seus amigos veem exatamente o que aparece nela.';
-    $('hint').textContent = hint;
+    $('qualitySummary').textContent = qualitySummary(st.q);
+    renderUploadEst();
   }
 
-  function endRoom() {
-    if (st.viewers.size && !confirm('Encerrar a sala para todo mundo?')) return;
+  function renderUploadEst() {
+    const n = st.viewers.size;
+    const per = st.q.mbps + AUDIO_BPS / 1e6;
+    const est = $('uploadEst');
+    est.classList.toggle('warn', n * per > 50);
+    est.textContent = n
+      ? 'Com ' + plural(n, 'amigo', 'amigos') + ', seu upload precisa de até ~' + fmtNum(n * per) + ' Mbps.'
+      : 'Cada amigo usa até ~' + fmtNum(per) + ' Mbps do seu upload.';
+  }
+
+  // ---------- painel de qualidade ----------
+  function renderPresets() {
+    const box = $('presets');
+    box.textContent = '';
+    for (const p of PRESETS) {
+      const b = el('button', 'preset');
+      b.type = 'button';
+      b.dataset.preset = p.id;
+      b.appendChild(el('strong', null, p.name));
+      if (p.id === 'custom') {
+        b.appendChild(el('span', null, 'Do seu jeito'));
+        b.appendChild(el('span', null, ' '));
+      } else {
+        b.appendChild(el('span', null, resLabel(p.height) + ' · ' + p.fps + ' fps'));
+        b.appendChild(el('span', null, 'até ' + p.mbps + ' Mbps'));
+      }
+      b.addEventListener('click', () => {
+        if (p.id === 'custom') { setQuality({ preset: 'custom' }); $('resSel').focus(); }
+        else setQuality({ height: p.height, fps: p.fps, mbps: p.mbps });
+      });
+      box.appendChild(b);
+    }
+    for (const o of $('codecSel').options) {
+      if (!codecSupported(o.value)) { o.disabled = true; o.textContent += ' (indisponível)'; }
+    }
+  }
+
+  function renderQualityForm() {
+    const q = st.q;
+    for (const b of $('presets').children) b.setAttribute('aria-pressed', String(b.dataset.preset === q.preset));
+    $('resSel').value = String(q.height);
+    $('fpsSel').value = String(q.fps);
+    $('prioritySel').value = q.priority;
+    $('codecSel').value = q.codec;
+    if (document.activeElement !== $('bitrateInput')) $('bitrateInput').value = String(q.mbps);
+    $('bitrateRange').value = String(clamp(Math.round(q.mbps), 1, 100));
+    $('qualitySummary').textContent = qualitySummary(q);
+    renderUploadEst();
+  }
+
+  function setQuality(patch) {
+    const prev = st.q;
+    const next = sanitizeQuality(Object.assign({}, prev, patch));
+    next.preset = patch.preset === 'custom' ? 'custom' : matchPreset(next);
+    st.q = next;
+    storage.set('cinema-quality', JSON.stringify(next));
+    renderQualityForm();
+    if (st.role !== 'host') return;
+    if (prev.height !== next.height || prev.fps !== next.fps) applyCaptureConstraints();
+    applyEncodingAll();
+    scheduleQualityRecall();
+    renderHost();
+  }
+
+  async function endRoom() {
+    if (st.viewers.size) {
+      const ok = await confirmDialog('Encerrar a sala?', 'A transmissão termina para ' + plural(st.viewers.size, 'pessoa', 'pessoas') + ' e o código deixa de funcionar.', 'Encerrar sala');
+      if (!ok) return;
+    }
     broadcast({ t: 'bye' });
     stopSource();
     st.closing = true;
@@ -886,8 +1697,6 @@ input[type=text]::placeholder{color:#6b7488}
     st.role = 'viewer';
     st.code = code;
     enterRoom();
-    const vol = parseFloat(storage.get('cinema-volume'));
-    if (!Number.isNaN(vol)) { video.volume = vol; $('volume').value = String(vol); }
     renderViewer();
 
     const peer = new Peer({ debug: 1 });
@@ -895,7 +1704,7 @@ input[type=text]::placeholder{color:#6b7488}
     const hostId = PREFIX + code;
 
     st.joinTimer = setTimeout(() => {
-      if (!st.conn || !st.conn.open) endViewer('Não consegui entrar na sala. Confira o código e se quem criou a sala está com a página aberta.');
+      if (!st.conn || !st.conn.open) endViewer('Não consegui entrar na sala', 'Confira o código e se quem criou a sala está com a página aberta.');
     }, JOIN_TIMEOUT_MS);
 
     peer.on('open', () => {
@@ -905,8 +1714,8 @@ input[type=text]::placeholder{color:#6b7488}
       st.conn = conn;
       conn.on('open', () => { clearTimeout(st.joinTimer); renderViewer(); });
       conn.on('data', onViewerData);
-      conn.on('close', () => endViewer('A conexão com o host caiu ou a sala foi encerrada.'));
-      conn.on('error', () => endViewer('A conexão com o host caiu ou a sala foi encerrada.'));
+      conn.on('close', () => endViewer('A conexão com o host caiu', 'A sala foi encerrada ou a internet de alguém oscilou.'));
+      conn.on('error', () => endViewer('A conexão com o host caiu', 'A sala foi encerrada ou a internet de alguém oscilou.'));
     });
 
     peer.on('call', (call) => {
@@ -915,7 +1724,8 @@ input[type=text]::placeholder{color:#6b7488}
       st.call = call;
       st.mediaFailed = false;
       if (old) { try { old.close(); } catch { /* ignora */ } }
-      call.answer(undefined, { sdpTransform: tuneSdp });
+      const kbps = sanitizeKbps(call.metadata && call.metadata.q);
+      call.answer(undefined, { sdpTransform: (sdp) => tuneSdp(sdp, kbps) });
       const pc = call.peerConnection;
       if (pc) {
         pc.addEventListener('connectionstatechange', () => {
@@ -935,7 +1745,7 @@ input[type=text]::placeholder{color:#6b7488}
     peer.on('error', (err) => {
       if (err.type === 'peer-unavailable') {
         // Só vale como "sala não existe" antes de entrar; depois disso é aviso passageiro do servidor.
-        if (!st.conn || !st.conn.open) endViewer('Sala não encontrada. Confira o código com quem criou a sala.');
+        if (!st.conn || !st.conn.open) endViewer('Sala não encontrada', 'Confira o código com quem criou a sala.');
         return;
       }
       peerError(err);
@@ -969,7 +1779,7 @@ input[type=text]::placeholder{color:#6b7488}
         if (REACTIONS.includes(msg.e)) floatReaction(msg.e);
         break;
       case 'bye':
-        endViewer('O host encerrou a sala. Valeu pela sessão!');
+        endViewer('O host encerrou a sala', 'Valeu pela sessão!');
         break;
     }
   }
@@ -984,6 +1794,7 @@ input[type=text]::placeholder{color:#6b7488}
   function clearRemote() {
     clearInterval(st.statsTimer);
     $('stats').hidden = true;
+    st.rx = null;
     if (st.call) { const c = st.call; st.call = null; try { c.close(); } catch { /* ignora */ } }
     video.srcObject = null;
     st.playing = false;
@@ -994,7 +1805,7 @@ input[type=text]::placeholder{color:#6b7488}
   function attachRemote(stream, call) {
     st.live = true;
     if (video.srcObject !== stream) video.srcObject = stream;
-    video.controls = false;
+    video.muted = st.userMuted;
     const p = video.play();
     if (p && p.then) {
       p.then(() => { st.needsClick = false; renderViewer(); })
@@ -1021,30 +1832,40 @@ input[type=text]::placeholder{color:#6b7488}
       try {
         const report = await pc.getStats();
         let v = null;
-        report.forEach((r) => { if (r.type === 'inbound-rtp' && r.kind === 'video') v = r; });
+        const codecs = {};
+        report.forEach((r) => {
+          if (r.type === 'inbound-rtp' && r.kind === 'video') v = r;
+          else if (r.type === 'codec') codecs[r.id] = r;
+        });
         if (!v) return;
         let mbps = 0;
         if (st.lastTs && v.timestamp > st.lastTs) mbps = ((v.bytesReceived - st.lastBytes) * 8) / ((v.timestamp - st.lastTs) * 1000);
         st.lastBytes = v.bytesReceived;
         st.lastTs = v.timestamp;
-        const parts = [];
-        if (v.frameHeight) parts.push(v.frameHeight + 'p');
-        if (v.framesPerSecond) parts.push(Math.round(v.framesPerSecond) + ' fps');
-        if (mbps > 0) parts.push(mbps.toFixed(1).replace('.', ',') + ' Mbps');
-        $('stats').textContent = parts.join(' · ');
-        $('stats').hidden = !parts.length;
+        const codec = codecs[v.codecId];
+        st.rx = {
+          h: v.frameHeight || 0,
+          fps: v.framesPerSecond || 0,
+          mbps,
+          codec: codec && codec.mimeType ? codec.mimeType.split('/')[1].toUpperCase() : '',
+        };
+        const text = statsText(st.rx);
+        $('stats').textContent = text;
+        $('stats').hidden = !text;
+        renderViewerBar();
       } catch { /* estatística é só informativa */ }
     }, 2000);
   }
 
-  function endViewer(msg) {
+  function endViewer(title, sub) {
     if (st.ended || st.role !== 'viewer') return;
     clearTimeout(st.joinTimer);
     st.ended = true;
-    st.endedMsg = msg;
+    st.endedMsg = title;
+    st.endedSub = sub || '';
     clearRemote();
     st.live = false;
-    sysChat(msg);
+    sysChat(title + '.');
     try { if (st.peer) st.peer.destroy(); } catch { /* ignora */ }
     renderViewer();
   }
@@ -1058,43 +1879,43 @@ input[type=text]::placeholder{color:#6b7488}
       if (!p || typeof p !== 'object') continue;
       const name = cleanName(p.name) || 'Alguém';
       const tags = [];
-      if (p.host) tags.push('host');
-      if (p.id === myId) tags.push('você');
-      addPerson(ul, name + (tags.length ? ' (' + tags.join(', ') + ')' : ''), 'ok', '');
+      if (p.host) tags.push('Host');
+      if (p.id === myId) tags.push('Você');
+      ul.appendChild(personItem({ name, tags, state: 'ok', sub: p.host ? 'transmitindo' : 'assistindo' }));
       count++;
     }
     $('peopleCount').textContent = String(count);
   }
 
-  function renderViewer() {
-    if (st.role !== 'viewer') return;
-    let msg = '';
-    let play = false;
-    if (st.ended) msg = st.endedMsg;
-    else if (!st.conn || !st.conn.open) msg = 'Conectando à sala…';
-    else if (!st.live) msg = 'Conectado! Esperando ' + (st.hostName || 'o host') + ' começar a transmissão…';
-    else if (st.mediaFailed) msg = 'O vídeo não conseguiu chegar até você (bloqueio de rede ou firewall). Tente outra rede, como o 4G do celular.';
-    else if (st.needsClick) { msg = 'A transmissão começou!'; play = true; }
-    else if (!st.playing) msg = 'Recebendo a transmissão…';
-
-    $('overlay').hidden = !msg;
-    $('overlayMsg').textContent = msg;
-    $('playBtn').hidden = !play;
-    $('backBtn').hidden = !st.ended;
-    $('pausedPill').hidden = !(st.live && st.playing && st.paused && !st.ended);
-    const live = st.live && st.playing && !st.ended;
-    const badge = $('liveBadge');
-    badge.textContent = st.ended ? 'Encerrada' : live ? 'Ao vivo' : 'Aguardando';
-    badge.classList.toggle('live', live);
-    if (!$('people').children.length) {
-      addPerson($('people'), st.name + ' (você)', 'ok', '');
+  function renderViewerBar() {
+    const title = st.hostName && st.hostName !== 'o host' ? 'Sessão de ' + st.hostName : 'Sessão de cinema';
+    $('viewerTitle').textContent = title;
+    let sub = 'Conectando…';
+    if (st.ended) sub = st.endedMsg;
+    else if (st.conn && st.conn.open) {
+      if (!st.live) sub = 'Aguardando a transmissão começar';
+      else if (st.playing) sub = (st.paused ? 'Pausado' : 'Assistindo ao vivo') + (st.rx ? ' · ' + statsText(st.rx) : '');
+      else sub = 'Recebendo a transmissão…';
     }
+    $('viewerSub').textContent = sub;
   }
 
-  function updateVolumeIcon() {
-    const muted = video.muted || video.volume === 0;
-    $('iconSound').hidden = muted;
-    $('iconMuted').hidden = !muted;
+  function renderViewer() {
+    if (st.role !== 'viewer') return;
+    let cfg = null;
+    if (st.ended) cfg = { error: true, title: st.endedMsg, sub: st.endedSub, back: true };
+    else if (!st.conn || !st.conn.open) cfg = { spinner: true, title: 'Conectando à sala…', sub: 'Sala ' + st.code };
+    else if (!st.live) cfg = { spinner: true, title: 'Esperando ' + (st.hostName || 'o host') + ' começar', sub: 'Assim que a transmissão começar, ela aparece aqui sozinha.' };
+    else if (st.mediaFailed) cfg = { error: true, title: 'O vídeo não conseguiu chegar até você', sub: 'Provavelmente um bloqueio de rede ou firewall. Tente outra rede, como o 4G do celular.' };
+    else if (st.needsClick) cfg = { title: 'A transmissão começou!', sub: 'Clique para assistir com som.', play: true };
+    else if (!st.playing) cfg = { spinner: true, title: 'Recebendo a transmissão…' };
+    showOverlay(cfg);
+    stage.classList.toggle('no-controls', !!cfg);
+    $('pausedPill').hidden = !(st.live && st.playing && st.paused && !st.ended);
+    const live = st.live && st.playing && !st.ended;
+    setBadge(live, st.ended ? 'Encerrada' : live ? 'Ao vivo' : 'Aguardando');
+    if (!$('people').children.length) $('people').appendChild(personItem({ name: st.name, tags: ['Você'], state: 'ok' }));
+    renderViewerBar();
   }
 
   // ---------- eventos ----------
@@ -1106,6 +1927,8 @@ input[type=text]::placeholder{color:#6b7488}
     if (!savedName) $('nameInput').focus();
   }
 
+  // Aberto como arquivo local, "./" mostraria a pasta: o logo volta para esta mesma página.
+  document.querySelector('.brand').href = location.href.split('#')[0];
   $('createBtn').addEventListener('click', startHost);
   $('joinForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1115,15 +1938,21 @@ input[type=text]::placeholder{color:#6b7488}
   });
 
   $('copyCodeBtn').addEventListener('click', async () => {
-    notify(await copyText(st.code) ? 'Código copiado! Mande para seus amigos.' : 'Não consegui copiar. O código é ' + st.code);
+    notify(await copyText(st.code) ? 'Código copiado.' : 'Não consegui copiar. O código é ' + st.code);
   });
   $('copyLinkBtn').addEventListener('click', async () => {
-    const link = location.href.split('#')[0] + '#' + st.code;
-    notify(await copyText(link) ? 'Link copiado! Mande para seus amigos.' : 'Não consegui copiar o link.');
+    notify(await copyText(inviteLink()) ? 'Link copiado. Mande para seus amigos.' : 'Não consegui copiar o link.');
   });
+  $('inviteLink').addEventListener('focus', (e) => e.target.select());
   $('endBtn').addEventListener('click', endRoom);
   $('leaveBtn').addEventListener('click', leaveRoom);
   $('backBtn').addEventListener('click', leaveRoom);
+
+  for (const t of document.querySelectorAll('.tab')) t.addEventListener('click', () => setTab(t.dataset.tab));
+  $('qualityChip').addEventListener('click', () => {
+    setTab('quality');
+    if (window.matchMedia('(max-width: 1040px)').matches) $('panel-quality').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   const pickFile = () => $('fileInput').click();
   $('fileChoice').addEventListener('click', pickFile);
@@ -1136,37 +1965,97 @@ input[type=text]::placeholder{color:#6b7488}
   $('screenChoice').addEventListener('click', useScreen);
   $('screenBtn').addEventListener('click', useScreen);
   $('stopBtn').addEventListener('click', () => { stopSource(); publish(null); sysChat('Transmissão encerrada'); });
-  $('qualitySel').addEventListener('change', (e) => {
-    st.bitrate = parseInt(e.target.value, 10) || 4000000;
-    for (const v of st.viewers.values()) if (v.call) applyBitrate(v.call);
-    renderHost();
+
+  $('resSel').addEventListener('change', (e) => setQuality({ height: Number(e.target.value) }));
+  $('fpsSel').addEventListener('change', (e) => setQuality({ fps: Number(e.target.value) }));
+  $('prioritySel').addEventListener('change', (e) => setQuality({ priority: e.target.value }));
+  $('codecSel').addEventListener('change', (e) => setQuality({ codec: e.target.value }));
+  $('bitrateRange').addEventListener('input', (e) => setQuality({ mbps: Number(e.target.value) }));
+  $('bitrateInput').addEventListener('change', (e) => {
+    const n = parseFloat(String(e.target.value).replace(',', '.'));
+    if (Number.isFinite(n)) setQuality({ mbps: n });
+    e.target.value = String(st.q.mbps);
   });
 
   video.addEventListener('play', () => {
+    updatePlayIcon();
     if (st.role === 'host' && st.source === 'file') { broadcast({ t: 'paused', paused: false }); checkFileAudio(); recaptureIfEnded(); }
+    wakeControls();
   });
   video.addEventListener('pause', () => {
+    updatePlayIcon();
+    stage.classList.remove('idle');
     if (st.role === 'host' && st.source === 'file') broadcast({ t: 'paused', paused: true });
   });
   video.addEventListener('playing', () => { if (st.role === 'viewer') { st.playing = true; renderViewer(); } });
   video.addEventListener('emptied', () => { if (st.role === 'viewer') { st.playing = false; renderViewer(); } });
   video.addEventListener('volumechange', updateVolumeIcon);
-  video.addEventListener('dblclick', () => { if (st.role === 'viewer') toggleFullscreen(); });
+  video.addEventListener('timeupdate', () => { if (st.source === 'file') updateTime(); });
+  video.addEventListener('durationchange', () => {
+    const d = video.duration;
+    $('seek').max = Number.isFinite(d) ? String(d) : '0';
+    updateTime();
+  });
+  video.addEventListener('resize', () => { if (st.role === 'host') { applyEncodingAll(); scheduleQualityRecall(); } });
+  video.addEventListener('dblclick', toggleFullscreen);
+  video.addEventListener('click', () => { if (st.role === 'host' && st.source === 'file') togglePlay(); });
 
+  $('seek').addEventListener('input', () => { st.seeking = true; updateTime(); });
+  // Se o arraste termina no mesmo ponto, "change" não dispara: libera a barra mesmo assim.
+  $('seek').addEventListener('pointerup', () => { setTimeout(() => { st.seeking = false; }, 0); });
+  $('seek').addEventListener('change', (e) => {
+    video.currentTime = Number(e.target.value);
+    st.seeking = false;
+    updateTime();
+  });
+  $('playPauseBtn').addEventListener('click', togglePlay);
   $('playBtn').addEventListener('click', () => {
     video.muted = false;
+    st.userMuted = false;
     video.play().then(() => { st.needsClick = false; renderViewer(); }).catch(() => {});
   });
-  $('muteBtn').addEventListener('click', () => {
-    video.muted = !video.muted;
-    if (!video.muted && video.volume === 0) { video.volume = 0.8; $('volume').value = '0.8'; }
-  });
+  $('muteBtn').addEventListener('click', toggleMute);
   $('volume').addEventListener('input', (e) => {
     video.volume = parseFloat(e.target.value);
     video.muted = video.volume === 0;
+    st.userMuted = video.muted;
     storage.set('cinema-volume', String(video.volume));
   });
   $('fsBtn').addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', () => {
+    const fs = !!document.fullscreenElement;
+    $('iconMax').toggleAttribute('hidden', fs);
+    $('iconMin').toggleAttribute('hidden', !fs);
+  });
+  stage.addEventListener('mousemove', wakeControls);
+  stage.addEventListener('focusin', wakeControls);
+  stage.addEventListener('touchstart', () => {
+    // O primeiro toque com os controles escondidos só mostra os controles, não aperta botão.
+    if (stage.classList.contains('idle')) revealUntil = Date.now() + 400;
+    wakeControls();
+  }, { passive: true });
+  $('controls').addEventListener('click', (e) => {
+    if (Date.now() < revealUntil) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  stage.addEventListener('mouseleave', () => { if (!video.paused) stage.classList.add('idle'); });
+
+  document.addEventListener('keydown', (e) => {
+    if (!st.role || e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    const inPlayer = !!(t && t.closest && t.closest('#controls'));
+    if (!inPlayer && t && t.closest && t.closest('input, textarea, select, button, dialog')) return;
+    if (inPlayer && t.type === 'range' && e.key.startsWith('Arrow')) return;
+    const k = e.key.toLowerCase();
+    if (inPlayer && k === ' ') e.preventDefault();
+    if (k === 'f') { e.preventDefault(); toggleFullscreen(); }
+    else if (k === 'm') toggleMute();
+    else if (st.role === 'host' && st.source === 'file') {
+      if (k === ' ' || k === 'k') { e.preventDefault(); togglePlay(); }
+      else if (k === 'arrowleft') { e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 10); }
+      else if (k === 'arrowright') { e.preventDefault(); video.currentTime = Math.min(video.duration || 0, video.currentTime + 10); }
+    }
+    wakeControls();
+  });
 
   $('chatForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1185,8 +2074,6 @@ input[type=text]::placeholder{color:#6b7488}
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && st.stream && !st.wakeLock) keepAwake(true);
   });
-
-  updateVolumeIcon();
 })();
 </script>
 </body>
