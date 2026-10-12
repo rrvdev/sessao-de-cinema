@@ -94,7 +94,10 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .room-icon{font-weight:700;font-size:15px;color:#0a0a0c;letter-spacing:-.02em}
 .room-icon:hover,.room-icon.active{border-radius:14px}
 .room-icon.active::before,.rail-btn.home.active::before{content:"";position:absolute;left:-12px;top:50%;width:4px;height:36px;margin-top:-18px;border-radius:0 4px 4px 0;background:var(--text)}
-.room-icon .dot-live{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;border-radius:50%;background:var(--live);border:3px solid #060608}
+.room-icon .dot-here{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;border-radius:50%;background:var(--ok);border:3px solid #060608}
+.rail-btn.active{border-radius:14px;background:var(--accent);color:var(--accent-ink)}
+.rail-btn.home.active{background:transparent}
+.rail-btn.movies.active::before{content:"";position:absolute;left:-12px;top:50%;width:4px;height:36px;margin-top:-18px;border-radius:0 4px 4px 0;background:var(--text)}
 .rail-sep{width:32px;height:2px;border-radius:1px;background:var(--border-2);flex:none}
 .main{flex:1;min-width:0}
 @media (max-width:760px){
@@ -104,7 +107,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   .rail-sep{width:2px;height:28px}
   .rail-btn,.room-icon{width:40px;height:40px}
   .rail-btn.home svg{width:40px;height:40px}
-  .room-icon.active::before,.rail-btn.home.active::before{display:none}
+  .room-icon.active::before,.rail-btn.home.active::before,.rail-btn.movies.active::before{display:none}
   .room-icon.active{box-shadow:0 0 0 2px #060608,0 0 0 4px var(--text)}
 }
 
@@ -291,6 +294,77 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 .num-wrap .input{width:86px;height:32px;text-align:right;font-variant-numeric:tabular-nums}
 .ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
 
+/* filmes */
+.movies-inner{max-width:1320px;margin:0 auto;padding:24px}
+@media (max-width:560px){.movies-inner{padding:16px}}
+.mv-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.mv-head h1{font-size:26px;letter-spacing:-.025em}
+.mv-head p{color:var(--text-2);font-size:13.5px}
+.mv-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--surface);border:1px solid var(--border)}
+.seg button{height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--text-2);font-weight:600;font-size:13px;white-space:nowrap}
+.seg button:hover{color:var(--text)}
+.seg button[aria-pressed=true]{background:var(--surface-3);color:var(--text)}
+.mv-search{position:relative;flex:1 1 240px;min-width:0}
+.mv-search .input{padding-left:38px}
+.mv-search .i{position:absolute;left:12px;top:11px;color:var(--text-3)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--border-2);background:var(--surface);color:var(--text-2);font-size:13px;font-weight:500}
+.chip:hover{color:var(--text);border-color:var(--text-3)}
+.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.clear{border-style:dashed}
+.mv-status{font-size:13px;color:var(--text-2);margin-bottom:12px;min-height:20px}
+.mv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px 16px}
+@media (max-width:560px){.mv-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:16px 12px}.seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}.mv-toolbar{flex-direction:column;align-items:stretch}.mv-search{flex:none}}
+.mv-card{display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:transparent;text-align:left;color:var(--text);cursor:pointer;min-width:0}
+.mv-poster{position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:var(--surface-2);border:1px solid var(--border);transition:transform .15s,border-color .15s}
+.mv-card:hover .mv-poster,.mv-card:focus-visible .mv-poster{transform:translateY(-3px);border-color:var(--text-3)}
+.mv-poster img{width:100%;height:100%;object-fit:cover;display:block}
+.mv-ph{position:absolute;inset:0;display:grid;place-items:center;padding:12px;text-align:center;font-weight:700;color:var(--text-2);background:linear-gradient(135deg,var(--surface-3),var(--surface))}
+.mv-rating{position:absolute;top:8px;left:8px;display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:7px;background:rgba(0,0,0,.72);font-size:12px;font-weight:700}
+.star{color:var(--accent)}
+.mv-title{font-weight:600;font-size:13.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mv-sub{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mv-skel .mv-poster{animation:skel 1.2s ease-in-out infinite}
+.mv-skel .mv-line{height:10px;border-radius:5px;background:var(--surface-2);animation:skel 1.2s ease-in-out infinite}
+@keyframes skel{50%{opacity:.45}}
+.mv-empty{grid-column:1/-1;text-align:center;color:var(--text-2);padding:48px 16px}
+.mv-more{display:flex;justify-content:center;margin:28px 0 8px}
+.mv-setup{max-width:600px;margin:24px auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px}
+.mv-setup h2{font-size:19px;margin-bottom:8px}
+.mv-setup p,.mv-setup li{color:var(--text-2);font-size:13.5px}
+.mv-setup ol{padding-left:20px;margin:10px 0 16px;display:flex;flex-direction:column;gap:6px}
+.mv-setup a{color:var(--accent)}
+.mv-setup .join-row{margin-top:8px}
+.tmdb-credit{margin-top:36px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tmdb-credit a{color:var(--text-2)}
+.tmdb-badge{font-weight:800;letter-spacing:.02em;padding:2px 8px;border-radius:6px;background:linear-gradient(90deg,#90cea1,#01b4e4);color:#0d253f;text-decoration:none}
+.dialog.movie-dialog{width:min(880px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;overflow-y:auto}
+.md-hero{height:220px;background:linear-gradient(135deg,rgba(245,181,68,.2),rgba(20,20,24,0) 70%) center top/cover no-repeat;position:relative}
+.md-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,20,24,.15),var(--surface))}
+.md-close{position:absolute;top:12px;right:12px;z-index:3;width:36px;height:36px;background:rgba(0,0,0,.6);color:#fff}
+.md-body{display:grid;grid-template-columns:180px minmax(0,1fr);gap:24px;padding:0 24px 24px;margin-top:-120px;position:relative;z-index:1}
+.md-poster{aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:var(--surface-2);border:1px solid var(--border-2);box-shadow:var(--shadow);position:relative}
+.md-poster img{width:100%;height:100%;object-fit:cover;display:block}
+.md-info{padding-top:70px;min-width:0}
+.md-info h2{font-size:24px;line-height:1.15;letter-spacing:-.02em}
+.md-orig{color:var(--text-3);font-size:13px;margin-top:2px}
+.md-facts{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 12px;font-size:13px;color:var(--text-2)}
+.md-tagline{font-style:italic;color:var(--text-2);margin-bottom:6px}
+.md-overview{line-height:1.6;margin-bottom:6px;color:#e4e4e7}
+.md-h{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:18px 0 8px}
+.prov-group{margin-bottom:10px}
+.prov-lbl{font-size:12px;color:var(--text-2);margin-bottom:6px}
+.provs{display:flex;flex-wrap:wrap;gap:8px}
+.prov{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 4px;border-radius:9px;border:1px solid var(--border-2);background:var(--bg-elev);font-size:13px}
+.prov img,.prov .pl{width:26px;height:26px;border-radius:6px;flex:none}
+.prov .pl{display:grid;place-items:center;background:var(--surface-3);font-size:11px;font-weight:700}
+.md-jw{font-size:11.5px;color:var(--text-3);margin-top:4px}
+.md-jw a{color:var(--text-2)}
+.md-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.md-loading{padding:80px 24px;display:grid;place-items:center}
+@media (max-width:640px){.md-hero{height:150px}.md-body{grid-template-columns:110px minmax(0,1fr);gap:14px;padding:0 16px 18px;margin-top:-80px}.md-info{padding-top:46px}.md-info h2{font-size:19px}}
+
 .dialog{border:1px solid var(--border-2);border-radius:var(--r-lg);background:var(--surface);color:var(--text);padding:24px;width:min(420px,calc(100vw - 32px));box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .dialog::backdrop{background:rgba(0,0,0,.6)}
 .dialog h3{font-size:17px;margin-bottom:6px}
@@ -332,6 +406,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-trending" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
     <symbol id="i-cast" viewBox="0 0 24 24"><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M2 20h.01"/></symbol>
   </defs>
 </svg>
@@ -339,6 +416,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
 <div class="app">
   <nav id="rail" class="rail" aria-label="Suas salas">
     <button id="homeBtn" class="rail-btn home" type="button" title="Início" aria-label="Início"><svg aria-hidden="true"><use href="#i-logo"/></svg></button>
+    <button id="moviesBtn" class="rail-btn movies" type="button" title="Filmes em alta" aria-label="Filmes em alta"><svg class="i"><use href="#i-trending"/></svg></button>
     <div class="rail-sep"></div>
     <div id="railRooms" class="rail-rooms"></div>
     <button id="railCreate" class="rail-btn add" type="button" title="Criar sala" aria-label="Criar sala"><svg class="i"><use href="#i-plus"/></svg></button>
@@ -400,6 +478,61 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
           </div>
         </section>
         <footer class="footer"><svg class="i"><use href="#i-lock"/></svg>Vídeo e som vão direto entre os navegadores (WebRTC), criptografados. Um servidor gratuito (PeerJS) só ajuda vocês a se encontrarem.</footer>
+      </div>
+    </section>
+
+    <!-- FILMES -->
+    <section id="movies" hidden>
+      <header class="topbar">
+        <div class="brand"><svg class="i" style="color:var(--accent)"><use href="#i-trending"/></svg>Filmes em alta</div>
+        <div class="spacer"></div>
+        <button id="mvBackRoom" class="btn btn-secondary btn-sm" type="button" hidden><svg class="i"><use href="#i-logout"/></svg>Voltar para a sala</button>
+      </header>
+      <div class="movies-inner">
+        <div class="mv-head">
+          <div>
+            <h1>O que está bombando</h1>
+            <p>Ideias para a próxima sessão: escolha os gêneros e veja onde assistir no Brasil.</p>
+          </div>
+        </div>
+        <div id="mvSetup" class="mv-setup" hidden>
+          <h2>Conectar ao catálogo de filmes</h2>
+          <p>Os filmes em alta vêm do TMDB, um catálogo gratuito com títulos e sinopses em português e onde assistir no Brasil. Para ligar, é preciso uma chave grátis:</p>
+          <ol>
+            <li>Crie uma conta em <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a>.</li>
+            <li>Em <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Configurações → API</a>, peça uma chave de desenvolvedor (uso pessoal).</li>
+            <li>Copie o <strong>Token de leitura da API</strong> e cole aqui.</li>
+          </ol>
+          <form id="mvKeyForm" class="join-row">
+            <input id="mvKeyInput" class="input" type="password" autocomplete="off" placeholder="Token de leitura da API (começa com eyJ…)" aria-label="Token do TMDB">
+            <button class="btn btn-primary" type="submit">Conectar</button>
+          </form>
+          <p id="mvKeyMsg" class="hint" style="margin-top:8px"></p>
+        </div>
+        <div id="mvBrowse" hidden>
+          <div class="mv-toolbar">
+            <div id="mvModes" class="seg" role="group" aria-label="Listas">
+              <button type="button" data-mode="trending" aria-pressed="true">Em alta na semana</button>
+              <button type="button" data-mode="today" aria-pressed="false">Em alta hoje</button>
+              <button type="button" data-mode="popular" aria-pressed="false">Populares</button>
+              <button type="button" data-mode="top" aria-pressed="false">Mais bem avaliados</button>
+              <button type="button" data-mode="now" aria-pressed="false">Nos cinemas</button>
+            </div>
+            <label class="mv-search">
+              <svg class="i"><use href="#i-search"/></svg>
+              <input id="mvSearch" class="input" type="search" placeholder="Buscar um filme" autocomplete="off" aria-label="Buscar um filme">
+            </label>
+          </div>
+          <div id="mvGenres" class="chips" role="group" aria-label="Gêneros"></div>
+          <p id="mvStatus" class="mv-status" aria-live="polite"></p>
+          <div id="mvGrid" class="mv-grid"></div>
+          <div class="mv-more"><button id="mvMore" class="btn btn-secondary" type="button" hidden>Carregar mais</button></div>
+        </div>
+        <footer class="tmdb-credit">
+          <a class="tmdb-badge" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>
+          <span>Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB. Onde assistir: dados da JustWatch.</span>
+          <button id="mvKeyChange" class="btn btn-ghost btn-xs" type="button" hidden>Trocar a chave</button>
+        </footer>
       </div>
     </section>
 
@@ -628,6 +761,11 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   </form>
 </dialog>
 
+<dialog id="movieDialog" class="dialog movie-dialog" aria-label="Detalhes do filme">
+  <button id="mdClose" class="icon-btn md-close" type="button" aria-label="Fechar"><svg class="i"><use href="#i-x"/></svg></button>
+  <div id="mdContent"></div>
+</dialog>
+
 <div id="toast" class="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" integrity="sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR" crossorigin="anonymous"></script>
@@ -658,6 +796,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   const DEGRADATION = { resolution: 'maintain-resolution', framerate: 'maintain-framerate', balanced: 'balanced' };
   const CODEC_MIME = { h264: 'video/h264', vp9: 'video/vp9', av1: 'video/av1' };
   const COLORS = ['#f5b544', '#60a5fa', '#34d399', '#f472b6', '#a78bfa', '#fb923c', '#22d3ee', '#facc15'];
+  // Token de leitura da API do TMDB (catálogo de filmes em alta). Vazio = cada navegador
+  // configura o seu na aba Filmes.
+  const TMDB_TOKEN = '';
 
   const $ = (id) => document.getElementById(id);
   const localVideo = $('localVideo');
@@ -946,7 +1087,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     watching: null,       // id de quem eu assisto, 'self' ou null
     call: null, playing: false, needsClick: false, mediaFailed: false, rx: null,
     rxTimer: 0, lastBytes: 0, lastTs: 0, userMuted: false,
-    tab: 'chat', unread: 0, lastReact: 0,
+    tab: 'chat', unread: 0, lastReact: 0, view: 'home',
   };
 
   // ---------- salas salvas ----------
@@ -2086,32 +2227,37 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   // =====================================================================
   // INTERFACE
   // =====================================================================
-  function showHome() {
-    $('room').hidden = true;
-    $('home').hidden = false;
+  // Telas: início, sala e filmes. Sair da tela da sala não sai da sala (como no Discord).
+  function showView(name) {
+    if (name === 'room' && !st.room) name = 'home';
+    st.view = name;
+    $('home').hidden = name !== 'home';
+    $('room').hidden = name !== 'room';
+    $('movies').hidden = name !== 'movies';
+    if (name === 'home') renderRoomCards();
+    if (name === 'room') renderAll();
+    if (name === 'movies') openMovies();
     renderRail();
-    renderRoomCards();
   }
-
-  function showRoomView() {
-    $('home').hidden = true;
-    $('room').hidden = false;
-    renderAll();
-  }
+  function showHome() { showView('home'); }
+  function showRoomView() { showView('room'); }
 
   function renderRail() {
     const box = $('railRooms');
     box.textContent = '';
     for (const r of st.rooms) {
-      const b = el('button', 'room-icon' + (st.room && st.room.id === r.id ? ' active' : ''), initials(r.name));
+      const here = !!st.room && st.room.id === r.id;
+      const b = el('button', 'room-icon' + (here && st.view === 'room' ? ' active' : ''), initials(r.name));
       b.type = 'button';
-      b.title = r.name;
+      b.title = here ? r.name + ' (você está aqui)' : r.name;
       b.setAttribute('aria-label', 'Sala ' + r.name);
       b.style.background = colorFor(r.id);
+      if (here && st.view !== 'room') b.appendChild(el('span', 'dot-here'));
       b.addEventListener('click', () => openRoom({ id: r.id, name: r.name }));
       box.appendChild(b);
     }
-    $('homeBtn').classList.toggle('active', !$('home').hidden);
+    $('homeBtn').classList.toggle('active', st.view === 'home');
+    $('moviesBtn').classList.toggle('active', st.view === 'movies');
   }
 
   function renderRoomCards() {
@@ -2511,6 +2657,303 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     }, 2800);
   }
 
+  // =====================================================================
+  // FILMES EM ALTA (TMDB) — só para navegar e escolher, não para assistir aqui
+  // =====================================================================
+  const TMDB_API = 'https://api.themoviedb.org/3';
+  const TMDB_IMG = 'https://image.tmdb.org/t/p/';
+  const MV_MODE_LABEL = { trending: 'Em alta na semana', today: 'Em alta hoje', popular: 'Populares no Brasil', top: 'Mais bem avaliados', now: 'Nos cinemas do Brasil' };
+  const PROV_GROUPS = [['flatrate', 'Incluído na assinatura'], ['free', 'Grátis'], ['ads', 'Grátis com anúncios'], ['rent', 'Alugar'], ['buy', 'Comprar']];
+  const mv = { mode: 'trending', genres: new Set(), q: '', page: 1, totalPages: 1, items: [], genreNames: new Map(), seq: 0, started: false, cache: new Map() };
+
+  const tmdbToken = () => TMDB_TOKEN || (storage.get('cinema-tmdb') || '').trim();
+  const isoDate = (d) => d.toISOString().slice(0, 10);
+  const yearOf = (m) => String(m.release_date || '').slice(0, 4);
+
+  function tmdb(path, params) {
+    const token = tmdbToken();
+    if (!token) return Promise.reject(Object.assign(new Error('Sem chave do TMDB.'), { code: 'nokey' }));
+    const u = new URL(TMDB_API + path);
+    for (const [k, v] of Object.entries(params || {})) if (v !== undefined && v !== null && v !== '') u.searchParams.set(k, v);
+    const headers = { accept: 'application/json' };
+    // O "token de leitura" (v4) é um JWT e vai no cabeçalho; a chave curta (v3) vai na URL.
+    if (token.startsWith('eyJ')) headers.Authorization = 'Bearer ' + token;
+    else u.searchParams.set('api_key', token);
+    const key = u.toString();
+    if (mv.cache.has(key)) return mv.cache.get(key);
+    const p = fetch(u, { headers }).then((r) => {
+      if (r.status === 401) throw Object.assign(new Error('O TMDB recusou a chave.'), { code: 'badkey' });
+      if (r.status === 429) throw new Error('Muitas consultas ao TMDB. Tente de novo em alguns segundos.');
+      if (!r.ok) throw new Error('O TMDB respondeu ' + r.status + '.');
+      return r.json();
+    });
+    mv.cache.set(key, p);
+    p.catch(() => mv.cache.delete(key));
+    return p;
+  }
+
+  function openMovies() {
+    $('mvBackRoom').hidden = !st.room;
+    const hasKey = !!tmdbToken();
+    $('mvSetup').hidden = hasKey;
+    $('mvBrowse').hidden = !hasKey;
+    $('mvKeyChange').hidden = !hasKey || !!TMDB_TOKEN;
+    if (hasKey && !mv.started) {
+      mv.started = true;
+      loadGenres();
+      loadMovies(true);
+    }
+  }
+
+  function showKeySetup(msg) {
+    mv.started = false;
+    $('mvSetup').hidden = false;
+    $('mvBrowse').hidden = true;
+    $('mvKeyMsg').textContent = msg || '';
+    $('mvKeyInput').value = '';
+    $('mvKeyInput').focus();
+  }
+
+  async function loadGenres() {
+    const box = $('mvGenres');
+    try {
+      const { genres } = await tmdb('/genre/movie/list', { language: 'pt-BR' });
+      mv.genreNames = new Map(genres.map((g) => [g.id, g.name]));
+      box.textContent = '';
+      for (const g of genres) {
+        const b = el('button', 'chip', g.name);
+        b.type = 'button';
+        b.dataset.g = String(g.id);
+        b.setAttribute('aria-pressed', String(mv.genres.has(g.id)));
+        box.appendChild(b);
+      }
+      const clear = el('button', 'chip clear', 'Limpar');
+      clear.type = 'button';
+      clear.dataset.g = 'clear';
+      box.appendChild(clear);
+      if (mv.items.length) renderMovies();
+    } catch (e) {
+      if (e.code === 'badkey' && !TMDB_TOKEN) showKeySetup('Essa chave não funcionou. Confira se copiou o "Token de leitura da API" inteiro.');
+    }
+  }
+
+  // Monta a consulta: sem gênero usa as listas prontas do TMDB; com gênero usa o "discover",
+  // ordenado por popularidade (e só lançamentos recentes, para "em alta").
+  function moviesQuery() {
+    const base = { language: 'pt-BR', region: 'BR', page: mv.page, include_adult: false };
+    if (mv.q) return ['/search/movie', Object.assign({}, base, { query: mv.q })];
+    if (!mv.genres.size) {
+      return {
+        trending: ['/trending/movie/week', base],
+        today: ['/trending/movie/day', base],
+        popular: ['/movie/popular', base],
+        top: ['/movie/top_rated', base],
+        now: ['/movie/now_playing', base],
+      }[mv.mode];
+    }
+    const d = Object.assign({}, base, { with_genres: [...mv.genres].join('|'), sort_by: 'popularity.desc', 'vote_count.gte': 30 });
+    const daysAgo = (n) => isoDate(new Date(Date.now() - n * 864e5));
+    if (mv.mode === 'top') return ['/discover/movie', Object.assign(d, { sort_by: 'vote_average.desc', 'vote_count.gte': 500 })];
+    if (mv.mode === 'now') return ['/discover/movie', Object.assign(d, { 'vote_count.gte': 0, with_release_type: '2|3', 'release_date.gte': daysAgo(45), 'release_date.lte': isoDate(new Date()) })];
+    if (mv.mode === 'today') return ['/discover/movie', Object.assign(d, { 'vote_count.gte': 10, 'primary_release_date.gte': daysAgo(120) })];
+    if (mv.mode === 'trending') return ['/discover/movie', Object.assign(d, { 'primary_release_date.gte': daysAgo(365) })];
+    return ['/discover/movie', d];
+  }
+
+  function skeletonCards(n) {
+    const grid = $('mvGrid');
+    grid.textContent = '';
+    for (let i = 0; i < n; i++) {
+      const c = el('div', 'mv-card mv-skel');
+      c.setAttribute('aria-hidden', 'true');
+      const l1 = el('div', 'mv-line'); l1.style.width = '80%';
+      const l2 = el('div', 'mv-line'); l2.style.width = '45%';
+      c.append(el('div', 'mv-poster'), l1, l2);
+      grid.appendChild(c);
+    }
+  }
+
+  async function loadMovies(reset) {
+    const seq = ++mv.seq;
+    if (reset) { mv.page = 1; mv.items = []; skeletonCards(12); }
+    else mv.page++;
+    $('mvMore').hidden = true;
+    const [path, params] = moviesQuery();
+    try {
+      const data = await tmdb(path, params);
+      if (seq !== mv.seq) return;
+      let results = Array.isArray(data.results) ? data.results : [];
+      // A busca do TMDB não filtra por gênero: aplica o filtro aqui.
+      if (mv.q && mv.genres.size) results = results.filter((m) => (m.genre_ids || []).some((g) => mv.genres.has(g)));
+      const seen = new Set(mv.items.map((m) => m.id));
+      mv.items = mv.items.concat(results.filter((m) => m && !seen.has(m.id)));
+      mv.totalPages = Math.min(data.total_pages || 1, 50);
+      renderMovies(data.total_results);
+      $('mvMore').hidden = mv.page >= mv.totalPages;
+    } catch (e) {
+      if (seq !== mv.seq) return;
+      if (e.code === 'badkey' && !TMDB_TOKEN) { showKeySetup('Essa chave não funcionou. Confira se copiou o "Token de leitura da API" inteiro.'); return; }
+      $('mvGrid').textContent = '';
+      $('mvGrid').appendChild(el('div', 'mv-empty', 'Não deu para carregar os filmes. ' + e.message));
+      $('mvStatus').textContent = '';
+      if (!reset) mv.page--;
+    }
+  }
+
+  function renderMovies(total) {
+    const names = [...mv.genres].map((g) => mv.genreNames.get(g)).filter(Boolean);
+    const parts = [mv.q ? 'Resultados para “' + mv.q + '”' : MV_MODE_LABEL[mv.mode]];
+    if (names.length) parts.push(names.join(' ou '));
+    if (total != null && mv.q) parts.push(Number(total).toLocaleString('pt-BR') + ' filmes');
+    $('mvStatus').textContent = parts.join(' · ');
+    const grid = $('mvGrid');
+    grid.textContent = '';
+    if (!mv.items.length) { grid.appendChild(el('div', 'mv-empty', 'Nenhum filme com esses filtros.')); return; }
+    for (const m of mv.items) {
+      const card = el('button', 'mv-card');
+      card.type = 'button';
+      card.dataset.id = String(m.id);
+      const poster = el('div', 'mv-poster');
+      if (m.poster_path) {
+        const img = el('img');
+        img.loading = 'lazy';
+        img.alt = '';
+        img.src = TMDB_IMG + 'w342' + m.poster_path;
+        poster.appendChild(img);
+      } else {
+        poster.appendChild(el('div', 'mv-ph', m.title || ''));
+      }
+      if (m.vote_count) {
+        const r = el('span', 'mv-rating');
+        r.append(el('span', 'star', '★'), document.createTextNode(Number(m.vote_average || 0).toFixed(1)));
+        poster.appendChild(r);
+      }
+      const gs = (m.genre_ids || []).slice(0, 2).map((g) => mv.genreNames.get(g)).filter(Boolean).join(', ');
+      card.append(poster, el('div', 'mv-title', m.title || m.original_title || 'Sem título'), el('div', 'mv-sub', [yearOf(m), gs].filter(Boolean).join(' · ')));
+      grid.appendChild(card);
+    }
+  }
+
+  async function openMovieDetails(id) {
+    const dlg = $('movieDialog');
+    const box = $('mdContent');
+    box.textContent = '';
+    const loading = el('div', 'md-loading');
+    loading.appendChild(el('div', 'spinner'));
+    box.appendChild(loading);
+    if (!dlg.open) dlg.showModal();
+    try {
+      const m = await tmdb('/movie/' + id, { language: 'pt-BR', append_to_response: 'watch/providers,videos', include_video_language: 'pt,en,null' });
+      let overview = m.overview;
+      if (!overview) {
+        try { overview = (await tmdb('/movie/' + id, { language: 'en-US' })).overview; } catch { /* sem sinopse */ }
+      }
+      if (!dlg.open) return;
+      renderMovieDetails(m, overview);
+    } catch (e) {
+      box.textContent = '';
+      const err = el('div', 'md-loading');
+      err.appendChild(el('div', 'alert bad', 'Não deu para abrir o filme. ' + e.message));
+      box.appendChild(err);
+    }
+  }
+
+  function renderMovieDetails(m, overview) {
+    const box = $('mdContent');
+    box.textContent = '';
+    const hero = el('div', 'md-hero');
+    if (m.backdrop_path) hero.style.backgroundImage = 'url("' + TMDB_IMG + 'w1280' + m.backdrop_path + '")';
+    const body = el('div', 'md-body');
+    const poster = el('div', 'md-poster');
+    if (m.poster_path) {
+      const img = el('img');
+      img.alt = '';
+      img.src = TMDB_IMG + 'w342' + m.poster_path;
+      poster.appendChild(img);
+    } else poster.appendChild(el('div', 'mv-ph', m.title || ''));
+
+    const info = el('div', 'md-info');
+    info.appendChild(el('h2', null, m.title || m.original_title));
+    if (m.original_title && m.original_title !== m.title) info.appendChild(el('div', 'md-orig', m.original_title));
+    const facts = el('div', 'md-facts');
+    if (m.vote_count) {
+      const r = el('span');
+      r.append(el('span', 'star', '★ '), document.createTextNode(Number(m.vote_average || 0).toFixed(1) + ' (' + Number(m.vote_count).toLocaleString('pt-BR') + ' votos)'));
+      facts.appendChild(r);
+    }
+    if (yearOf(m)) facts.appendChild(el('span', null, yearOf(m)));
+    if (m.runtime) facts.appendChild(el('span', null, Math.floor(m.runtime / 60) + 'h ' + String(m.runtime % 60).padStart(2, '0') + 'min'));
+    if (m.genres && m.genres.length) facts.appendChild(el('span', null, m.genres.map((g) => g.name).join(', ')));
+    info.appendChild(facts);
+    if (m.tagline) info.appendChild(el('div', 'md-tagline', m.tagline));
+    info.appendChild(el('p', 'md-overview', overview || 'Sem sinopse disponível.'));
+
+    info.appendChild(el('div', 'md-h', 'Onde assistir no Brasil'));
+    const br = m['watch/providers'] && m['watch/providers'].results && m['watch/providers'].results.BR;
+    let anyProv = false;
+    if (br) {
+      for (const [k, label] of PROV_GROUPS) {
+        const list = Array.isArray(br[k]) ? br[k].slice().sort((a, b) => (a.display_priority || 0) - (b.display_priority || 0)) : [];
+        if (!list.length) continue;
+        anyProv = true;
+        const g = el('div', 'prov-group');
+        g.appendChild(el('div', 'prov-lbl', label));
+        const provs = el('div', 'provs');
+        for (const p of list) {
+          const chip = el('span', 'prov');
+          if (p.logo_path) { const img = el('img'); img.alt = ''; img.src = TMDB_IMG + 'w92' + p.logo_path; chip.appendChild(img); }
+          else chip.appendChild(el('span', 'pl', String(p.provider_name || '?').slice(0, 2)));
+          chip.appendChild(document.createTextNode(p.provider_name || ''));
+          provs.appendChild(chip);
+        }
+        g.appendChild(provs);
+        info.appendChild(g);
+      }
+    }
+    if (!anyProv) info.appendChild(el('div', 'md-orig', 'Sem informação de streaming, aluguel ou compra no Brasil agora.'));
+    const jw = el('div', 'md-jw', 'Dados de disponibilidade: JustWatch');
+    if (br && typeof br.link === 'string' && br.link.startsWith('https://')) {
+      jw.appendChild(document.createTextNode(' · '));
+      jw.appendChild(linkEl('ver todas as opções', br.link));
+    }
+    info.appendChild(jw);
+
+    const actions = el('div', 'md-actions');
+    const trailer = ((m.videos && m.videos.results) || []).find((v) => v.site === 'YouTube' && v.type === 'Trailer' && /^[\w-]{6,20}$/.test(v.key));
+    if (trailer) actions.appendChild(actionLink('Trailer', 'play', 'https://www.youtube.com/watch?v=' + trailer.key, 'btn-secondary'));
+    if (m.imdb_id && /^tt\d+$/.test(m.imdb_id)) actions.appendChild(actionLink('Ver no IMDb', 'external', 'https://www.imdb.com/title/' + m.imdb_id + '/', 'btn-secondary'));
+    actions.appendChild(actionLink('TMDB', 'external', 'https://www.themoviedb.org/movie/' + m.id, 'btn-ghost'));
+    if (st.room && st.joined) {
+      const sug = el('button', 'btn btn-primary btn-sm');
+      sug.type = 'button';
+      sug.append(svgIcon('chat'), document.createTextNode('Sugerir na sala'));
+      sug.addEventListener('click', () => {
+        const y = yearOf(m);
+        sendChat('🎬 Que tal assistir “' + (m.title || m.original_title) + '”' + (y ? ' (' + y + ')' : '') + '?');
+        notify('Sugestão enviada no chat da sala ' + st.room.name + '.');
+      });
+      actions.prepend(sug);
+    }
+    info.appendChild(actions);
+    body.append(poster, info);
+    box.append(hero, body);
+  }
+
+  function linkEl(text, href) {
+    const a = el('a', null, text);
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    return a;
+  }
+
+  function actionLink(text, icon, href, cls) {
+    const a = linkEl('', href);
+    a.className = 'btn btn-sm ' + cls;
+    a.append(svgIcon(icon, icon === 'play' ? 'fill' : ''), document.createTextNode(text));
+    return a;
+  }
+
   // ---------- convite ----------
   async function invite() {
     if (!st.room) return;
@@ -2575,13 +3018,65 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   $('railCreate').addEventListener('click', createRoomFlow);
   $('railJoin').addEventListener('click', () => joinFlow(''));
   $('joinForm').addEventListener('submit', (e) => { e.preventDefault(); joinFlow($('codeInput').value); });
-  $('homeBtn').addEventListener('click', () => {
-    // Voltar ao início não sai da sala: dá para ver as outras salas e voltar.
-    $('room').hidden = true;
-    $('home').hidden = false;
-    renderRail();
-    renderRoomCards();
+  // Voltar ao início ou ver filmes não sai da sala: dá para olhar e voltar.
+  $('homeBtn').addEventListener('click', () => showView('home'));
+  $('moviesBtn').addEventListener('click', () => showView('movies'));
+  $('mvBackRoom').addEventListener('click', () => showView('room'));
+
+  $('mvModes').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-mode]');
+    if (!b || b.dataset.mode === mv.mode) return;
+    mv.mode = b.dataset.mode;
+    for (const x of $('mvModes').children) x.setAttribute('aria-pressed', String(x === b));
+    if (mv.q) { mv.q = ''; $('mvSearch').value = ''; }
+    loadMovies(true);
   });
+  $('mvGenres').addEventListener('click', (e) => {
+    const c = e.target.closest('.chip[data-g]');
+    if (!c) return;
+    if (c.dataset.g === 'clear') mv.genres.clear();
+    else {
+      const id = Number(c.dataset.g);
+      if (mv.genres.has(id)) mv.genres.delete(id); else mv.genres.add(id);
+    }
+    for (const b of $('mvGenres').children) if (b.dataset.g !== 'clear') b.setAttribute('aria-pressed', String(mv.genres.has(Number(b.dataset.g))));
+    loadMovies(true);
+  });
+  let mvSearchTimer = 0;
+  $('mvSearch').addEventListener('input', (e) => {
+    clearTimeout(mvSearchTimer);
+    mvSearchTimer = setTimeout(() => {
+      const q = cleanText(e.target.value).slice(0, 100);
+      if (q === mv.q) return;
+      mv.q = q;
+      loadMovies(true);
+    }, 400);
+  });
+  $('mvMore').addEventListener('click', () => loadMovies(false));
+  $('mvGrid').addEventListener('click', (e) => {
+    const c = e.target.closest('.mv-card[data-id]');
+    if (c) openMovieDetails(Number(c.dataset.id));
+  });
+  $('mdClose').addEventListener('click', () => $('movieDialog').close());
+  $('movieDialog').addEventListener('click', (e) => { if (e.target === $('movieDialog')) $('movieDialog').close(); });
+  $('mvKeyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const v = $('mvKeyInput').value.trim();
+    if (!v) { $('mvKeyMsg').textContent = 'Cole o token primeiro.'; return; }
+    storage.set('cinema-tmdb', v);
+    mv.cache.clear();
+    $('mvKeyMsg').textContent = 'Testando…';
+    try {
+      await tmdb('/genre/movie/list', { language: 'pt-BR' });
+      $('mvKeyMsg').textContent = '';
+      mv.started = false;
+      openMovies();
+      notify('Catálogo conectado.');
+    } catch (err) {
+      $('mvKeyMsg').textContent = err.code === 'badkey' ? 'Essa chave não funcionou. Confira se copiou o "Token de leitura da API" inteiro.' : err.message;
+    }
+  });
+  $('mvKeyChange').addEventListener('click', () => showKeySetup(''));
   $('inviteBtn').addEventListener('click', invite);
   $('leaveBtn').addEventListener('click', async () => { if (await confirmLeave()) leaveRoom(); });
   $('renameBtn').addEventListener('click', renameMe);
