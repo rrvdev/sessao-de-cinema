@@ -1219,7 +1219,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   // TURN (desvio pela Cloudflare para quem não consegue conexão direta). As senhas vêm do
   // Worker em cloudflare/turn-worker.js, que guarda o token e decide quem pode usar.
   // O navegador só usa o TURN quando a conexão direta não fecha. Vazio = sem TURN.
-  const TURN_ENDPOINT = '';
+  const TURN_ENDPOINT = 'https://sessao-turn.blizelshorts.workers.dev/';
   let iceReady = null;
   function loadIceServers() {
     if (iceReady) return iceReady;
