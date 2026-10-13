@@ -1210,11 +1210,34 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   // Servidores que descobrem o endereço público de cada um (STUN). Os TURN gratuitos que o
   // PeerJS usava por padrão foram desligados e só atrasavam a conexão (o Firefox ainda acusa
   // "TURN server appears to be broken"); um TURN de verdade entra aqui quando houver.
-  const ICE_SERVERS = [
+  let ICE_SERVERS = [
     { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
     { urls: 'stun:stun.cloudflare.com:3478' },
   ];
   const peerOptions = () => ({ debug: 1, config: { iceServers: ICE_SERVERS } });
+
+  // TURN (desvio pela Cloudflare para quem não consegue conexão direta). As senhas vêm do
+  // Worker em cloudflare/turn-worker.js, que guarda o token e decide quem pode usar.
+  // O navegador só usa o TURN quando a conexão direta não fecha. Vazio = sem TURN.
+  const TURN_ENDPOINT = '';
+  let iceReady = null;
+  function loadIceServers() {
+    if (iceReady) return iceReady;
+    if (!TURN_ENDPOINT || !/^https?:$/.test(location.protocol)) return (iceReady = Promise.resolve());
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    iceReady = fetch(TURN_ENDPOINT, { signal: ctrl.signal, cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const extra = d && Array.isArray(d.iceServers)
+          ? d.iceServers.filter((s) => s && s.urls && [].concat(s.urls).some((u) => /^turns?:/.test(u)))
+          : [];
+        if (extra.length) ICE_SERVERS = ICE_SERVERS.concat(extra);
+      })
+      .catch(() => { /* sem TURN: segue só com STUN */ })
+      .finally(() => clearTimeout(timer));
+    return iceReady;
+  }
 
   function peerLibOk() {
     if (typeof window.Peer === 'function') return true;
@@ -1285,6 +1308,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     setHash(roomLink(st.room).split('#')[1]);
     resetRoomState();
     showRoomView();
+    await loadIceServers(); // no máximo 3 s; normalmente já veio no carregamento da página
+    if (seq !== openSeq || !st.room) return;
     connectMemberPeer();
   }
 
@@ -3552,6 +3577,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     prompt.prompt();
     try { await prompt.userChoice; } catch { /* a pessoa fechou a janela */ }
   });
+
+  loadIceServers();
 
   // Abriu um link de sala (#r=…): entra direto, pedindo o nome se precisar.
   const initial = parseRoomRef(location.hash);
