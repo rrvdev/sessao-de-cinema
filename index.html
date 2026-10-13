@@ -1207,6 +1207,15 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   }
 
   // ---------- conexão ----------
+  // Servidores que descobrem o endereço público de cada um (STUN). Os TURN gratuitos que o
+  // PeerJS usava por padrão foram desligados e só atrasavam a conexão (o Firefox ainda acusa
+  // "TURN server appears to be broken"); um TURN de verdade entra aqui quando houver.
+  const ICE_SERVERS = [
+    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+  ];
+  const peerOptions = () => ({ debug: 1, config: { iceServers: ICE_SERVERS } });
+
   function peerLibOk() {
     if (typeof window.Peer === 'function') return true;
     $('libError').hidden = false;
@@ -1287,6 +1296,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     st.members.clear();
     st.pending.clear();
     st.dialing.clear();
+    st.lobbyFails = 0;
     st.watchers.clear();
     st.watching = null;
     st.unread = 0;
@@ -1299,7 +1309,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
   }
 
   function connectMemberPeer() {
-    const peer = new Peer(MEMBER_PREFIX + randomId(12), { debug: 1 });
+    const peer = new Peer(MEMBER_PREFIX + randomId(12), peerOptions());
     st.peer = peer;
     netStatus('Conectando…');
     renderAll();
@@ -1341,6 +1351,19 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
       connectMemberPeer();
       return;
     }
+    // A conexão direta não fechou (bloqueio de rede entre os dois lados; sem TURN não há desvio).
+    if (err.type === 'negotiation-failed') {
+      const m = /connection to (\S+) failed/.exec(String(err.message || ''));
+      const target = m ? m[1] : '';
+      if (st.room && target === ROOM_PREFIX + st.room.id) {
+        if (!st.joined) { st.lobbyFails = (st.lobbyFails || 0) + 1; renderStage(); }
+      } else if (target) {
+        st.dialing.delete(target);
+        if (st.pending.delete(target)) electCoordinator();
+      }
+      console.warn('conexão direta falhou com', target);
+      return;
+    }
     peerError(err);
   }
 
@@ -1373,7 +1396,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     if (!st.room || st.closing || st.lobby || st.lobbyPending) return;
     clearTimeout(st.lobbyRetry);
     const roomId = st.room.id;
-    const lobby = new Peer(ROOM_PREFIX + roomId, { debug: 1 });
+    const lobby = new Peer(ROOM_PREFIX + roomId, peerOptions());
     st.lobbyPending = lobby;
     lobby.on('open', () => {
       if (st.lobbyPending !== lobby || !st.room || st.room.id !== roomId) { try { lobby.destroy(); } catch { /* ignora */ } return; }
@@ -2345,7 +2368,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer;margin:0}
     localVideo.hidden = true;
     remoteVideo.hidden = true;
     if (!st.joined) {
-      showOverlay({ spinner: true, title: 'Entrando na sala…', sub: st.room.name });
+      showOverlay({ spinner: true, title: 'Entrando na sala…', sub: st.lobbyFails ? 'Não estou conseguindo conectar com quem está na sala (bloqueio de rede entre vocês). Continuo tentando… Se não entrar em 1 minuto, tente pelo Chrome ou Edge, ou por outra rede, como o 4G do celular.' : st.room.name });
     } else if (w === 'self' && st.share) {
       view = 'self-screen';
       localVideo.hidden = false;
